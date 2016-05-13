@@ -1,0 +1,259 @@
+<html>
+    <head>
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EmonESP</title>
+    <style>
+    body {
+        background-color:#eee;
+        font-family:sans-serif;
+        color:#333;
+        font:14px/1.3 Helvetica, sans-serif;
+    }
+    
+    #page {
+        margin:20px;
+        background-color:#fff;
+    }
+    
+    h1 {
+        padding-bottom: 0.3em;
+        border-bottom: 1px solid #eee;
+        color:#73769f;
+    }
+    
+    h2 {
+        padding-bottom: 0.3em;
+        border-bottom: 1px solid #eee;
+    }
+    
+    table {
+        width:100%;
+        border-collapse: collapse;
+    }
+    
+    table, th, td {
+        text-align:left;
+        border: 1px solid #ddd;
+        padding:6px 13px;
+    }
+    
+    tr:nth-child(2n+2) {background-color:#f3f3f3;}
+    
+    .box {
+        padding:20px;
+    }
+    
+    .box380 {
+        width:380px;
+        float:left;
+        padding:20px;
+        margin-left:20px;
+        margin-bottom:20px;
+        border: 1px solid #ddd;
+        
+    }
+    
+    @media (min-width: 900px) {
+        #page {
+            width:900px;
+        }
+    }
+    
+    @media (max-width: 900px) {
+        #page {
+            width:460px;
+            margin:0px;
+        }
+    }
+    
+    input[type=text] {
+        padding:5px;
+    }
+    
+    button {
+        padding:5px;
+    }
+    </style>
+        
+    </head>
+    
+    <body>
+    
+        <div id="page">
+            <div class="box">
+            <h1>EmonESP</h1>
+            <p>Hello! To set up, select a WIFI network to connect to and then enter your emoncms apikey.</p>
+            </div>
+            
+            <div class="box380">
+                <h2>Wifi Config</h2>
+                
+                <p><b>Mode:</b> <span id="mode"></span></p>
+                
+                <div id="client-view" style="display:none">
+                    <p><b>Network SSID:</b><br><span id="sta-ssid"></span></p>
+                    <p><b>IP Address:</b><br><span id="sta-ip"></span></p>
+                    <p><b>Successful packets:</b><br><span id="sta-psuccess"></span> of <span id="sta-psent"></span></p>
+                    <button>Switch to Access Point Mode</button>
+                </div>
+                
+                <div id="ap-view" style="display:none">
+                    <p>Connect to network:</p>
+                    <table>
+                        <tr><th width=20>Select</th><th>Network</th></tr>
+                        <tbody id="networks"></tbody>
+                    </table>
+                    
+                    <p><b>Passkey:</b><br>
+                    <input id="passkey" type="text" style="width:280px;">
+                    <button id="connect">Connect</button>
+                    </p>
+                </div>
+                
+                <div id="wait-view" style="display:none">
+                    <p>Connecting to WIFI Network...</p>
+                </div>
+            </div>
+            
+            <div class="box380">
+                <h2>Emoncms Config</h2>
+                <p><b>Write apikey:</b><br>
+                <input id="apikey" type="text" style="width:280px;">
+                <button id="save-apikey">Save</button>
+                </p>
+            </div>
+                
+            <div class="box380">
+                <h2>Latest data values</h2>
+                <table>
+                    <tr><th>Name</th><th>Value</th></tr>
+                    <tbody id="datavalues"></tbody>
+                </table>
+            </div>
+            
+            <div style="clear:both"></div>
+        </div>
+    
+    </body>
+</html>
+
+<script>
+
+var selected_network_ssid = "";
+
+var r1 = new XMLHttpRequest(); 
+r1.open("GET", "status", false);
+r1.onreadystatechange = function () {
+  if (r1.readyState != 4 || r1.status != 200) return;
+  var status = JSON.parse(r1.responseText);
+  
+  document.getElementById("passkey").value = status.pass;
+  document.getElementById("apikey").value = status.apikey;
+  
+  if (status.mode=="AP") {
+      document.getElementById("mode").innerHTML = "Access Point (AP)";
+      document.getElementById("client-view").style.display = 'none';
+      document.getElementById("ap-view").style.display = '';
+      
+      var out = "";
+      for (var z in status.networks) {
+          out += "<tr><td><input class='networkcheckbox' name='"+status.networks[z]+"' type='checkbox'></td><td>"+status.networks[z]+"</td></tr>";
+      }
+      document.getElementById("networks").innerHTML = out;
+  } else {
+      document.getElementById("mode").innerHTML = "Client (STA)";
+      document.getElementById("sta-ssid").innerHTML = status.ssid;
+      document.getElementById("sta-ip").innerHTML = status.ipaddress;
+      document.getElementById("sta-psent").innerHTML = status.packets_sent;
+      document.getElementById("sta-psuccess").innerHTML = status.packets_success;
+      document.getElementById("ap-view").style.display = 'none';
+      document.getElementById("client-view").style.display = '';
+  }
+};
+r1.send();
+
+
+update();
+setInterval(update,10000);
+
+// -----------------------------------------------------------------------
+// Periodic 10s update of last data values
+// -----------------------------------------------------------------------
+function update() {
+
+    var r = new XMLHttpRequest(); 
+    r.open("GET", "lastvalues", true);
+    r.onreadystatechange = function () {
+	    if (r.readyState != 4 || r.status != 200) return;
+	    var str = r.responseText;
+	    var namevaluepairs = str.split(",");
+	    var out = "";
+	    for (var z in namevaluepairs) {
+	        var namevalue = namevaluepairs[z].split(":");
+	        var units = "";
+	        if (namevalue[0].indexOf("CT")==0) units = "W";
+	        if (namevalue[0].indexOf("T")==0) units = "&deg;C";
+	        out += "<tr><td>"+namevalue[0]+"</td><td>"+namevalue[1]+units+"</td></tr>";
+	    }
+	    document.getElementById("datavalues").innerHTML = out;
+    };
+    r.send();
+}
+
+// -----------------------------------------------------------------------
+// Event: Connect
+// -----------------------------------------------------------------------
+document.getElementById("connect").addEventListener("click", function(e) {
+    var passkey = document.getElementById("passkey").value;
+    if (selected_network_ssid=="") {
+        alert("Please select network");
+    } else {
+        document.getElementById("ap-view").style.display = 'none';
+        document.getElementById("wait-view").style.display = '';
+        
+        var r = new XMLHttpRequest(); 
+        r.open("POST", "savenetwork", false);
+        r.setRequestHeader("Content-type","application/x-www-form-urlencoded");
+        r.onreadystatechange = function () {
+	        if (r.readyState != 4 || r.status != 200) return;
+	        var str = r.responseText;
+	        console.log(str);
+        };
+        r.send("ssid="+selected_network_ssid+"&pass="+passkey);
+    }
+});
+
+// -----------------------------------------------------------------------
+// Event: Apikey save
+// -----------------------------------------------------------------------
+document.getElementById("save-apikey").addEventListener("click", function(e) {
+    var apikey = document.getElementById("apikey").value;
+    if (apikey=="") alert("Please enter apikey");
+    
+    var r = new XMLHttpRequest(); 
+    r.open("POST", "saveapikey", true);
+    r.setRequestHeader("Content-type","application/x-www-form-urlencoded");
+    r.onreadystatechange = function () {};
+    r.send("&apikey="+apikey);
+});
+
+// -----------------------------------------------------------------------
+// UI: Network select
+// -----------------------------------------------------------------------
+var networkcheckboxes = document.getElementsByClassName("networkcheckbox");
+
+var networkSelect = function() {
+    selected_network_ssid = this.getAttribute("name");
+    
+    for (var i = 0; i < networkcheckboxes.length; i++) {
+        if (networkcheckboxes[i].getAttribute("name")!=selected_network_ssid)
+            networkcheckboxes[i].checked = 0;
+    }
+};
+
+for (var i = 0; i < networkcheckboxes.length; i++) {
+    networkcheckboxes[i].addEventListener('click', networkSelect, false);
+}
+
+</script>
