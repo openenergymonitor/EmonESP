@@ -26,7 +26,7 @@ From: https://github.com/esp8266/Arduino/blob/master/doc/filesystem.md
 - Unpack the tool into tools directory (the path will look like <home_dir>/Arduino/tools/ESP8266FS/tool/esp8266fs.jar)
 - Restart Arduino
 
-#### 3. Complile and Upload
+#### 3. Compile and Upload
 
 - Open EmonESP.ino in the Arduino IDE.
 - Compile and Upload as normal
