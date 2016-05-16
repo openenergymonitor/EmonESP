@@ -29,12 +29,16 @@
 #include <EEPROM.h>
 #include "FS.h"
 #include <ArduinoJson.h>
+#include <ArduinoOTA.h>
+#include <ESP8266mDNS.h>
 
 ESP8266WebServer server(80);
 
 //Default SSID and PASSWORD for AP Access Point Mode
 const char* ssid = "emonESP";
 const char* password = "emonesp";
+const char* www_username = "admin";
+const char* www_password = "emonesp";
 String st;
 
 String esid = "";
@@ -338,8 +342,12 @@ void setup() {
     wifi_mode = 0;
     startClient();
   }
-  
-  server.on("/", handleHome);
+  ArduinoOTA.begin();
+  server.on("/", [](){
+    if(!server.authenticate(www_username, www_password))
+      return server.requestAuthentication();
+    handleHome();
+  });
   server.on("/savenetwork", handleSaveNetwork);
   server.on("/saveapikey", handleSaveApikey);
   server.on("/status", handleStatus);
@@ -347,6 +355,7 @@ void setup() {
   server.on("/reset", handleRst);
   server.on("/scan", handleScan);
   server.on("/apoff",handleAPOff);
+	
 	server.begin();
 	Serial.println("HTTP server started");
   delay(100);
@@ -357,6 +366,7 @@ void setup() {
 // LOOP
 // -------------------------------------------------------------------
 void loop() {
+  ArduinoOTA.handle();
   server.handleClient();
 
   /*
