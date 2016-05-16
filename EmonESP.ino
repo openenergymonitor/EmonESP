@@ -24,7 +24,7 @@
  */
  
 #include <ESP8266WiFi.h>
-#include <WiFiClient.h> 
+#include <WiFiClientSecure.h> 
 #include <ESP8266WebServer.h>
 #include <EEPROM.h>
 #include "FS.h"
@@ -52,7 +52,9 @@ String ipaddress = "";
 
 //SERVER strings and interfers for OpenEVSE Energy Monotoring
 const char* host = "emoncms.org";
+const int httpsPort = 443;
 const char* e_url = "/input/post.json?json=";
+const char* fingerprint = "0C EC B6 C9 62 2E D0 58 81 09 22 10 08 14 E8 66 4F DF 98 97";
 
 
 // Wifi mode
@@ -402,9 +404,8 @@ void loop() {
     if (wifi_mode == 0 && apikey != 0) 
     {
       // Use WiFiClient class to create TCP connections
-      WiFiClient client;
-      const int httpPort = 80;
-      if (!client.connect(host, httpPort)) {
+      WiFiClientSecure client;
+      if (!client.connect(host, httpsPort)) {
         return;
       }
 
@@ -426,8 +427,10 @@ void loop() {
       packets_sent++;
       
       // This will send the request to the server
+    if (client.verify(fingerprint, host)) {
+      Serial.println("certificate matches");
       client.print(String("GET ") + url + " HTTP/1.1\r\n" + "Host: " + host + "\r\n" + "Connection: close\r\n\r\n");
-      // Handle wait for reply and timeout
+       // Handle wait for reply and timeout
       unsigned long timeout = millis();
       while (client.available() == 0) {
         if (millis() - timeout > 5000) {
@@ -445,6 +448,12 @@ void loop() {
         }
       }
       Serial.println();
+    } 
+    else {
+      Serial.println("certificate doesn't match");
+    }
+      
+     
     }
   }
 }
