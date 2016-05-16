@@ -95,7 +95,8 @@
                     <p><b>Network SSID:</b><br><span id="sta-ssid"></span></p>
                     <p><b>IP Address:</b><br><span id="sta-ip"></span></p>
                     <p><b>Successful packets:</b><br><span id="sta-psuccess"></span> of <span id="sta-psent"></span></p>
-                    <button>Switch to Access Point Mode</button>
+                    <button id="apoff" style="display:none">Turn off Access Point</button>
+                    <button id="reset">Reset config and reboot</button>
                 </div>
                 
                 <div id="ap-view" style="display:none">
@@ -140,7 +141,10 @@
 
 <script>
 
+var statusupdate = false;
 var selected_network_ssid = "";
+var lastmode = "";
+var ipaddress = "";
 
 var r1 = new XMLHttpRequest(); 
 r1.open("GET", "status", false);
@@ -164,11 +168,12 @@ r1.onreadystatechange = function () {
   } else {
       document.getElementById("mode").innerHTML = "Client (STA)";
       document.getElementById("sta-ssid").innerHTML = status.ssid;
-      document.getElementById("sta-ip").innerHTML = status.ipaddress;
+      document.getElementById("sta-ip").innerHTML = "<a href='http://"+status.ipaddress+"'>"+status.ipaddress+"</a>";
       document.getElementById("sta-psent").innerHTML = status.packets_sent;
       document.getElementById("sta-psuccess").innerHTML = status.packets_success;
       document.getElementById("ap-view").style.display = 'none';
       document.getElementById("client-view").style.display = '';
+      ipaddress = status.ipaddress;
   }
 };
 r1.send();
@@ -201,6 +206,39 @@ function update() {
     r.send();
 }
 
+function updateStatus() {
+  var r1 = new XMLHttpRequest(); 
+  r1.open("GET", "status", true);
+  r1.timeout = 2000;
+  r1.onreadystatechange = function () {
+    if (r1.readyState != 4 || r1.status != 200) return;
+    var status = JSON.parse(r1.responseText);
+    
+    document.getElementById("apikey").value = status.apikey;
+    
+    if (status.mode=="STA+AP" || status.mode=="STA") {
+        // Hide waiting message
+        document.getElementById("wait-view").style.display = 'none';
+        // Display mode
+        if (status.mode=="STA+AP") {
+            document.getElementById("mode").innerHTML = "Client + Access Point (STA+AP)";
+            document.getElementById("apoff").style.display = '';
+        }
+        if (status.mode=="STA") document.getElementById("mode").innerHTML = "Client (STA)";
+        document.getElementById("sta-ssid").innerHTML = status.ssid;
+        document.getElementById("sta-ip").innerHTML = "<a href='http://"+status.ipaddress+"'>"+status.ipaddress+"</a>";
+        document.getElementById("sta-psent").innerHTML = status.packets_sent;
+        document.getElementById("sta-psuccess").innerHTML = status.packets_success;
+        
+        // View display
+        document.getElementById("ap-view").style.display = 'none';
+        document.getElementById("client-view").style.display = '';
+    }
+    lastmode = status.mode;
+  };
+  r1.send();
+}
+
 // -----------------------------------------------------------------------
 // Event: Connect
 // -----------------------------------------------------------------------
@@ -219,6 +257,8 @@ document.getElementById("connect").addEventListener("click", function(e) {
 	        if (r.readyState != 4 || r.status != 200) return;
 	        var str = r.responseText;
 	        console.log(str);
+	        
+	        statusupdate = setInterval(updateStatus,5000);
         };
         r.send("ssid="+selected_network_ssid+"&pass="+passkey);
     }
@@ -236,6 +276,36 @@ document.getElementById("save-apikey").addEventListener("click", function(e) {
     r.setRequestHeader("Content-type","application/x-www-form-urlencoded");
     r.onreadystatechange = function () {};
     r.send("&apikey="+apikey);
+});
+
+// -----------------------------------------------------------------------
+// Event: Turn off Access POint
+// -----------------------------------------------------------------------
+document.getElementById("apoff").addEventListener("click", function(e) {    
+    var r = new XMLHttpRequest(); 
+    r.open("POST", "apoff", true);
+    r.onreadystatechange = function () {
+        if (r.readyState != 4 || r.status != 200) return;
+        var str = r.responseText;
+        console.log(str);
+        document.getElementById("apoff").style.display = 'none';
+        if (ipaddress!="") window.location = ipaddress;
+        
+	  };
+    r.send();
+});
+// -----------------------------------------------------------------------
+// Event: Reset config and reboot
+// -----------------------------------------------------------------------
+document.getElementById("reset").addEventListener("click", function(e) {    
+    var r = new XMLHttpRequest(); 
+    r.open("POST", "reset", true);
+    r.onreadystatechange = function () {
+        if (r.readyState != 4 || r.status != 200) return;
+        var str = r.responseText;
+        console.log(str);
+	  };
+    r.send();
 });
 
 // -----------------------------------------------------------------------

@@ -1,24 +1,24 @@
 /*
- * Serial to emoncms gateway
+ * -------------------------------------------------------------------
+ * EmonESP Serial to emoncms gateway
+ * -------------------------------------------------------------------
  * Adaptation of Chris Howells OpenEVSE ESP Wifi
  * by Trystan Lea, OpenEnergyMonitor
  * All adaptation GNU General Public License as below.
- */
-
-/*
- * Copyright (c) 2015 Chris Howell
  *
- * This file is part of Open EVSE.
- * Open EVSE is free software; you can redistribute it and/or modify
+ * -------------------------------------------------------------------
+ *
+ * This file is part of OpenEnergyMonitor project.
+ * EmonESP is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 3, or (at your option)
  * any later version.
- * Open EVSE is distributed in the hope that it will be useful,
+ * EmonESP is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  * You should have received a copy of the GNU General Public License
- * along with Open EVSE; see the file COPYING.  If not, write to the
+ * along with EmonESP; see the file COPYING.  If not, write to the
  * Free Software Foundation, Inc., 59 Temple Place - Suite 330,
  * Boston, MA 02111-1307, USA.
  */
@@ -44,18 +44,101 @@ String apikey = "";
 String connected_network = "";
 String last_datastr = "";
 String status_string = "";
+String ipaddress = "";
 
 //SERVER strings and interfers for OpenEVSE Energy Monotoring
 const char* host = "emoncms.org";
 const char* e_url = "/input/post.json?json=";
 
-int wifi_mode = 0; 
+
+// Wifi mode
+// 0 - STA (Client)
+// 1 - AP with STA retry
+// 2 - AP only
+// 3 - AP + STA
+int wifi_mode = 0;
+ 
 int buttonState = 0;
 int clientTimeout = 0;
 int i = 0;
 unsigned long Timer;
 unsigned long packets_sent = 0;
 unsigned long packets_success = 0;
+
+// -------------------------------------------------------------------
+// Start Access Point, starts on 192.168.4.1
+// Access point is used for wifi network selection
+// -------------------------------------------------------------------
+void startAP() {
+  Serial.print("Starting Access Point");
+  WiFi.mode(WIFI_STA);
+  WiFi.disconnect();
+  delay(100);
+  Serial.print("Scan: ");
+  int n = WiFi.scanNetworks();
+  Serial.print(n);
+  Serial.println(" networks found");
+  st = "";
+  for (int i = 0; i < n; ++i){
+    st += "\""+WiFi.SSID(i)+"\"";
+    if (i<n-1) st += ",";
+  }
+  delay(100);
+  WiFi.softAP(ssid, password);
+  IPAddress myIP = WiFi.softAPIP();
+  char tmpStr[40];
+  sprintf(tmpStr,"%d.%d.%d.%d",myIP[0],myIP[1],myIP[2],myIP[3]);
+  Serial.print("Access Point IP Address: ");
+  Serial.println(tmpStr);
+  ipaddress = tmpStr;
+}
+
+// -------------------------------------------------------------------
+// Start Client, attempt to connect to Wifi network
+// -------------------------------------------------------------------
+void startClient() {
+  Serial.print("Connecting as Wifi Client to ");
+  Serial.print(esid.c_str());
+  Serial.print(" epass:");
+  Serial.println(epass.c_str());
+  WiFi.begin(esid.c_str(), epass.c_str());
+  
+  delay(50);
+  
+  int t = 0;
+  int attempt = 0;
+  while (WiFi.status() != WL_CONNECTED){
+    
+    delay(500);
+    t++;
+    if (t >= 20){
+      Serial.println(" ");
+      Serial.println("Trying Again...");
+      delay(2000);
+      WiFi.disconnect();
+      WiFi.begin(esid.c_str(), epass.c_str());
+      t = 0;
+      attempt++;
+      if (attempt >= 5){
+        startAP();
+        // AP mode with SSID in EEPROM, connection will retry in 5 minutes
+        wifi_mode = 1;
+        break;
+      }
+    }
+  }
+  
+  if (wifi_mode == 0 || wifi_mode == 3){
+    IPAddress myAddress = WiFi.localIP();
+    char tmpStr[40];
+    sprintf(tmpStr,"%d.%d.%d.%d",myAddress[0],myAddress[1],myAddress[2],myAddress[3]);
+    Serial.print("Connected, IP Address: ");
+    Serial.println(tmpStr);
+    // Copy the connected network and ipaddress to global strings for use in status request
+    connected_network = esid;
+    ipaddress = tmpStr;
+  }
+}
 
 void ResetEEPROM(){
   //Serial.println("Erasing EEPROM");
@@ -66,6 +149,10 @@ void ResetEEPROM(){
   EEPROM.commit();   
 }
 
+// -------------------------------------------------------------------
+// Load SPIFFS Home page
+// url: /
+// -------------------------------------------------------------------
 void handleHome() {
   SPIFFS.begin(); // mount the fs
   File f = SPIFFS.open("/home.html", "r");
@@ -76,10 +163,27 @@ void handleHome() {
   }
 }
 
+// -------------------------------------------------------------------
+// Handle turning Access point off
+// url: /apoff
+// -------------------------------------------------------------------
+void handleAPOff() {
+  server.send(200, "text/html", "Turning Access Point Off");
+  Serial.println("Turning Access Point Off");
+  delay(2000);
+  WiFi.mode(WIFI_STA); 
+}
+
+// -------------------------------------------------------------------
+// Save selected network to EEPROM and attempt connection
+// url: /savenetwork
+// -------------------------------------------------------------------
 void handleSaveNetwork() {
   String s;
   String qsid = server.arg("ssid");
   String qpass = server.arg("pass");
+  esid = qsid;
+  epass = qpass;
  
   qpass.replace("%23", "#");
   qpass.replace('+', ' ');
@@ -105,11 +209,19 @@ void handleSaveNetwork() {
     EEPROM.commit();
     server.send(200, "text/html", "saved");
     delay(2000);
-    WiFi.disconnect();
-    ESP.reset(); 
+    
+    // Startup in STA + AP mode
+    WiFi.mode(WIFI_AP_STA);
+    WiFi.softAP(ssid, password);
+    wifi_mode = 3;
+    startClient();
   }
 }
 
+// -------------------------------------------------------------------
+// Save apikey
+// url: /saveapikey
+// -------------------------------------------------------------------
 void handleSaveApikey() {
   apikey = server.arg("apikey");
   if (apikey!=0) {
@@ -125,36 +237,60 @@ void handleSaveApikey() {
   }
 }
 
+// -------------------------------------------------------------------
+// Wifi scan /scan not currently used
+// url: /scan
+// -------------------------------------------------------------------
+void handleScan() {
+  Serial.println("WIFI Scan");
+  int n = WiFi.scanNetworks();
+  Serial.print(n);
+  Serial.println(" networks found");
+  st = "";
+  for (int i = 0; i < n; ++i){
+    st += "\""+WiFi.SSID(i)+"\"";
+    if (i<n-1) st += ",";
+  }
+  server.send(200, "text/plain","["+st+"]");
+}
+
+// -------------------------------------------------------------------
+// url: /lastvalues
+// Last values on atmega serial
+// -------------------------------------------------------------------
 void handleLastValues() {
-    server.send(200, "text/html", last_datastr);
+  server.send(200, "text/html", last_datastr);
 }
 
-void status_add(String key,String value, bool comma) {
-  status_string += "\"" + key + "\":\"" + value + "\"";
-  if (comma) status_string += ",";
-}
-
+// -------------------------------------------------------------------
+// url: /status
+// returns wifi status
+// -------------------------------------------------------------------
 void handleStatus() {
 
   String s = "{";
   if (wifi_mode==0) {
     s += "\"mode\":\"STA\",";
-  } else {
+  } else if (wifi_mode==1 || wifi_mode==2) {
     s += "\"mode\":\"AP\",";
+  } else if (wifi_mode==3) {
+    s += "\"mode\":\"STA+AP\",";
   }
   s += "\"networks\":["+st+"],";
   s += "\"ssid\":\""+esid+"\",";
   s += "\"pass\":\""+epass+"\",";
   s += "\"apikey\":\""+apikey+"\",";
-  s += "\"ipaddress\":\"192.168.1.112\",";
-  s += "\"packets_sent\":\"1800\",";
-  s += "\"packets_sent\":\"3205\"";
+  s += "\"ipaddress\":\""+ipaddress+"\",";
+  s += "\"packets_sent\":\""+String(packets_sent)+"\",";
+  s += "\"packets_success\":\""+String(packets_success)+"\"";
   s += "}";
   server.send(200, "text/html", s);
 }
 
-
-
+// -------------------------------------------------------------------
+// Reset config and reboot
+// url: /reset
+// -------------------------------------------------------------------
 void handleRst() {
   ResetEEPROM();
   EEPROM.commit();
@@ -164,27 +300,9 @@ void handleRst() {
   ESP.reset();
 }
 
-void startAP() {
-  Serial.print("Starting Access Point");
-  WiFi.mode(WIFI_STA);
-  WiFi.disconnect();
-  delay(100);
-  Serial.print("Scan: ");
-  int n = WiFi.scanNetworks();
-  Serial.print(n);
-  Serial.println(" networks found");
-  for (int i = 0; i < n; ++i){
-    st += "\""+WiFi.SSID(i)+"\"";
-    if (i<n-1) st += ",";
-  }
-  delay(100);
-  WiFi.softAP(ssid, password);
-  IPAddress myIP = WiFi.softAPIP();
-  char tmpStr[40];
-  sprintf(tmpStr,"MODE:AP IP Address: %d.%d.%d.%d",myIP[0],myIP[1],myIP[2],myIP[3]);
-  Serial.println(tmpStr);
-}
-
+// -------------------------------------------------------------------
+// SETUP
+// -------------------------------------------------------------------
 void setup() {
 	delay(2000);
 	Serial.begin(115200);
@@ -192,7 +310,6 @@ void setup() {
   Serial.println("emonESP Startup");
   EEPROM.begin(512);
   // ResetEEPROM();
-  char tmpStr[40];
  
   for (int i = 0; i < 32; ++i){
     char c = char(EEPROM.read(i));
@@ -207,6 +324,7 @@ void setup() {
     if (c!=0) apikey += c;
   }
 
+  WiFi.disconnect();
   // 1) If no network configured start up access point
   if (esid == 0)
   {
@@ -216,56 +334,28 @@ void setup() {
   // 2) else try and connect to the configured network
   else
   {
-    Serial.print("Connecting as Wifi Client to ");
-    Serial.println(esid.c_str());
-    
     WiFi.mode(WIFI_STA);
-    WiFi.disconnect();
-    WiFi.begin(esid.c_str(), epass.c_str());
-    delay(50);
-    int t = 0;
-    int attempt = 0;
-    while (WiFi.status() != WL_CONNECTED){
-      
-      delay(500);
-      t++;
-      if (t >= 20){
-        Serial.println(" ");
-        Serial.println("Trying Again...");
-        delay(2000);
-        WiFi.disconnect();
-        WiFi.begin(esid.c_str(), epass.c_str());
-        t = 0;
-        attempt++;
-        if (attempt >= 5){
-          startAP();
-          // AP mode with SSID in EEPROM, connection will retry in 5 minutes
-          wifi_mode = 1;
-          break;
-        }
-      }
-    }
+    wifi_mode = 0;
+    startClient();
   }
   
-	if (wifi_mode == 0){
-    IPAddress myAddress = WiFi.localIP();
-    sprintf(tmpStr,"MODE:CLIENT %d.%d.%d.%d",myAddress[0],myAddress[1],myAddress[2],myAddress[3]);
-    Serial.println(tmpStr);
-    connected_network = esid;
-  }
-
   server.on("/", handleHome);
   server.on("/savenetwork", handleSaveNetwork);
   server.on("/saveapikey", handleSaveApikey);
   server.on("/status", handleStatus);
   server.on("/lastvalues",handleLastValues);
   server.on("/reset", handleRst);
+  server.on("/scan", handleScan);
+  server.on("/apoff",handleAPOff);
 	server.begin();
 	Serial.println("HTTP server started");
   delay(100);
   Timer = millis();
 }
 
+// -------------------------------------------------------------------
+// LOOP
+// -------------------------------------------------------------------
 void loop() {
   server.handleClient();
 
