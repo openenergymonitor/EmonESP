@@ -24,17 +24,21 @@
  */
  
 #include <ESP8266WiFi.h>
-#include <WiFiClient.h> 
+#include <WiFiClientSecure.h> 
 #include <ESP8266WebServer.h>
 #include <EEPROM.h>
 #include "FS.h"
 #include <ArduinoJson.h>
+#include <ArduinoOTA.h>
+#include <ESP8266mDNS.h>
 
 ESP8266WebServer server(80);
 
 //Default SSID and PASSWORD for AP Access Point Mode
 const char* ssid = "emonESP";
 const char* password = "emonesp";
+const char* www_username = "admin";
+const char* www_password = "emonesp";
 String st;
 
 String esid = "";
@@ -48,7 +52,9 @@ String ipaddress = "";
 
 //SERVER strings and interfers for OpenEVSE Energy Monotoring
 const char* host = "emoncms.org";
+const int httpsPort = 443;
 const char* e_url = "/input/post.json?json=";
+const char* fingerprint = "0C EC B6 C9 62 2E D0 58 81 09 22 10 08 14 E8 66 4F DF 98 97";
 
 
 // Wifi mode
@@ -64,6 +70,38 @@ int i = 0;
 unsigned long Timer;
 unsigned long packets_sent = 0;
 unsigned long packets_success = 0;
+
+String getContentType(String filename){
+  if(server.hasArg("download")) return "application/octet-stream";
+  else if(filename.endsWith(".htm")) return "text/html";
+  else if(filename.endsWith(".html")) return "text/html";
+  else if(filename.endsWith(".css")) return "text/css";
+  else if(filename.endsWith(".js")) return "application/javascript";
+  else if(filename.endsWith(".png")) return "image/png";
+  else if(filename.endsWith(".gif")) return "image/gif";
+  else if(filename.endsWith(".jpg")) return "image/jpeg";
+  else if(filename.endsWith(".ico")) return "image/x-icon";
+  else if(filename.endsWith(".xml")) return "text/xml";
+  else if(filename.endsWith(".pdf")) return "application/x-pdf";
+  else if(filename.endsWith(".zip")) return "application/x-zip";
+  else if(filename.endsWith(".gz")) return "application/x-gzip";
+  return "text/plain";
+}
+
+bool handleFileRead(String path){
+  if(path.endsWith("/")) path += "index.htm";
+  String contentType = getContentType(path);
+  String pathWithGz = path + ".gz";
+  if(SPIFFS.exists(pathWithGz) || SPIFFS.exists(path)){
+    if(SPIFFS.exists(pathWithGz))
+      path += ".gz";
+    File file = SPIFFS.open(path, "r");
+    size_t sent = server.streamFile(file, contentType);
+    file.close();
+    return true;
+  }
+  return false;
+}
 
 // -------------------------------------------------------------------
 // Start Access Point, starts on 192.168.4.1
@@ -338,8 +376,12 @@ void setup() {
     wifi_mode = 0;
     startClient();
   }
-  
-  server.on("/", handleHome);
+  ArduinoOTA.begin();
+  server.on("/", [](){
+    if(!server.authenticate(www_username, www_password))
+      return server.requestAuthentication();
+    handleHome();
+  });
   server.on("/savenetwork", handleSaveNetwork);
   server.on("/saveapikey", handleSaveApikey);
   server.on("/status", handleStatus);
@@ -347,6 +389,11 @@ void setup() {
   server.on("/reset", handleRst);
   server.on("/scan", handleScan);
   server.on("/apoff",handleAPOff);
+  server.onNotFound([](){
+  if(!handleFileRead(server.uri()))
+    server.send(404, "text/plain", "FileNotFound");
+  });
+	
 	server.begin();
 	Serial.println("HTTP server started");
   delay(100);
@@ -357,6 +404,7 @@ void setup() {
 // LOOP
 // -------------------------------------------------------------------
 void loop() {
+  ArduinoOTA.handle();
   server.handleClient();
 
   /*
@@ -392,9 +440,8 @@ void loop() {
     if (wifi_mode == 0 && apikey != 0) 
     {
       // Use WiFiClient class to create TCP connections
-      WiFiClient client;
-      const int httpPort = 80;
-      if (!client.connect(host, httpPort)) {
+      WiFiClientSecure client;
+      if (!client.connect(host, httpsPort)) {
         return;
       }
 
@@ -416,8 +463,10 @@ void loop() {
       packets_sent++;
       
       // This will send the request to the server
+    if (client.verify(fingerprint, host)) {
+      Serial.println("certificate matches");
       client.print(String("GET ") + url + " HTTP/1.1\r\n" + "Host: " + host + "\r\n" + "Connection: close\r\n\r\n");
-      // Handle wait for reply and timeout
+       // Handle wait for reply and timeout
       unsigned long timeout = millis();
       while (client.available() == 0) {
         if (millis() - timeout > 5000) {
@@ -435,6 +484,12 @@ void loop() {
         }
       }
       Serial.println();
+    } 
+    else {
+      Serial.println("certificate doesn't match");
+    }
+      
+     
     }
   }
 }
