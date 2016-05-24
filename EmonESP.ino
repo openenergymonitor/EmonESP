@@ -350,16 +350,17 @@ void setup() {
   // ResetEEPROM();
  
   for (int i = 0; i < 32; ++i){
-    char c = char(EEPROM.read(i));
-    if (c!=0) esid += c;
+    byte c = EEPROM.read(i);
+    if (c!=0) esid += (char) c;
   }
+  
   for (int i = 32; i < 96; ++i){
-    char c = char(EEPROM.read(i));
-    if (c!=0) epass += c;
+    byte c = EEPROM.read(i);
+    if (c!=0) epass += (char) c;
   }
   for (int i = 96; i < 128; ++i){
-    char c = char(EEPROM.read(i));
-    if (c!=0) apikey += c;
+    byte c = EEPROM.read(i);
+    if (c!=0) apikey += (char) c;
   }
 
   WiFi.disconnect();
