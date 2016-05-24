@@ -37,8 +37,8 @@ ESP8266WebServer server(80);
 //Default SSID and PASSWORD for AP Access Point Mode
 const char* ssid = "emonESP";
 const char* password = "emonesp";
-const char* www_username = "admin";
-const char* www_password = "emonesp";
+const char* www_username = "";
+const char* www_password = "";
 String st;
 
 String esid = "";
@@ -54,7 +54,7 @@ String ipaddress = "";
 const char* host = "emoncms.org";
 const int httpsPort = 443;
 const char* e_url = "/input/post.json?json=";
-const char* fingerprint = "0C EC B6 C9 62 2E D0 58 81 09 22 10 08 14 E8 66 4F DF 98 97";
+const char* fingerprint = "B6:44:19:FF:B8:F2:62:46:60:39:9D:21:C6:FB:F5:6A:F3:D9:1A:79";
 
 
 // Wifi mode
@@ -379,7 +379,7 @@ void setup() {
   }
   ArduinoOTA.begin();
   server.on("/", [](){
-    if(!server.authenticate(www_username, www_password))
+    if(www_username!="" && !server.authenticate(www_username, www_password))
       return server.requestAuthentication();
     handleHome();
   });
@@ -438,7 +438,7 @@ void loop() {
     
     last_datastr = data;
 
-    if (wifi_mode == 0 && apikey != 0) 
+    if ((wifi_mode==0 || wifi_mode==3) && apikey != 0) 
     {
       // Use WiFiClient class to create TCP connections
       WiFiClientSecure client;

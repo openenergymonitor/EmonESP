@@ -23,7 +23,11 @@ r1.onreadystatechange = function () {
       }
       document.getElementById("networks").innerHTML = out;
   } else {
-      document.getElementById("mode").innerHTML = "Client (STA)";
+      if (status.mode=="STA+AP") {
+          document.getElementById("mode").innerHTML = "Client + Access Point (STA+AP)";
+          document.getElementById("apoff").style.display = '';
+      }
+      if (status.mode=="STA") document.getElementById("mode").innerHTML = "Client (STA)";
       document.getElementById("sta-ssid").innerHTML = status.ssid;
       document.getElementById("sta-ip").innerHTML = "<a href='http://"+status.ipaddress+"'>"+status.ipaddress+"</a>";
       document.getElementById("sta-psent").innerHTML = status.packets_sent;
