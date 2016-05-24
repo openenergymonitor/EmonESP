@@ -208,8 +208,11 @@ void handleHome() {
 void handleAPOff() {
   server.send(200, "text/html", "Turning Access Point Off");
   Serial.println("Turning Access Point Off");
-  delay(2000);
-  WiFi.mode(WIFI_STA); 
+  WiFi.disconnect();
+  delay(1000);
+  ESP.reset();
+  //delay(2000);
+  //WiFi.mode(WIFI_STA); 
 }
 
 // -------------------------------------------------------------------

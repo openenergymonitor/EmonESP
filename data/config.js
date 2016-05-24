@@ -150,7 +150,7 @@ document.getElementById("apoff").addEventListener("click", function(e) {
         var str = r.responseText;
         console.log(str);
         document.getElementById("apoff").style.display = 'none';
-        if (ipaddress!="") window.location = ipaddress;
+        if (ipaddress!="") window.location = "http://"+ipaddress;
         
 	  };
     r.send();
