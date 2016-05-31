@@ -67,8 +67,6 @@ function update() {
     r1.onreadystatechange = function () {
     if (r1.readyState != 4 || r1.status != 200) return;
       var status = JSON.parse(r1.responseText);
-	  document.getElementById("comm-psent").innerHTML = status.comm_sent;
-      document.getElementById("comm-psuccess").innerHTML = status.comm_success;
       document.getElementById("sta-psent").innerHTML = status.packets_sent;
       document.getElementById("sta-psuccess").innerHTML = status.packets_success;
     };
