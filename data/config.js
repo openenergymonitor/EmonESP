@@ -44,7 +44,7 @@ update();
 setInterval(update,10000);
 
 // -----------------------------------------------------------------------
-// Periodic 10s update of last data values
+// Periodic 10s update of last data values and packets sent
 // -----------------------------------------------------------------------
 function update() {
 
@@ -65,6 +65,16 @@ function update() {
 	    document.getElementById("datavalues").innerHTML = out;
     };
     r.send();
+
+    var r1 = new XMLHttpRequest(); 
+    r1.open("GET", "status", false);
+    r1.onreadystatechange = function () {
+    if (r1.readyState != 4 || r1.status != 200) return;
+      var status = JSON.parse(r1.responseText);
+      document.getElementById("sta-psent").innerHTML = status.packets_sent;
+      document.getElementById("sta-psuccess").innerHTML = status.packets_success;
+    };
+    r1.send();
 }
 
 function updateStatus() {
