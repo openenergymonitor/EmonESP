@@ -353,21 +353,21 @@ void setup() {
  
   for (int i = 0; i < 32; ++i){
     byte c = EEPROM.read(i);
-    if (c!=0) esid += (char) c;
+    if (c!=0 && c!=255) esid += (char) c;
   }
   
   for (int i = 32; i < 96; ++i){
     byte c = EEPROM.read(i);
-    if (c!=0) epass += (char) c;
+    if (c!=0 && c!=255) epass += (char) c;
   }
   for (int i = 96; i < 128; ++i){
     byte c = EEPROM.read(i);
-    if (c!=0) apikey += (char) c;
+    if (c!=0 && c!=255) apikey += (char) c;
   }
 
   WiFi.disconnect();
   // 1) If no network configured start up access point
-  if (esid == 0)
+  if (esid == 0 || esid == "")
   {
     startAP();
     wifi_mode = 2; // AP mode with no SSID in EEPROM    
