@@ -31,8 +31,11 @@ Required to include `data` folder with html etc in the upload
 #### 3. Compile and Upload
 
 - Open EmonESP.ino in the Arduino IDE.
-- Compile and Upload as normal
-- Upload home.html web page using the ESP8266 Sketch Data Upload tool under Arduino tools.
+- Put ESP into bootloder mode 
+   - On Heatpump monitor use jumper to pull `GPIO0` low then reset then connect power (simulates reset)
+   - On other ESP boards (Adafruit HUZZAH) press and hold `GPIO0` button then press Reset, LED should light dimly to indicate bootloader mode
+- Compile and upload as normal, this will 
+- Upload `data` folder contents (html, css etc.) using `Tools > ESP8266 Sketch Data Upload`
 
 ### Licence
 
