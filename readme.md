@@ -18,11 +18,13 @@ Insuructions from: https://github.com/esp8266/Arduino
 
 #### 2. Install ESP filesystem file uploader
 
-Insturctions from: https://github.com/esp8266/Arduino/blob/master/doc/filesystem.md
+Required to include `data` folder with html etc in the upload 
 
-- Download the tool: https://github.com/esp8266/arduino-esp8266fs-plugin/releases/download/0.2.0/ESP8266FS-0.2.0.zip.
-- In your Arduino sketchbook directory, create tools directory if it doesn't exist yet
-- Unpack the tool into tools directory (the path will look like <home_dir>/Arduino/tools/ESP8266FS/tool/esp8266fs.jar)
+[Follow esp8266 filesystem instructions (copied  below):](https://github.com/esp8266/Arduino/blob/master/doc/filesystem.md)
+
+- [Download the Arduino IDE plug-in (.zip)](https://github.com/esp8266/arduino-esp8266fs-plugin/releases/download/0.2.0/ESP8266FS-0.2.0.zip)
+- Navigate to the `tools` folder in your Arduino sketchbook directory, (create directory if it doesn't exist)
+- Unpack the plug-in into tools directory (the path will look like `<home_dir>/Arduino/tools/ESP8266FS/tool/esp8266fs.jar`)
 - Restart Arduino
 
 #### 3. Compile and Upload
