@@ -1,14 +1,53 @@
 # EmonESP
 
+[![Build Status](https://travis-ci.org/openenergymonitor/emonesp.svg?branch=master)](https://travis-ci.org/openenergymonitor/emonesp)
+
 ESP8266 WIFI serial to emoncms link
 
-![emonesp.jpg](emonesp.jpg)
+![EmonEsp WiFi AP Setup Portal](docs/emonesp.jpg)
 
-### Installation
+## Installation
+
+EmonEsp used [ESP8266 Arduino core](https://github.com/esp8266/Arduino)
+
+The code can be compiled and uplaoaded either using PlatfomIO ([see blog post](https://blog.openenergymonitor.org/2016/06/platformio/)) or Arduino IDE.
+
+
+### Option 1: Using PlatformIO
+
+#### 1a. Install PlatformIO command line
+
+The easiest way if running Linux is to install use the install script, this installed pio via python pip and installs pip if not present. See [PlatformIO installation docs](http://docs.platformio.org/en/latest/installation.html#installer-script). Or PlatformIO IDE can be used :
+
+`$ sudo python -c "$(curl -fsSL https://raw.githubusercontent.com/platformio/platformio/master/scripts/get-platformio.py)"`
+
+#### 1b. And / Or use PlatformIO IDE
+
+[Download PlatfomIO IDE](http://platformio.org/platformio-ide), built on GitHub Atom IDE or use Atom plug-in.
+
+#### 2. Clone this repo
+
+`$ git clone https://github.com/openenergymonitor/EmonESP`
+
+#### 3. Compile
+
+`$ cd EmonESP`
+`$ pio run`
+
+The first time platformIO is run the espressif tool chanis will be installed if required.
+
+
+#### 3. Upload
+
+`$ pio run -t upload`
+
+***
+
+### Option 2: Using Arduino IDE
 
 #### 1. Install ESP for Arduino with Boards Manager
 
-From: https://github.com/esp8266/Arduino
+Install steps from: https://github.com/esp8266/Arduino
 
 Starting with 1.6.4, Arduino allows installation of third-party platform packages using Boards Manager. ESP Arduino packages are available for Windows, Mac OS, and Linux (32 and 64 bit).
 
