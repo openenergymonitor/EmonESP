@@ -1,6 +1,6 @@
 # EmonESP
 
-[![Build Status](https://travis-ci.org/openenergymonitor/emonesp.svg?branch=master)](https://travis-ci.org/openenergymonitor/emonesp)
+[![Build Status](https://travis-ci.org/openenergymonitor/EmonESP.svg?branch=master)](https://travis-ci.org/openenergymonitor/EmonESP)
 
 ESP8266 WIFI serial to emoncms link
 
@@ -8,9 +8,9 @@ ESP8266 WIFI serial to emoncms link
 
 ## Installation
 
-EmonEsp used [ESP8266 Arduino core](https://github.com/esp8266/Arduino)
+EmonESP used [ESP8266 Arduino core](https://github.com/esp8266/Arduino)
 
-The code can be compiled and uplaoaded either using PlatfomIO ([see blog post](https://blog.openenergymonitor.org/2016/06/platformio/)) or Arduino IDE.
+Firmware can be compiled and uploaded either using PlatfomIO ([see blog post](https://blog.openenergymonitor.org/2016/06/platformio/)) or Arduino IDE.
 
 
 ### Option 1: Using PlatformIO
@@ -31,10 +31,12 @@ The easiest way if running Linux is to install use the install script, this inst
 
 #### 3. Compile
 
-`$ cd EmonESP`
-`$ pio run`
+```
+$ cd EmonESP
+$ pio run
+```
 
-The first time platformIO is run the espressif tool chanis will be installed if required.
+The first time platformIO is ran the espressif arduino tool chain and all the required libs will be installed if required.
 
 
 #### 3. Upload
@@ -70,6 +72,8 @@ From: https://github.com/esp8266/Arduino/blob/master/doc/filesystem.md
 - Open EmonESP.ino in the Arduino IDE.
 - Compile and Upload as normal
 - Upload home.html web page using the ESP8266 Sketch Data Upload tool under Arduino tools.
+
+***
 
 ### Licence
 
