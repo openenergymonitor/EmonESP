@@ -1,14 +1,69 @@
 # EmonESP
 
-ESP8266 WIFI serial to Emoncms link
+[![Build Status](https://travis-ci.org/openenergymonitor/EmonESP.svg?branch=master)](https://travis-ci.org/openenergymonitor/EmonESP)
 
-![emonesp.jpg](emonesp.jpg)
+ESP8266 WIFI serial to emoncms link
 
-### Installation
+![EmonEsp WiFi AP Setup Portal](docs/emonesp.jpg)
+
+## Installation
+
+EmonESP used [ESP8266 Arduino core](https://github.com/esp8266/Arduino)
+
+Firmware can be compiled and uploaded either using PlatfomIO ([see blog post](https://blog.openenergymonitor.org/2016/06/platformio/)) or Arduino IDE.
+
+
+### Option 1: Using PlatformIO
+
+For more detailed ESP8266 Arduino core specific PlatfomIO notes see: https://github.com/esp8266/Arduino#using-platformio
+
+#### 1a. Install PlatformIO command line
+
+The easiest way if running Linux is to install use the install script, this installed pio via python pip and installs pip if not present. See [PlatformIO installation docs](http://docs.platformio.org/en/latest/installation.html#installer-script). Or PlatformIO IDE can be used :
+
+`$ sudo python -c "$(curl -fsSL https://raw.githubusercontent.com/platformio/platformio/master/scripts/get-platformio.py)"`
+
+#### 1b. And / Or use PlatformIO IDE
+
+Standalone built on GitHub Atom IDE, or use PlatformIO Atom IDE plug-in if you already have Atom installed. The IDE is nice, easy and self-explanitory.
+
+[Download PlatfomIO IDE](http://platformio.org/platformio-ide),
+
+#### 2. Clone this repo
+
+`$ git clone https://github.com/openenergymonitor/EmonESP`
+
+#### 3. Compile
+
+```
+$ cd EmonESP
+$ pio run -e emonesp
+```
+
+The first time platformIO is ran the espressif arduino tool chain and all the required libs will be installed if required.
+
+
+#### 3. Upload
+
+Put the ESP into bootloader mode by pressing and holding GPIO0 while pressing reset.
+
+##### a.) Upload main program:
+
+`$ pio run -e emonesp -t upload`
+
+##### b.) Upload data folder to the file system (html, CSS etc.) (SPIFFS):
+
+`$ pio run -e emonesp -t uploadfs`
+
+See [PlatfomrIO docs regarding SPIFFS uploading ](http://docs.platformio.org/en/latest/platforms/espressif.html#uploading-files-to-file-system-spiffs)
+
+***
+
+### Option 2: Using Arduino IDE
 
 #### 1. Install ESP for Arduino IDE with Boards Manager
 
-Insuructions from [ESP8266 Arduino](https://github.com/esp8266/Arduino) (copied below)
+Install steps from: https://github.com/esp8266/Arduino
 
 - Install Arduino IDE 1.6.8 from the Arduino website.
 - Start Arduino and open Preferences window.
@@ -18,7 +73,7 @@ Insuructions from [ESP8266 Arduino](https://github.com/esp8266/Arduino) (copied 
 
 #### 2. Install ESP filesystem file uploader
 
-Required to include `data` folder with html etc in the upload 
+Required to include `data` folder with HTML etc in the upload
 
 [Follow esp8266 filesystem instructions (copied  below):](https://github.com/esp8266/Arduino/blob/master/doc/filesystem.md)
 
@@ -28,15 +83,21 @@ Required to include `data` folder with html etc in the upload
 - Unpack the plug-in into `ESP8266FS` directory (the path will look like `<home_dir>/Arduino/tools/ESP8266FS/tool/esp8266fs.jar`)
 - Restart Arduino IDE
 
-#### 3. Compile and Upload
+#### 3. Clone this repo
 
-- Open EmonESP.ino in the Arduino IDE.
-- Put ESP into bootloder mode 
+`$ git clone https://github.com/openenergymonitor/EmonESP`
+
+#### 4. Compile and Upload
+
+- Open src/src.ino in the Arduino IDE.
+- Put ESP into bootloder mode
    - On Heatpump monitor use jumper to pull `GPIO0` low then reset then connect power (simulates reset)
    - On other ESP boards (Adafruit HUZZAH) press and hold `GPIO0` button then press Reset, LED should light dimly to indicate bootloader mode
-- Compile and upload as normal, this will 
-- Upload `data` folder contents (html, css etc.) using `Tools > ESP8266 Sketch Data Upload`
+- **Upload main sketch:** Compile and Upload as normal using Arduino IDE [CTRL + u]
+- **Upload 'data' folder**: Upload data folder (home.html web page etc) using `tools > ESP8266 Sketch Data Upload tool`.
 
-### Licence
+***
+
+### License
 
 GNU General Public License
