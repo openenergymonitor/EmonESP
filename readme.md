@@ -37,7 +37,7 @@ Standalone built on GitHub Atom IDE, or use PlatformIO Atom IDE plug-in if you a
 
 ```
 $ cd EmonESP
-$ pio run
+$ pio run -e emonesp
 ```
 
 The first time platformIO is ran the espressif arduino tool chain and all the required libs will be installed if required.
@@ -45,13 +45,15 @@ The first time platformIO is ran the espressif arduino tool chain and all the re
 
 #### 3. Upload
 
+Put the ESP into bootloader mode by pressing and holding GPIO0 while pressing reset.
+
 ##### a.) Upload main program:
 
-`$ pio run -t upload`
+`$ pio run -e emonesp -t upload`
 
-##### b.) Upload data folder to the file system (html, css etc.) (SPIFFS):
+##### b.) Upload data folder to the file system (html, CSS etc.) (SPIFFS):
 
-`$ pio run -t uploadfs`
+`$ pio run -e emonesp -t uploadfs`
 
 See [PlatfomrIO docs regarding SPIFFS uploading ](http://docs.platformio.org/en/latest/platforms/espressif.html#uploading-files-to-file-system-spiffs)
 
