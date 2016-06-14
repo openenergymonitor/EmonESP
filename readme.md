@@ -15,6 +15,8 @@ Firmware can be compiled and uploaded either using PlatfomIO ([see blog post](ht
 
 ### Option 1: Using PlatformIO
 
+For more detailed ESP8266 Arduino core specific PlatfomIO notes see: https://github.com/esp8266/Arduino#using-platformio
+
 #### 1a. Install PlatformIO command line
 
 The easiest way if running Linux is to install use the install script, this installed pio via python pip and installs pip if not present. See [PlatformIO installation docs](http://docs.platformio.org/en/latest/installation.html#installer-script). Or PlatformIO IDE can be used :
@@ -23,7 +25,9 @@ The easiest way if running Linux is to install use the install script, this inst
 
 #### 1b. And / Or use PlatformIO IDE
 
-[Download PlatfomIO IDE](http://platformio.org/platformio-ide), built on GitHub Atom IDE or use Atom plug-in.
+Standalone built on GitHub Atom IDE, or use PlatformIO Atom IDE plug-in if you already have Atom installed. The IDE is nice, easy and self-explanitory.
+
+[Download PlatfomIO IDE](http://platformio.org/platformio-ide),
 
 #### 2. Clone this repo
 
@@ -41,7 +45,15 @@ The first time platformIO is ran the espressif arduino tool chain and all the re
 
 #### 3. Upload
 
+##### a.) Upload main program:
+
 `$ pio run -t upload`
+
+##### b.) Upload data folder to the file system (html, css etc.) (SPIFFS):
+
+`$ pio run -t uploadfs`
+
+See [PlatfomrIO docs regarding SPIFFS uploading ](http://docs.platformio.org/en/latest/platforms/espressif.html#uploading-files-to-file-system-spiffs)
 
 ***
 
@@ -67,11 +79,16 @@ From: https://github.com/esp8266/Arduino/blob/master/doc/filesystem.md
 - Unpack the tool into tools directory (the path will look like <home_dir>/Arduino/tools/ESP8266FS/tool/esp8266fs.jar)
 - Restart Arduino
 
-#### 3. Compile and Upload
 
-- Open EmonESP.ino in the Arduino IDE.
-- Compile and Upload as normal
-- Upload home.html web page using the ESP8266 Sketch Data Upload tool under Arduino tools.
+#### 3. Clone this repo
+
+`$ git clone https://github.com/openenergymonitor/EmonESP`
+
+#### 4. Compile and Upload
+
+- Open src/src.ino in the Arduino IDE.
+- **Upload main sketch:** Compile and Upload as normal using Arduino IDE [CTRL + u]
+- **Upload 'data' folder**: Upload data folder (home.html web page etc) using `tools > ESP8266 Sketch Data Upload tool`.
 
 ***
 
