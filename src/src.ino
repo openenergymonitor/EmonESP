@@ -22,9 +22,9 @@
  * Free Software Foundation, Inc., 59 Temple Place - Suite 330,
  * Boston, MA 02111-1307, USA.
  */
- 
+
 #include <ESP8266WiFi.h>
-#include <WiFiClientSecure.h> 
+#include <WiFiClientSecure.h>
 #include <ESP8266WebServer.h>
 #include <EEPROM.h>
 #include "FS.h"
@@ -41,7 +41,7 @@ const char* www_password = "";
 String st;
 
 String esid = "";
-String epass = "";  
+String epass = "";
 String apikey = "";
 
 String connected_network = "";
@@ -62,7 +62,7 @@ const char* fingerprint = "B6:44:19:FF:B8:F2:62:46:60:39:9D:21:C6:FB:F5:6A:F3:D9
 // 2 - AP only
 // 3 - AP + STA
 int wifi_mode = 0;
- 
+
 int buttonState = 0;
 int clientTimeout = 0;
 int i = 0;
@@ -139,13 +139,13 @@ void startClient() {
   Serial.print(" epass:");
   Serial.println(epass.c_str());
   WiFi.begin(esid.c_str(), epass.c_str());
-  
+
   delay(50);
-  
+
   int t = 0;
   int attempt = 0;
   while (WiFi.status() != WL_CONNECTED){
-    
+
     delay(500);
     t++;
     if (t >= 20){
@@ -164,7 +164,7 @@ void startClient() {
       }
     }
   }
-  
+
   if (wifi_mode == 0 || wifi_mode == 3){
     IPAddress myAddress = WiFi.localIP();
     char tmpStr[40];
@@ -179,11 +179,11 @@ void startClient() {
 
 void ResetEEPROM(){
   //Serial.println("Erasing EEPROM");
-  for (int i = 0; i < 512; ++i) { 
+  for (int i = 0; i < 512; ++i) {
     EEPROM.write(i, 0);
-    //Serial.print("#"); 
+    //Serial.print("#");
   }
-  EEPROM.commit();   
+  EEPROM.commit();
 }
 
 // -------------------------------------------------------------------
@@ -211,7 +211,7 @@ void handleAPOff() {
   delay(1000);
   ESP.reset();
   //delay(2000);
-  //WiFi.mode(WIFI_STA); 
+  //WiFi.mode(WIFI_STA);
 }
 
 // -------------------------------------------------------------------
@@ -224,12 +224,12 @@ void handleSaveNetwork() {
   String qpass = server.arg("pass");
   esid = qsid;
   epass = qpass;
- 
+
   qpass.replace("%23", "#");
   qpass.replace('+', ' ');
-  
+
   if (qsid != 0){
-    
+
     for (int i = 0; i < 32; i++){
       if (i<qsid.length()) {
         EEPROM.write(i+0, qsid[i]);
@@ -237,7 +237,7 @@ void handleSaveNetwork() {
         EEPROM.write(i+0, 0);
       }
     }
-    
+
     for (int i = 0; i < 32; i++){
       if (i<qpass.length()) {
         EEPROM.write(i+32, qpass[i]);
@@ -245,11 +245,11 @@ void handleSaveNetwork() {
         EEPROM.write(i+32, 0);
       }
     }
-     
+
     EEPROM.commit();
     server.send(200, "text/html", "saved");
     delay(2000);
-    
+
     // Startup in STA + AP mode
     WiFi.mode(WIFI_AP_STA);
     WiFi.softAP(ssid, password);
@@ -350,12 +350,12 @@ void setup() {
   Serial.println("emonESP Startup");
   EEPROM.begin(512);
   // ResetEEPROM();
- 
+
   for (int i = 0; i < 32; ++i){
     byte c = EEPROM.read(i);
     if (c!=0 && c!=255) esid += (char) c;
   }
-  
+
   for (int i = 32; i < 96; ++i){
     byte c = EEPROM.read(i);
     if (c!=0 && c!=255) epass += (char) c;
@@ -370,8 +370,8 @@ void setup() {
   if (esid == 0 || esid == "")
   {
     startAP();
-    wifi_mode = 2; // AP mode with no SSID in EEPROM    
-  } 
+    wifi_mode = 2; // AP mode with no SSID in EEPROM
+  }
   // 2) else try and connect to the configured network
   else
   {
@@ -396,7 +396,7 @@ void setup() {
   if(!handleFileRead(server.uri()))
     server.send(404, "text/plain", "FileNotFound");
   });
-	
+
 	server.begin();
 	Serial.println("HTTP server started");
   delay(100);
@@ -411,7 +411,7 @@ void loop() {
   server.handleClient();
 
   /*
-  int erase = 0;  
+  int erase = 0;
   buttonState = digitalRead(0);
   while (buttonState == LOW) {
     buttonState = digitalRead(0);
@@ -423,7 +423,7 @@ void loop() {
       Serial.print("Finished...");
       delay(2000);
       ESP.reset();
-    } 
+    }
   }*/
 
   // Remain in AP mode for 5 Minutes before resetting
@@ -432,15 +432,15 @@ void loop() {
        ESP.reset();
        Serial.println("WIFI Mode = 1, resetting");
      }
-  }   
+  }
 
   while(Serial.available()) {
     String data = Serial.readStringUntil('\n');
     // Could check for string integrity here
-    
+
     last_datastr = data;
 
-    if ((wifi_mode==0 || wifi_mode==3) && apikey != 0) 
+    if ((wifi_mode==0 || wifi_mode==3) && apikey != 0)
     {
       // Use WiFiClient class to create TCP connections
       WiFiClientSecure client;
@@ -464,7 +464,7 @@ void loop() {
 
       Serial.print("Emoncms request: ");
       packets_sent++;
-      
+
       // This will send the request to the server
     if (client.verify(fingerprint, host)) {
       Serial.println("certificate matches");
@@ -487,12 +487,12 @@ void loop() {
         }
       }
       Serial.println();
-    } 
+    }
     else {
       Serial.println("certificate doesn't match");
     }
-      
-     
+
+
     }
   }
 }

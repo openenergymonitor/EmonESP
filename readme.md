@@ -37,7 +37,7 @@ Standalone built on GitHub Atom IDE, or use PlatformIO Atom IDE plug-in if you a
 
 ```
 $ cd EmonESP
-$ pio run -e emonesp
+$ pio run
 ```
 
 The first time platformIO is ran the espressif arduino tool chain and all the required libs will be installed if required.
@@ -45,17 +45,36 @@ The first time platformIO is ran the espressif arduino tool chain and all the re
 
 #### 3. Upload
 
-Put the ESP into bootloader mode by pressing and holding GPIO0 while pressing reset.
+- Put ESP into bootloder mode
+   - On Heatpump monitor use jumper to pull `GPIO0` low then reset then connect power (simulates reset) or pull RST pin low.
+   - On other ESP boards (Adafruit HUZZAH) press and hold `GPIO0` button then press Reset, LED should light dimly to indicate bootloader mode
 
 ##### a.) Upload main program:
 
-`$ pio run -e emonesp -t upload`
+`$ pio run -t upload`
 
 ##### b.) Upload data folder to the file system (html, CSS etc.) (SPIFFS):
 
-`$ pio run -e emonesp -t uploadfs`
+- Put ESP back into bootloder mode, see above
 
-See [PlatfomrIO docs regarding SPIFFS uploading ](http://docs.platformio.org/en/latest/platforms/espressif.html#uploading-files-to-file-system-spiffs)
+`$ pio run -t uploadfs`
+
+See [PlatfomrIO docs regarding SPIFFS uploading](http://docs.platformio.org/en/latest/platforms/espressif.html#uploading-files-to-file-system-spiffs)
+
+##### c.) OTA upload over local network
+
+`$  pio run  -t upload --upload-port <LOCAL-ESP-IP-ADDRESS>`
+
+Upload SPIFFS filesystem over OTA (and don't flash):
+
+` pio run -e emonesp_spiffs -t upload --upload-port <LOCAL-ESP-IP-ADDRESS>`
+
+OTA uses port 8266. See [PlatformIO ESP OTA docs](http://docs.platformio.org/en/latest/platforms/espressif.html#over-the-air-ota-update):
+
+
+
+
+
 
 ***
 
