@@ -45,7 +45,7 @@ The first time platformIO is ran the espressif arduino tool chain and all the re
 
 #### 3. Upload
 
-- Put ESP into bootloder mode
+- Put ESP into bootloader mode
    - On Heatpump monitor use jumper to pull `GPIO0` low then reset then connect power (simulates reset) or pull RST pin low.
    - On other ESP boards (Adafruit HUZZAH) press and hold `GPIO0` button then press Reset, LED should light dimly to indicate bootloader mode
 
@@ -55,7 +55,6 @@ The first time platformIO is ran the espressif arduino tool chain and all the re
 
 ##### b.) Upload data folder to the file system (html, CSS etc.) (SPIFFS):
 
-<<<<<<< HEAD
 - Put ESP back into bootloder mode, see above
 
 `$ pio run -t uploadfs`
@@ -75,11 +74,6 @@ OTA uses port 8266. See [PlatformIO ESP OTA docs](http://docs.platformio.org/en/
 
 
 
-=======
-Put the ESP back into bootloader mode by pressing and holding GPIO0 while pressing reset.
-
-`$ pio run -t uploadfs`
->>>>>>> d58753eb59eca5bd4f8195a02d2963a575067ed7
 
 
 ***
