@@ -49,11 +49,13 @@ Put the ESP into bootloader mode by pressing and holding GPIO0 while pressing re
 
 ##### a.) Upload main program:
 
-`$ pio run -e emonesp -t upload`
+`$ pio run -t upload`
 
 ##### b.) Upload data folder to the file system (html, CSS etc.) (SPIFFS):
 
-`$ pio run -e emonesp -t uploadfs`
+Put the ESP back into bootloader mode by pressing and holding GPIO0 while pressing reset.
+
+`$ pio run -t uploadfs`
 
 See [PlatfomrIO docs regarding SPIFFS uploading ](http://docs.platformio.org/en/latest/platforms/espressif.html#uploading-files-to-file-system-spiffs)
 
@@ -98,6 +100,15 @@ Required to include `data` folder with HTML etc in the upload
 
 ***
 
+## Opperation
+
+On first boot, ESP should broadcast a WiFI AP `ESP_XXX`. Connect to this AP and browser to:
+
+http://192.168.4.1
+
+*Note: You may need to disable mobile data if connecting via a Android 6 device*
+
+***
 ### License
 
 GNU General Public License
