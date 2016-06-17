@@ -30,6 +30,8 @@
 #include "FS.h"
 #include <ArduinoOTA.h>
 #include <ESP8266mDNS.h>
+#include <ESP8266httpUpdate.h>
+#include <Ticker.h>
 
 ESP8266WebServer server(80);
 
@@ -55,6 +57,14 @@ const int httpsPort = 443;
 const char* e_url = "/input/post.json?json=";
 const char* fingerprint = "B6:44:19:FF:B8:F2:62:46:60:39:9D:21:C6:FB:F5:6A:F3:D9:1A:79";
 
+#define CHECK_INTERVAL 60
+// Stringifying the BUILD_TAG parameter
+#define TEXTIFY(A) #A
+#define ESCAPEQUOTE(A) TEXTIFY(A)
+
+String buildTag = ESCAPEQUOTE(BUILD_TAG);
+Ticker updateCheck;
+boolean doUpdateCheck = true;
 
 // Wifi mode
 // 0 - STA (Client)
@@ -69,6 +79,11 @@ int i = 0;
 unsigned long Timer;
 unsigned long packets_sent = 0;
 unsigned long packets_success = 0;
+
+void enableUpdateCheck() {
+  doUpdateCheck = true;
+}
+
 
 String getContentType(String filename){
   if(server.hasArg("download")) return "application/octet-stream";
@@ -348,6 +363,11 @@ void setup() {
 	Serial.begin(115200);
   Serial.println();
   Serial.println("emonESP Startup");
+  Serial.println("BUILD_TAG: "+ buildTag);
+
+  // Check for firmware updates from webserver every CHECK_INTERVAL seconds
+  updateCheck.attach(CHECK_INTERVAL, enableUpdateCheck);
+
   EEPROM.begin(512);
   // ResetEEPROM();
 
@@ -425,6 +445,30 @@ void loop() {
       ESP.reset();
     }
   }*/
+
+  if (doUpdateCheck) {
+    Serial.println("Going to update firmware...");
+    if (wifi_mode == 0 || wifi_mode == 3){
+
+            Serial.println("Checking for Update. Current version: " + buildTag);
+            t_httpUpdate_return ret = ESPhttpUpdate.update("http://openenergymonitor.org/dev/EmonESP/ota/firmware.php?tag=" + buildTag);
+
+            switch(ret) {
+                case HTTP_UPDATE_FAILED:
+                    Serial.printf("HTTP_UPDATE_FAILD Error (%d): %s", ESPhttpUpdate.getLastError(), ESPhttpUpdate.getLastErrorString().c_str());
+                    break;
+
+                case HTTP_UPDATE_NO_UPDATES:
+                    Serial.println("HTTP_UPDATE_NO_UPDATES");
+                    break;
+
+                case HTTP_UPDATE_OK:
+                    Serial.println("HTTP_UPDATE_OK");
+                    break;
+            }
+        }
+        doUpdateCheck = false;
+    }
 
   // Remain in AP mode for 5 Minutes before resetting
   if (wifi_mode == 1){
