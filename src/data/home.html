@@ -2,50 +2,50 @@
     <head>
     <meta http-equiv="content-type" content="text/html; charset=UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>EmonESP</title> 
+    <title>EmonESP</title>
     </head>
-    
+
     <body>
       <link rel="stylesheet" type="text/css" href="style.css">
          <div id="page">
             <div class="box">
             <!--<img src="logo.png" alt="EmonESP">-->
             <h1>EmonESP</h1>
-            
-            <p>Hello! To set up, select a WIFI network to connect to and then enter your emoncms apikey.</p>
+
+            <p>HELLO! To set up: select a WiFi network, enter passkey and <a href="https://emoncms.org">Emoncms.org</a> R/W apikey.</p>
             </div>
-            
+
             <div class="box380">
                 <h2>Wifi Config</h2>
-                
+
                 <p><b>Mode:</b> <span id="mode"></span></p>
-                
+
                 <div id="client-view" style="display:none">
                     <p><b>Network SSID:</b><br><span id="sta-ssid"></span></p>
                     <p><b>IP Address:</b><br><span id="sta-ip"></span></p>
                     <p><b>Successful packets:</b><br><span id="sta-psuccess"></span> of <span id="sta-psent"></span></p>
                     <button id="apoff" style="display:none">Turn off Access Point</button>
-                    <button id="reset">Reset config and reboot</button>
+                    <button id="reset">Reset config and Reboot</button>
                 </div>
-                
+
                 <div id="ap-view" style="display:none">
                     <p>Connect to network:</p>
                     <table>
                         <tr><th width=20>Select</th><th>Network</th></tr>
                         <tbody id="networks"></tbody>
                     </table>
-                    
+
                     <p><b>Passkey:</b><br>
                     <input id="passkey" type="text" style="width:280px;">
                     <button id="connect">Connect</button>
                     </p>
                 </div>
-                
+
                 <div id="wait-view" style="display:none">
-                    <p>Connecting to WIFI Network...</p>
+                    <p>Connecting to WiFi Network...</p>
                 </div>
             </div>
-            
+
             <div class="box380">
                 <h2>Emoncms Config</h2>
                 <p><b>Write apikey:</b><br>
@@ -53,7 +53,7 @@
                 <button id="save-apikey">Save</button>
                 </p>
             </div>
-                
+
             <div class="box380">
                 <h2>Latest data values</h2>
                 <table>
@@ -61,10 +61,10 @@
                     <tbody id="datavalues"></tbody>
                 </table>
             </div>
-            
+
             <div style="clear:both"></div>
         </div>
-    
+
     </body>
 </html>
 
