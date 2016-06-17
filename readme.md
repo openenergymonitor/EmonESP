@@ -55,6 +55,7 @@ The first time platformIO is ran the espressif arduino tool chain and all the re
 
 ##### b.) Upload data folder to the file system (html, CSS etc.) (SPIFFS):
 
+<<<<<<< HEAD
 - Put ESP back into bootloder mode, see above
 
 `$ pio run -t uploadfs`
@@ -74,6 +75,11 @@ OTA uses port 8266. See [PlatformIO ESP OTA docs](http://docs.platformio.org/en/
 
 
 
+=======
+Put the ESP back into bootloader mode by pressing and holding GPIO0 while pressing reset.
+
+`$ pio run -t uploadfs`
+>>>>>>> d58753eb59eca5bd4f8195a02d2963a575067ed7
 
 
 ***
@@ -117,6 +123,15 @@ Required to include `data` folder with HTML etc in the upload
 
 ***
 
+## Opperation
+
+On first boot, ESP should broadcast a WiFI AP `ESP_XXX`. Connect to this AP and browser to:
+
+http://192.168.4.1
+
+*Note: You may need to disable mobile data if connecting via a Android 6 device*
+
+***
 ### License
 
 GNU General Public License
