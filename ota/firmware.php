@@ -1,4 +1,3 @@
-
 <?php
     $githubApiUrl = "https://api.github.com/repos/openenergymonitor/EmonESP/releases/latest";
     $ch = curl_init();

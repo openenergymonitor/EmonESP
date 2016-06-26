@@ -451,7 +451,7 @@ void loop() {
     if (wifi_mode == 0 || wifi_mode == 3){
 
             Serial.println("Checking for Update. Current version: " + buildTag);
-            t_httpUpdate_return ret = ESPhttpUpdate.update("http://openenergymonitor.org/dev/EmonESP/ota/firmware.php?tag=" + buildTag);
+            t_httpUpdate_return ret = ESPhttpUpdate.update("http://lab.megni.co.uk/EmonESP/ota/firmware.php?tag=" + buildTag);
 
             switch(ret) {
                 case HTTP_UPDATE_FAILED:
