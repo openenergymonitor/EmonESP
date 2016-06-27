@@ -12,7 +12,8 @@
     $json = json_decode($result);
     $latestTag = $json->tag_name;
     $currentTag = $_GET["tag"];
-    if ($latestTag != $currentTag) {
+    echo $latestTag;
+    if (($latestTag != $currentTag) && ($currentTag!=NULL)) {
         $binPath = $json->assets[0]->browser_download_url;
         // the file you want to send
         $ch = curl_init();
@@ -30,8 +31,6 @@
         header("Content-Length: ".strlen($out));
 
         echo $out;
-    } else {
-       header($_SERVER["SERVER_PROTOCOL"].' 304 Not Modified', true, 304);
     }
 
     exit();
