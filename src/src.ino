@@ -61,10 +61,9 @@ const char* fingerprint = "B6:44:19:FF:B8:F2:62:46:60:39:9D:21:C6:FB:F5:6A:F3:D9
 //--------------------------------------------------------------OTA UPDATE SETTINGS-------------------------------------------------------
 //----------------------------------------------------------------------------------------------------------------------------------------
 //UPDATE SERVER strings and interfers for upate server
-const char* uhost = "lab.megni.co.uk";
+String uhost = "lab.megni.co.uk";
 // const int uhttpsPort = 443;
-const int uport = 80;
-const char* u_url = "/EmonESP/ota/firmware.php";
+String u_url = "/EmonESP/ota/firmware.php";
 //const char* ufingerprint = "B6:44:19:FF:B8:F2:62:46:60:39:9D:21:C6:FB:F5:6A:F3:D9:1A:79";
 // Checl for available updates ever X seconds
 #define CHECK_INTERVAL 120
@@ -377,41 +376,15 @@ void handleRst() {
 // -------------------------------------------------------------------
 void handleUpdateCheck() {
   Serial.println("Checking for Update. Running version: " + currentfirmware);
+  // Update web interface with current firmware version
+  String s = "{";
 
-  // Get latest firmware version from server
-  WiFiClient firmware;
-  if ((wifi_mode==0 || wifi_mode==3) && apikey != 0) {
+  s += "\"current\":\""+currentfirmware+"\",";
+  s += "\"latest\":\""+latestfirmware+"\"";
+  s += "}";
+  server.send(200, "text/html", s);
+  //t_httpUpdate_return ret = ESPhttpUpdate.update("http://lab.megni.co.uk/EmonESP/ota/firmware.php?tag=" + currentfirmware);
 
-    if (!firmware.connect(uhost, uport)) {
-      Serial.println("No connection to update server");
-      return;
-    }
-    firmware.print(String("GET ") + u_url + " HTTP/1.1\r\n" + "Host: " + uhost + "\r\n" + "Connection: close\r\n\r\n");
-         // Handle wait for reply and timeout
-        unsigned long timeout = millis();
-        while (firmware.available() == 0) {
-          if (millis() - timeout > 5000) {
-            Serial.println(">>> Firmware check Timeout !");
-            firmware.stop();
-            return;
-          }
-        }
-        // Handle message receive
-        while(firmware.available()){
-          String line = firmware.readStringUntil('\r');
-          Serial.print(line);
-      }
-
-    Serial.println("Latest version: " + latestfirmware);
-    // Update web interface with current firmware version
-    String s = "{";
-
-    s += "\"current\":\""+currentfirmware+"\",";
-    s += "\"latest\":\""+latestfirmware+"\"";
-    s += "}";
-    server.send(200, "text/html", s);
-
- }
 }
 
 
@@ -421,8 +394,7 @@ void handleUpdateCheck() {
 // -------------------------------------------------------------------
 void handleUpdatehttps() {
   server.send(200, "text/html", "Updating firmware via https (not yet implemented)...");
-
-  /*String update_URL = "http://" + str(uhost) + str(u_url) + "?tag=" + currentfirmware;
+  String update_URL = "http://" + uhost + u_url + "?tag=" + currentfirmware;
   t_httpUpdate_return ret = ESPhttpUpdate.update(update_URL);
   switch(ret) {
       case HTTP_UPDATE_FAILED:
@@ -437,9 +409,7 @@ void handleUpdatehttps() {
           Serial.println("HTTP_UPDATE_OK");
           break;
   }
-*/
 }
-
 
 
 // -------------------------------------------------------------------
