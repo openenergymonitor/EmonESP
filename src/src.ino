@@ -51,20 +51,37 @@ String last_datastr = "";
 String status_string = "";
 String ipaddress = "";
 
-//SERVER strings and interfers for OpenEVSE Energy Monotoring
+//EMONCMS SERVER strings and interfers for emoncms.org
 const char* host = "emoncms.org";
 const int httpsPort = 443;
 const char* e_url = "/input/post.json?json=";
 const char* fingerprint = "B6:44:19:FF:B8:F2:62:46:60:39:9D:21:C6:FB:F5:6A:F3:D9:1A:79";
 
-#define CHECK_INTERVAL 60
+//----------------------------------------------------------------------------------------------------------------------------------------
+//--------------------------------------------------------------OTA UPDATE SETTINGS-------------------------------------------------------
+//----------------------------------------------------------------------------------------------------------------------------------------
+//UPDATE SERVER strings and interfers for upate server
+String uhost = "lab.megni.co.uk";
+// const int uhttpsPort = 443;
+String u_url = "/EmonESP/ota/firmware.php";
+//const char* ufingerprint = "B6:44:19:FF:B8:F2:62:46:60:39:9D:21:C6:FB:F5:6A:F3:D9:1A:79";
+// Checl for available updates ever X seconds
+#define CHECK_INTERVAL 120
 // Stringifying the BUILD_TAG parameter
 #define TEXTIFY(A) #A
 #define ESCAPEQUOTE(A) TEXTIFY(A)
 
-String buildTag = ESCAPEQUOTE(BUILD_TAG);
+// Get firmware version form build tag environment variable
+String currentfirmware = ESCAPEQUOTE(BUILD_TAG);
+String latestfirmware = "0.0.0";
 Ticker updateCheck;
 boolean doUpdateCheck = true;
+
+void enableUpdateCheck() {
+  doUpdateCheck = true;
+}
+//----------------------------------------------------------------------------------------------------------------------------------------
+//----------------------------------------------------------------------------------------------------------------------------------------
 
 // Wifi mode
 // 0 - STA (Client)
@@ -72,7 +89,6 @@ boolean doUpdateCheck = true;
 // 2 - AP only
 // 3 - AP + STA
 int wifi_mode = 0;
-
 int buttonState = 0;
 int clientTimeout = 0;
 int i = 0;
@@ -80,9 +96,7 @@ unsigned long Timer;
 unsigned long packets_sent = 0;
 unsigned long packets_success = 0;
 
-void enableUpdateCheck() {
-  doUpdateCheck = true;
-}
+
 
 
 String getContentType(String filename){
@@ -355,6 +369,73 @@ void handleRst() {
   ESP.reset();
 }
 
+
+// -------------------------------------------------------------------
+// Check for updates and display current version
+// url: /firmware
+// -------------------------------------------------------------------
+void handleUpdateCheck() {
+  Serial.println("Checking for Update. Running version: " + currentfirmware);
+  // Update web interface with current firmware version
+  String s = "{";
+
+  s += "\"current\":\""+currentfirmware+"\",";
+  s += "\"latest\":\""+latestfirmware+"\"";
+  s += "}";
+  server.send(200, "text/html", s);
+  //t_httpUpdate_return ret = ESPhttpUpdate.update("http://lab.megni.co.uk/EmonESP/ota/firmware.php?tag=" + currentfirmware);
+
+}
+
+
+// -------------------------------------------------------------------
+// Update firmware via https
+// url: /update
+// -------------------------------------------------------------------
+void handleUpdatehttps() {
+  server.send(200, "text/html", "Updating firmware via https (not yet implemented)...");
+  String update_URL = "http://" + uhost + u_url + "?tag=" + currentfirmware;
+  t_httpUpdate_return ret = ESPhttpUpdate.update(update_URL);
+  switch(ret) {
+      case HTTP_UPDATE_FAILED:
+          Serial.printf("HTTP_UPDATE_FAILD Error (%d): %s", ESPhttpUpdate.getLastError(), ESPhttpUpdate.getLastErrorString().c_str());
+          break;
+
+      case HTTP_UPDATE_NO_UPDATES:
+          Serial.println("HTTP_UPDATE_NO_UPDATES");
+          break;
+
+      case HTTP_UPDATE_OK:
+          Serial.println("HTTP_UPDATE_OK");
+          break;
+  }
+}
+
+
+// -------------------------------------------------------------------
+// Update firmware via http
+// url: /updatehttp
+// -------------------------------------------------------------------
+void handleUpdatehttp() {
+  server.send(200, "text/html", "Updating firmware via http...");
+  t_httpUpdate_return ret = ESPhttpUpdate.update("http://lab.megni.co.uk/EmonESP/ota/firmware.php?tag=" + currentfirmware);
+  switch(ret) {
+      case HTTP_UPDATE_FAILED:
+          Serial.printf("HTTP_UPDATE_FAILD Error (%d): %s", ESPhttpUpdate.getLastError(), ESPhttpUpdate.getLastErrorString().c_str());
+          break;
+
+      case HTTP_UPDATE_NO_UPDATES:
+          Serial.println("HTTP_UPDATE_NO_UPDATES");
+          break;
+
+      case HTTP_UPDATE_OK:
+          Serial.println("HTTP_UPDATE_OK");
+          break;
+  }
+}
+
+
+
 // -------------------------------------------------------------------
 // SETUP
 // -------------------------------------------------------------------
@@ -363,7 +444,7 @@ void setup() {
 	Serial.begin(115200);
   Serial.println();
   Serial.println("emonESP Startup");
-  Serial.println("BUILD_TAG: "+ buildTag);
+  Serial.println("Firmware: "+ currentfirmware);
 
   // Check for firmware updates from webserver every CHECK_INTERVAL seconds
   updateCheck.attach(CHECK_INTERVAL, enableUpdateCheck);
@@ -405,6 +486,7 @@ void setup() {
       return server.requestAuthentication();
     handleHome();
   });
+  // Handle HTTP web interface button presses
   server.on("/savenetwork", handleSaveNetwork);
   server.on("/saveapikey", handleSaveApikey);
   server.on("/status", handleStatus);
@@ -412,6 +494,9 @@ void setup() {
   server.on("/reset", handleRst);
   server.on("/scan", handleScan);
   server.on("/apoff",handleAPOff);
+  server.on("/firmware",handleUpdateCheck);
+  server.on("/updatehttp",handleUpdatehttp);
+  server.on("/update",handleUpdatehttps);
   server.onNotFound([](){
   if(!handleFileRead(server.uri()))
     server.send(404, "text/plain", "FileNotFound");
@@ -446,36 +531,20 @@ void loop() {
     }
   }*/
 
-  if (doUpdateCheck) {
-    Serial.println("Going to update firmware...");
-    if (wifi_mode == 0 || wifi_mode == 3){
-
-            Serial.println("Checking for Update. Current version: " + buildTag);
-            t_httpUpdate_return ret = ESPhttpUpdate.update("http://lab.megni.co.uk/EmonESP/ota/firmware.php?tag=" + buildTag);
-
-            switch(ret) {
-                case HTTP_UPDATE_FAILED:
-                    Serial.printf("HTTP_UPDATE_FAILD Error (%d): %s", ESPhttpUpdate.getLastError(), ESPhttpUpdate.getLastErrorString().c_str());
-                    break;
-
-                case HTTP_UPDATE_NO_UPDATES:
-                    Serial.println("HTTP_UPDATE_NO_UPDATES");
-                    break;
-
-                case HTTP_UPDATE_OK:
-                    Serial.println("HTTP_UPDATE_OK");
-                    break;
-            }
-        }
-        doUpdateCheck = false;
-    }
-
   // Remain in AP mode for 5 Minutes before resetting
   if (wifi_mode == 1){
      if ((millis() - Timer) >= 300000){
        ESP.reset();
        Serial.println("WIFI Mode = 1, resetting");
      }
+  }
+
+  if (doUpdateCheck) {
+    Serial.println("Going to check for new firmware...");
+    if (wifi_mode == 0 || wifi_mode == 3){
+      handleUpdateCheck();
+    }
+    doUpdateCheck = false;
   }
 
   while(Serial.available()) {
@@ -492,7 +561,7 @@ void loop() {
         return;
       }
 
-      // We now create a URL for OpenEVSE RAPI data upload request
+      // We now create a URL for server data upload
       String url = e_url;
       url += "{";
       // Copy across, data length -1 to remove new line

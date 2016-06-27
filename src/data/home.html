@@ -12,7 +12,7 @@
             <!--<img src="logo.png" alt="EmonESP">-->
             <h1>EmonESP</h1>
 
-            <p>HELLO! To set up: select a WiFi network, enter passkey and <a href="https://emoncms.org">Emoncms.org</a> R/W apikey.</p>
+            <p>Hello! To set up: select a WiFi network, enter passkey and <a href="https://emoncms.org">Emoncms.org</a> R/W apikey.</p>
             </div>
 
             <div class="box380">
@@ -60,6 +60,19 @@
                     <tr><th>Name</th><th>Value</th></tr>
                     <tbody id="datavalues"></tbody>
                 </table>
+            </div>
+
+            <div class="box380">
+                <h2>Firmware</h2>
+                <table>
+                    <tr><th>Running</th><th>Latest</th></tr>
+                    <tbody id="firmware-version"></tbody>
+                </table>
+                <br>
+                <a href="https://github.com/openenergymonitor/EmonESP/releases">View changelog</a>
+                <br> <br>
+                <button id="updatecheck">Check for Updates</button>
+                <button id="update">Apply Update</button>
             </div>
 
             <div style="clear:both"></div>

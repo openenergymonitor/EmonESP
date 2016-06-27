@@ -3,20 +3,20 @@ var selected_network_ssid = "";
 var lastmode = "";
 var ipaddress = "";
 
-var r1 = new XMLHttpRequest(); 
+var r1 = new XMLHttpRequest();
 r1.open("GET", "status", false);
 r1.onreadystatechange = function () {
   if (r1.readyState != 4 || r1.status != 200) return;
   var status = JSON.parse(r1.responseText);
-  
+
   document.getElementById("passkey").value = status.pass;
   document.getElementById("apikey").value = status.apikey;
-  
+
   if (status.mode=="AP") {
       document.getElementById("mode").innerHTML = "Access Point (AP)";
       document.getElementById("client-view").style.display = 'none';
       document.getElementById("ap-view").style.display = '';
-      
+
       var out = "";
       for (var z in status.networks) {
           out += "<tr><td><input class='networkcheckbox' name='"+status.networks[z]+"' type='checkbox'></td><td>"+status.networks[z]+"</td></tr>";
@@ -48,7 +48,7 @@ setInterval(update,10000);
 // -----------------------------------------------------------------------
 function update() {
 
-    var r = new XMLHttpRequest(); 
+    var r = new XMLHttpRequest();
     r.open("GET", "lastvalues", true);
     r.onreadystatechange = function () {
 	    if (r.readyState != 4 || r.status != 200) return;
@@ -66,7 +66,7 @@ function update() {
     };
     r.send();
 
-    var r1 = new XMLHttpRequest(); 
+    var r1 = new XMLHttpRequest();
     r1.open("GET", "status", false);
     r1.onreadystatechange = function () {
     if (r1.readyState != 4 || r1.status != 200) return;
@@ -78,15 +78,15 @@ function update() {
 }
 
 function updateStatus() {
-  var r1 = new XMLHttpRequest(); 
+  var r1 = new XMLHttpRequest();
   r1.open("GET", "status", true);
   r1.timeout = 2000;
   r1.onreadystatechange = function () {
     if (r1.readyState != 4 || r1.status != 200) return;
     var status = JSON.parse(r1.responseText);
-    
+
     document.getElementById("apikey").value = status.apikey;
-    
+
     if (status.mode=="STA+AP" || status.mode=="STA") {
         // Hide waiting message
         document.getElementById("wait-view").style.display = 'none';
@@ -100,7 +100,7 @@ function updateStatus() {
         document.getElementById("sta-ip").innerHTML = "<a href='http://"+status.ipaddress+"'>"+status.ipaddress+"</a>";
         document.getElementById("sta-psent").innerHTML = status.packets_sent;
         document.getElementById("sta-psuccess").innerHTML = status.packets_success;
-        
+
         // View display
         document.getElementById("ap-view").style.display = 'none';
         document.getElementById("client-view").style.display = '';
@@ -120,15 +120,15 @@ document.getElementById("connect").addEventListener("click", function(e) {
     } else {
         document.getElementById("ap-view").style.display = 'none';
         document.getElementById("wait-view").style.display = '';
-        
-        var r = new XMLHttpRequest(); 
+
+        var r = new XMLHttpRequest();
         r.open("POST", "savenetwork", false);
         r.setRequestHeader("Content-type","application/x-www-form-urlencoded");
         r.onreadystatechange = function () {
 	        if (r.readyState != 4 || r.status != 200) return;
 	        var str = r.responseText;
 	        console.log(str);
-	        
+
 	        statusupdate = setInterval(updateStatus,5000);
         };
         r.send("ssid="+selected_network_ssid+"&pass="+passkey);
@@ -141,8 +141,8 @@ document.getElementById("connect").addEventListener("click", function(e) {
 document.getElementById("save-apikey").addEventListener("click", function(e) {
     var apikey = document.getElementById("apikey").value;
     if (apikey=="") alert("Please enter apikey");
-    
-    var r = new XMLHttpRequest(); 
+
+    var r = new XMLHttpRequest();
     r.open("POST", "saveapikey", true);
     r.setRequestHeader("Content-type","application/x-www-form-urlencoded");
     r.onreadystatechange = function () {};
@@ -152,8 +152,8 @@ document.getElementById("save-apikey").addEventListener("click", function(e) {
 // -----------------------------------------------------------------------
 // Event: Turn off Access POint
 // -----------------------------------------------------------------------
-document.getElementById("apoff").addEventListener("click", function(e) {    
-    var r = new XMLHttpRequest(); 
+document.getElementById("apoff").addEventListener("click", function(e) {
+    var r = new XMLHttpRequest();
     r.open("POST", "apoff", true);
     r.onreadystatechange = function () {
         if (r.readyState != 4 || r.status != 200) return;
@@ -161,15 +161,15 @@ document.getElementById("apoff").addEventListener("click", function(e) {
         console.log(str);
         document.getElementById("apoff").style.display = 'none';
         if (ipaddress!="") window.location = "http://"+ipaddress;
-        
+
 	  };
     r.send();
 });
 // -----------------------------------------------------------------------
 // Event: Reset config and reboot
 // -----------------------------------------------------------------------
-document.getElementById("reset").addEventListener("click", function(e) {    
-    var r = new XMLHttpRequest(); 
+document.getElementById("reset").addEventListener("click", function(e) {
+    var r = new XMLHttpRequest();
     r.open("POST", "reset", true);
     r.onreadystatechange = function () {
         if (r.readyState != 4 || r.status != 200) return;
@@ -186,7 +186,7 @@ var networkcheckboxes = document.getElementsByClassName("networkcheckbox");
 
 var networkSelect = function() {
     selected_network_ssid = this.getAttribute("name");
-    
+
     for (var i = 0; i < networkcheckboxes.length; i++) {
         if (networkcheckboxes[i].getAttribute("name")!=selected_network_ssid)
             networkcheckboxes[i].checked = 0;
@@ -196,3 +196,35 @@ var networkSelect = function() {
 for (var i = 0; i < networkcheckboxes.length; i++) {
     networkcheckboxes[i].addEventListener('click', networkSelect, false);
 }
+
+// -----------------------------------------------------------------------
+// Event:Check for updates & display current / latest
+// URL /firmware
+// -----------------------------------------------------------------------
+document.getElementById("updatecheck").addEventListener("click", function(e) {
+    var r = new XMLHttpRequest();
+    r.open("POST", "firmware", true);
+    r.onreadystatechange = function () {
+        if (r.readyState != 4 || r.status != 200) return;
+        var str = r.responseText;
+        console.log(str);
+        var firmware = JSON.parse(r.responseText);
+        document.getElementById("firmware-version").innerHTML = "<tr><td>"+"v"+firmware.current+"</td><td>"+firmware.latest+"</td></tr>";
+	  };
+    r.send();
+});
+
+
+// -----------------------------------------------------------------------
+// Event:Update HTTP
+// -----------------------------------------------------------------------
+document.getElementById("update").addEventListener("click", function(e) {
+    var r = new XMLHttpRequest();
+    r.open("POST", "update", true);
+    r.onreadystatechange = function () {
+        if (r.readyState != 4 || r.status != 200) return;
+        var str = r.responseText;
+        console.log(str);
+	  };
+    r.send();
+});
