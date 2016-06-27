@@ -216,7 +216,7 @@ document.getElementById("updatecheck").addEventListener("click", function(e) {
 
 
 // -----------------------------------------------------------------------
-// Event:Update HTTP
+// Event:Update Firmware
 // -----------------------------------------------------------------------
 document.getElementById("update").addEventListener("click", function(e) {
     var r = new XMLHttpRequest();

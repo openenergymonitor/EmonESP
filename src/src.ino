@@ -31,7 +31,6 @@
 #include <ArduinoOTA.h>
 #include <ESP8266mDNS.h>
 #include <ESP8266httpUpdate.h>
-#include <Ticker.h>
 
 ESP8266WebServer server(80);
 
@@ -65,21 +64,13 @@ String uhost = "lab.megni.co.uk";
 // const int uhttpsPort = 443;
 String u_url = "/EmonESP/ota/firmware.php";
 //const char* ufingerprint = "B6:44:19:FF:B8:F2:62:46:60:39:9D:21:C6:FB:F5:6A:F3:D9:1A:79";
-// Checl for available updates ever X seconds
-#define CHECK_INTERVAL 120
 // Stringifying the BUILD_TAG parameter
 #define TEXTIFY(A) #A
 #define ESCAPEQUOTE(A) TEXTIFY(A)
-
 // Get firmware version form build tag environment variable
 String currentfirmware = ESCAPEQUOTE(BUILD_TAG);
-String latestfirmware = "0.0.0";
-Ticker updateCheck;
-boolean doUpdateCheck = true;
 
-void enableUpdateCheck() {
-  doUpdateCheck = true;
-}
+
 //----------------------------------------------------------------------------------------------------------------------------------------
 //----------------------------------------------------------------------------------------------------------------------------------------
 
@@ -375,63 +366,40 @@ void handleRst() {
 // url: /firmware
 // -------------------------------------------------------------------
 void handleUpdateCheck() {
-  Serial.println("Checking for Update. Running version: " + currentfirmware);
-  // Update web interface with current firmware version
-  String s = "{";
-
+  Serial.println("Running firmware: " + currentfirmware);
+  
+  String s = "{"; // Update web interface with current firmware version & update URL in JSON, .js gets latet firmware version
   s += "\"current\":\""+currentfirmware+"\",";
-  s += "\"latest\":\""+latestfirmware+"\"";
+  s += "\"updateurl\":\""+ uhost + u_url+"\"";
   s += "}";
   server.send(200, "text/html", s);
-  //t_httpUpdate_return ret = ESPhttpUpdate.update("http://lab.megni.co.uk/EmonESP/ota/firmware.php?tag=" + currentfirmware);
-
 }
 
 
 // -------------------------------------------------------------------
-// Update firmware via https
+// Update firmware
 // url: /update
 // -------------------------------------------------------------------
 void handleUpdatehttps() {
-  server.send(200, "text/html", "Updating firmware via https (not yet implemented)...");
   String update_URL = "http://" + uhost + u_url + "?tag=" + currentfirmware;
   t_httpUpdate_return ret = ESPhttpUpdate.update(update_URL);
+  String str="error";
   switch(ret) {
       case HTTP_UPDATE_FAILED:
-          Serial.printf("HTTP_UPDATE_FAILD Error (%d): %s", ESPhttpUpdate.getLastError(), ESPhttpUpdate.getLastErrorString().c_str());
+          str = printf("Update failed error (%d): %s", ESPhttpUpdate.getLastError(), ESPhttpUpdate.getLastErrorString().c_str());
           break;
 
       case HTTP_UPDATE_NO_UPDATES:
-          Serial.println("HTTP_UPDATE_NO_UPDATES");
+          str="No update, already running latest firmware";
           break;
 
       case HTTP_UPDATE_OK:
-          Serial.println("HTTP_UPDATE_OK");
+          str="Update done!";
           break;
   }
-}
-
-
-// -------------------------------------------------------------------
-// Update firmware via http
-// url: /updatehttp
-// -------------------------------------------------------------------
-void handleUpdatehttp() {
-  server.send(200, "text/html", "Updating firmware via http...");
-  t_httpUpdate_return ret = ESPhttpUpdate.update("http://lab.megni.co.uk/EmonESP/ota/firmware.php?tag=" + currentfirmware);
-  switch(ret) {
-      case HTTP_UPDATE_FAILED:
-          Serial.printf("HTTP_UPDATE_FAILD Error (%d): %s", ESPhttpUpdate.getLastError(), ESPhttpUpdate.getLastErrorString().c_str());
-          break;
-
-      case HTTP_UPDATE_NO_UPDATES:
-          Serial.println("HTTP_UPDATE_NO_UPDATES");
-          break;
-
-      case HTTP_UPDATE_OK:
-          Serial.println("HTTP_UPDATE_OK");
-          break;
-  }
+  Serial.println(str);
+  server.send(400,"text/html",str);
+          
 }
 
 
@@ -446,8 +414,6 @@ void setup() {
   Serial.println("emonESP Startup");
   Serial.println("Firmware: "+ currentfirmware);
 
-  // Check for firmware updates from webserver every CHECK_INTERVAL seconds
-  updateCheck.attach(CHECK_INTERVAL, enableUpdateCheck);
 
   EEPROM.begin(512);
   // ResetEEPROM();
@@ -495,7 +461,6 @@ void setup() {
   server.on("/scan", handleScan);
   server.on("/apoff",handleAPOff);
   server.on("/firmware",handleUpdateCheck);
-  server.on("/updatehttp",handleUpdatehttp);
   server.on("/update",handleUpdatehttps);
   server.onNotFound([](){
   if(!handleFileRead(server.uri()))
@@ -539,14 +504,6 @@ void loop() {
      }
   }
 
-  if (doUpdateCheck) {
-    Serial.println("Going to check for new firmware...");
-    if (wifi_mode == 0 || wifi_mode == 3){
-      handleUpdateCheck();
-    }
-    doUpdateCheck = false;
-  }
-
   while(Serial.available()) {
     String data = Serial.readStringUntil('\n');
     // Could check for string integrity here
@@ -578,7 +535,7 @@ void loop() {
       Serial.print("Emoncms request: ");
       packets_sent++;
 
-      // This will send the request to the server
+      // Send data to Emocms server
     if (client.verify(fingerprint, host)) {
       Serial.println("certificate matches");
       client.print(String("GET ") + url + " HTTP/1.1\r\n" + "Host: " + host + "\r\n" + "Connection: close\r\n\r\n");
