@@ -518,7 +518,6 @@ void loop() {
 
       // Send data to Emocms server
     if (client.verify(fingerprint, host)) {
-      Serial.println("HTTPS certificate matches");
       client.print(String("GET ") + url + " HTTP/1.1\r\n" + "Host: " + host + "\r\n" + "Connection: close\r\n\r\n");
        // Handle wait for reply and timeout
       unsigned long timeout = millis();
@@ -533,7 +532,7 @@ void loop() {
       while(client.available()){
         String line = client.readStringUntil('\r');
         if (line.startsWith("HTTP/1.1 200 OK")) {
-          Serial.print("HTTP/1.1 200 OK");
+          Serial.print("OK");
           packets_success++;
         }
       }
