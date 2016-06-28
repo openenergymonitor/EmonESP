@@ -14,9 +14,10 @@
     $currentTag = $_GET["tag"];
 
     // return latest version if no ?tag=XXXX
-    if ($currentTag==NULL){
+    if (empty($currentTag)){
       echo $latestTag;
     }
+
     if (($latestTag != $currentTag) && ($currentTag!=NULL)) {
         $binPath = $json->assets[0]->browser_download_url;
         // the file you want to send
