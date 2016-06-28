@@ -60,14 +60,13 @@ const char* fingerprint = "B6:44:19:FF:B8:F2:62:46:60:39:9D:21:C6:FB:F5:6A:F3:D9
 //--------------------------------------------------------------OTA UPDATE SETTINGS-------------------------------------------------------
 //----------------------------------------------------------------------------------------------------------------------------------------
 //UPDATE SERVER strings and interfers for upate server
-String uhost = "lab.megni.co.uk";
-// const int uhttpsPort = 443;
-String u_url = "/EmonESP/ota/firmware.php";
-//const char* ufingerprint = "B6:44:19:FF:B8:F2:62:46:60:39:9D:21:C6:FB:F5:6A:F3:D9:1A:79";
-// Stringifying the BUILD_TAG parameter
+String uhost = "update.openenergymonitor.org";
+const int uhttpsPort = 443;
+String u_url = "/esp/firmware.php";
+const char* ufingerprint = "D1 2B 16 C7 6F D3 CF B3 7E 50 F8 CE C4 9F 83 CA 09 9B 03 07";
+// Get running firmware version from build tag environment variable
 #define TEXTIFY(A) #A
 #define ESCAPEQUOTE(A) TEXTIFY(A)
-// Get firmware version form build tag environment variable
 String currentfirmware = ESCAPEQUOTE(BUILD_TAG);
 
 
@@ -408,7 +407,7 @@ void setup() {
 	delay(2000);
 	Serial.begin(115200);
   Serial.println();
-  Serial.println("emonESP Startup");
+  Serial.println("EmonESP Startup");
   Serial.println("Firmware: "+ currentfirmware);
 
 
