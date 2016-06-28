@@ -87,8 +87,6 @@ unsigned long packets_sent = 0;
 unsigned long packets_success = 0;
 
 
-
-
 String getContentType(String filename){
   if(server.hasArg("download")) return "application/octet-stream";
   else if(filename.endsWith(".htm")) return "text/html";
@@ -520,7 +518,7 @@ void loop() {
 
       // Send data to Emocms server
     if (client.verify(fingerprint, host)) {
-      Serial.println("certificate matches");
+      Serial.println("HTTPS certificate matches");
       client.print(String("GET ") + url + " HTTP/1.1\r\n" + "Host: " + host + "\r\n" + "Connection: close\r\n\r\n");
        // Handle wait for reply and timeout
       unsigned long timeout = millis();
@@ -542,7 +540,7 @@ void loop() {
       Serial.println();
     }
     else {
-      Serial.println("certificate doesn't match");
+      Serial.println("HTTP fingerprint doesn't match");
     }
 
 
