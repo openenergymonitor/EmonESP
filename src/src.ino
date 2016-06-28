@@ -33,6 +33,8 @@
 #include <ESP8266httpUpdate.h>
 
 ESP8266WebServer server(80);
+// Use WiFiClientSecure class to create HTTPS TCP connections
+WiFiClientSecure client;
 
 //Default SSID and PASSWORD for AP Access Point Mode
 const char* ssid = "emonESP";
@@ -56,14 +58,22 @@ const int httpsPort = 443;
 const char* e_url = "/input/post.json?json=";
 const char* fingerprint = "B6:44:19:FF:B8:F2:62:46:60:39:9D:21:C6:FB:F5:6A:F3:D9:1A:79";
 
+
 //----------------------------------------------------------------------------------------------------------------------------------------
 //--------------------------------------------------------------OTA UPDATE SETTINGS-------------------------------------------------------
 //----------------------------------------------------------------------------------------------------------------------------------------
 //UPDATE SERVER strings and interfers for upate server
+
+// String used for update
 String uhost = "update.openenergymonitor.org";
-const int uhttpsPort = 443;
-String u_url = "/esp/firmware.php";
-const char* ufingerprint = "D1 2B 16 C7 6F D3 CF B3 7E 50 F8 CE C4 9F 83 CA 09 9B 03 07";
+String uurl = "/esp/firmware.php";
+
+// Array of strings Used to check firmware version
+const char* u_host = "update.openenergymonitor.org";
+const char* u_url = "/esp/firmware.php";
+const char* u_fingerprint = "D1 2B 16 C7 6F D3 CF B3 7E 50 F8 CE C4 9F 83 CA 09 9B 03 07";
+const int u_httpsPort = 443;
+
 // Get running firmware version from build tag environment variable
 #define TEXTIFY(A) #A
 #define ESCAPEQUOTE(A) TEXTIFY(A)
@@ -363,10 +373,14 @@ void handleRst() {
 // -------------------------------------------------------------------
 void handleUpdateCheck() {
   Serial.println("Running firmware: " + currentfirmware);
-  
+
+  // Send data to Emoncms server
+  String latestfirmware = get_https(u_fingerprint, u_host, u_url, u_httpsPort);
+
+
   String s = "{"; // Update web interface with current firmware version & update URL in JSON, .js gets latet firmware version
   s += "\"current\":\""+currentfirmware+"\",";
-  s += "\"updateurl\":\""+ uhost + u_url+"\"";
+  s += "\"latest\":\""+latestfirmware+"\"";
   s += "}";
   server.send(200, "text/html", s);
 }
@@ -376,8 +390,8 @@ void handleUpdateCheck() {
 // Update firmware
 // url: /update
 // -------------------------------------------------------------------
-void handleUpdatehttps() {
-  String update_URL = "http://" + uhost + u_url + "?tag=" + currentfirmware;
+void handleUpdate() {
+  String update_URL = "http://" + uhost + uurl + "?tag=" + currentfirmware;
   t_httpUpdate_return ret = ESPhttpUpdate.update(update_URL);
   String str="error";
   switch(ret) {
@@ -395,8 +409,42 @@ void handleUpdatehttps() {
   }
   Serial.println(str);
   server.send(400,"text/html",str);
-          
 }
+
+// -------------------------------------------------------------------
+// HTTPS GET Request
+// url: N/A
+// -------------------------------------------------------------------
+
+String get_https(const char* fingerprint,const char* host, String url, int httpsPort){
+  // Use WiFiClient class to create TCP connections
+
+  if (!client.connect(host, httpsPort)) {
+    return("\nConnection error " + String(host));
+  }
+  if (client.verify(fingerprint, host)) {
+    client.print(String("GET ") + url + " HTTP/1.1\r\n" + "Host: " + host + "\r\n" + "Connection: close\r\n\r\n");
+     // Handle wait for reply and timeout
+    unsigned long timeout = millis();
+    while (client.available() == 0) {
+      if (millis() - timeout > 5000) {
+        client.stop();
+        return("\nClient Timeout " + String(host));
+      }
+    }
+    // Handle message receive
+    while(client.available()){
+      String line = client.readStringUntil('\r');
+      if (line.startsWith("HTTP/1.1 200 OK")) {
+        return("OK");
+      }
+    }
+  }
+  else {
+    return("\nHTTP fingerprint doesn't match ");
+  }
+  return("error" + String(host));
+} // end httt_get
 
 
 
@@ -410,10 +458,8 @@ void setup() {
   Serial.println("EmonESP Startup");
   Serial.println("Firmware: "+ currentfirmware);
 
-
+  // Read saved settings from EEPROM
   EEPROM.begin(512);
-  // ResetEEPROM();
-
   for (int i = 0; i < 32; ++i){
     byte c = EEPROM.read(i);
     if (c!=0 && c!=255) esid += (char) c;
@@ -457,7 +503,7 @@ void setup() {
   server.on("/scan", handleScan);
   server.on("/apoff",handleAPOff);
   server.on("/firmware",handleUpdateCheck);
-  server.on("/update",handleUpdatehttps);
+  server.on("/update",handleUpdate);
   server.onNotFound([](){
   if(!handleFileRead(server.uri()))
     server.send(404, "text/plain", "FileNotFound");
@@ -467,7 +513,7 @@ void setup() {
 	Serial.println("HTTP server started");
   delay(100);
   Timer = millis();
-}
+} // end setup
 
 // -------------------------------------------------------------------
 // LOOP
@@ -483,21 +529,13 @@ void loop() {
        Serial.println("WIFI Mode = 1, resetting");
      }
   }
-
+  // If data received on serial
   while(Serial.available()) {
     String data = Serial.readStringUntil('\n');
     // Could check for string integrity here
-
     last_datastr = data;
-
-    if ((wifi_mode==0 || wifi_mode==3) && apikey != 0)
-    {
-      // Use WiFiClient class to create TCP connections
-      WiFiClientSecure client;
-      if (!client.connect(host, httpsPort)) {
-        return;
-      }
-
+    // If Wifi connected
+    if ((wifi_mode==0 || wifi_mode==3) && apikey != 0){
       // We now create a URL for server data upload
       String url = e_url;
       url += "{";
@@ -515,33 +553,13 @@ void loop() {
       Serial.print("Emoncms request: ");
       packets_sent++;
 
-      // Send data to Emocms server
-    if (client.verify(fingerprint, host)) {
-      client.print(String("GET ") + url + " HTTP/1.1\r\n" + "Host: " + host + "\r\n" + "Connection: close\r\n\r\n");
-       // Handle wait for reply and timeout
-      unsigned long timeout = millis();
-      while (client.available() == 0) {
-        if (millis() - timeout > 5000) {
-          Serial.println(">>> Client Timeout !");
-          client.stop();
-          return;
-        }
+      // Send data to Emoncms server
+      String result = get_https(fingerprint, host, url, httpsPort);
+      if (result == "OK"){
+        Serial.print(result);
+        packets_success++;
       }
-      // Handle message receive
-      while(client.available()){
-        String line = client.readStringUntil('\r');
-        if (line.startsWith("HTTP/1.1 200 OK")) {
-          Serial.print("OK");
-          packets_success++;
-        }
-      }
-      Serial.println();
-    }
-    else {
-      Serial.println("HTTP fingerprint doesn't match");
-    }
+    } // end wifi connected
+  } // end serial available
 
-
-    }
-  }
-}
+} // end loop
