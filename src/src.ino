@@ -392,6 +392,7 @@ void handleUpdate() {
   String str = "UPDATE " + currentfirmware + " > " + latestfirmware;
   Serial.println(str);
   server.send(400,"text/html",str);
+  delay(1000);
   t_httpUpdate_return ret = ESPhttpUpdate.update("http://" + String(u_host) + String(u_url) + "?tag=" + currentfirmware);
   str="error";
   switch(ret) {

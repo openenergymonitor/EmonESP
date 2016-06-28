@@ -13,6 +13,10 @@
     $latestTag = $json->tag_name;
     $currentTag = $_GET["tag"];
 
+    // return latest version if no ?tag=XXXX
+    if ($currentTag==NULL){
+      echo $latestTag;
+    }
     if (($latestTag != $currentTag) && ($currentTag!=NULL)) {
         $binPath = $json->assets[0]->browser_download_url;
         // the file you want to send
@@ -31,9 +35,6 @@
         header("Content-Length: ".strlen($out));
 
         echo $out;
-    }
-    else {
-      echo $latestTag;
     }
 
     exit();
