@@ -80,7 +80,6 @@ String currentfirmware = ESCAPEQUOTE(BUILD_TAG);
 // 2 - AP only
 // 3 - AP + STA
 int wifi_mode = 0;
-int buttonState = 0;
 int clientTimeout = 0;
 int i = 0;
 unsigned long Timer;
@@ -479,22 +478,6 @@ void setup() {
 void loop() {
   ArduinoOTA.handle();
   server.handleClient();
-
-  /*
-  int erase = 0;
-  buttonState = digitalRead(0);
-  while (buttonState == LOW) {
-    buttonState = digitalRead(0);
-    erase++;
-    if (erase >= 5000) {
-      ResetEEPROM();
-      int erase = 0;
-      WiFi.disconnect();
-      Serial.print("Finished...");
-      delay(2000);
-      ESP.reset();
-    }
-  }*/
 
   // Remain in AP mode for 5 Minutes before resetting
   if (wifi_mode == 1){
