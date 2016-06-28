@@ -36,6 +36,7 @@ ESP8266WebServer server(80);
 // Create class to for HTTPS nand http TCP connections
 WiFiClientSecure client;
 WiFiClient clienthttp;
+HTTPClient http;
 
 //Default SSID and PASSWORD for AP Access Point Mode
 const char* ssid = "emonESP";
@@ -386,7 +387,7 @@ void handleUpdateCheck() {
 // url: /update
 // -------------------------------------------------------------------
 void handleUpdate() {
-  //SPIFFS.end(); // unmount filesystem
+  SPIFFS.end(); // unmount filesystem
   t_httpUpdate_return ret = ESPhttpUpdate.update(String ("http://") + u_host + u_url + String("?tag=") + String(currentfirmware));
   String str="error";
   switch(ret) {
@@ -404,7 +405,7 @@ void handleUpdate() {
   }
   Serial.println(str);
   server.send(400,"text/html",str);
-  //SPIFFS.begin(); //mount-file system
+  SPIFFS.begin(); //mount-file system
 }
 
 // -------------------------------------------------------------------
@@ -450,10 +451,26 @@ String get_https(const char* fingerprint,const char* host, String url, int https
 // -------------------------------------------------------------------
 
 String get_http(const char* host, String url, int httpPort){
+  http.begin("http://lab.megni.co.uk/esp/firmware.php"); //HTTP
+  int httpCode = http.GET();
+  if((httpCode > 0) && (httpCode == HTTP_CODE_OK)){
+    String payload = http.getString();
+    http.end();
+    return(payload);
+  }
+  else{
+    http.end();
+    return("error"+httpCode);
+  }
+
+}
+
+
+
   // Use WiFiClient class to create TCP connections
 
-  if (!client.connect(host, httpPort)) {
-    Serial.print(host + httpsPort); //debug
+  /*if (!client.connect(host, httpPort)) {
+    Serial.print(host + httpPort); //debug
     return("Connection error");
   }
   client.print(String("GET ") + url + " HTTP/1.1\r\n" + "Host: " + host + "\r\n" + "Connection: close\r\n\r\n");
@@ -474,7 +491,8 @@ String get_http(const char* host, String url, int httpPort){
     }
   }
   return("error" + String(host));
-} // end http_get
+  */
+//} // end http_get
 
 // -------------------------------------------------------------------
 // Remount SPIFFS after update https://github.com/esp8266/Arduino/issues/1657
