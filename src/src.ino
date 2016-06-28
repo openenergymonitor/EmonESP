@@ -68,7 +68,6 @@ const char* fingerprint = "B6:44:19:FF:B8:F2:62:46:60:39:9D:21:C6:FB:F5:6A:F3:D9
 // Array of strings Used to check firmware version
 const char* u_host = "lab.megni.co.uk";
 const char* u_url = "/esp/firmware.php";
-const int httpPort = 80;
 
 // Get running firmware version from build tag environment variable
 #define TEXTIFY(A) #A
@@ -367,18 +366,19 @@ void handleRst() {
 // Check for updates and display current version
 // url: /firmware
 // -------------------------------------------------------------------
-void handleUpdateCheck() {
+String handleUpdateCheck() {
   Serial.println("Running firmware: " + currentfirmware);
-
   // Get latest firmware version number
   String url = u_url;
-  String latestfirmware = get_http(u_host, url, httpPort);
-
-  String s = "{"; // Update web interface with current firmware version & update URL in JSON, .js gets latet firmware version
+  String latestfirmware = get_http(u_host, url);
+  Serial.println("Latest firmware: " + latestfirmware);
+  // Update web interface with firmware version(s)
+  String s = "{";
   s += "\"current\":\""+currentfirmware+"\",";
   s += "\"latest\":\""+latestfirmware+"\"";
   s += "}";
   server.send(200, "text/html", s);
+  return (latestfirmware);
 }
 
 
@@ -387,25 +387,27 @@ void handleUpdateCheck() {
 // url: /update
 // -------------------------------------------------------------------
 void handleUpdate() {
-  SPIFFS.end(); // unmount filesystem
-  t_httpUpdate_return ret = ESPhttpUpdate.update(String ("http://") + u_host + u_url + String("?tag=") + String(currentfirmware));
-  String str="error";
+  //SPIFFS.end(); // unmount filesystem
+  String latestfirmware = handleUpdateCheck(); //get latest firmware version
+  String str = "UPDATE " + currentfirmware + " > " + latestfirmware;
+  Serial.println(str);
+  server.send(400,"text/html",str);
+  t_httpUpdate_return ret = ESPhttpUpdate.update("http://" + String(u_host) + String(u_url) + "?tag=" + currentfirmware);
+  str="error";
   switch(ret) {
       case HTTP_UPDATE_FAILED:
           str = printf("Update failed error (%d): %s", ESPhttpUpdate.getLastError(), ESPhttpUpdate.getLastErrorString().c_str());
           break;
-
       case HTTP_UPDATE_NO_UPDATES:
           str="No update, already running latest firmware";
           break;
-
       case HTTP_UPDATE_OK:
           str="Update done!";
           break;
   }
   Serial.println(str);
   server.send(400,"text/html",str);
-  SPIFFS.begin(); //mount-file system
+  //SPIFFS.begin(); //mount-file system
 }
 
 // -------------------------------------------------------------------
@@ -415,7 +417,6 @@ void handleUpdate() {
 
 String get_https(const char* fingerprint,const char* host, String url, int httpsPort){
   // Use WiFiClient class to create TCP connections
-
   if (!client.connect(host, httpsPort)) {
     Serial.print(host + httpsPort); //debug
     return("Connection error");
@@ -449,9 +450,8 @@ String get_https(const char* fingerprint,const char* host, String url, int https
 // HTTP GET Request
 // url: N/A
 // -------------------------------------------------------------------
-
-String get_http(const char* host, String url, int httpPort){
-  http.begin("http://lab.megni.co.uk/esp/firmware.php"); //HTTP
+String get_http(const char* host, String url){
+  http.begin(String("http://") + host + String(url));
   int httpCode = http.GET();
   if((httpCode > 0) && (httpCode == HTTP_CODE_OK)){
     String payload = http.getString();
@@ -460,49 +460,10 @@ String get_http(const char* host, String url, int httpPort){
   }
   else{
     http.end();
-    return("error"+httpCode);
+    return("server error: "+httpCode);
   }
+} // end http_get
 
-}
-
-
-
-  // Use WiFiClient class to create TCP connections
-
-  /*if (!client.connect(host, httpPort)) {
-    Serial.print(host + httpPort); //debug
-    return("Connection error");
-  }
-  client.print(String("GET ") + url + " HTTP/1.1\r\n" + "Host: " + host + "\r\n" + "Connection: close\r\n\r\n");
-   // Handle wait for reply and timeout
-  unsigned long timeout = millis();
-  while (client.available() == 0) {
-    if (millis() - timeout > 5000) {
-      client.stop();
-      return("Client Timeout");
-    }
-  }
-  // Handle message receive
-  while(client.available()){
-    String line = client.readStringUntil('\r');
-    Serial.println(line); //debug
-    if (line.startsWith("HTTP/1.1 200 OK")) {
-      return("OK");
-    }
-  }
-  return("error" + String(host));
-  */
-//} // end http_get
-
-// -------------------------------------------------------------------
-// Remount SPIFFS after update https://github.com/esp8266/Arduino/issues/1657
-// url: N/A
-// -------------------------------------------------------------------
-/*ArduinoOTA.onEnd([]() {
-  if (SPIFFS.begin()) {
-    // write config files to spiffs again
-  }
-});*/
 
 // -------------------------------------------------------------------
 // SETUP
