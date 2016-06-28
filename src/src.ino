@@ -71,7 +71,7 @@ String uurl = "/esp/firmware.php";
 // Array of strings Used to check firmware version
 const char* u_host = "update.openenergymonitor.org";
 const char* u_url = "/esp/firmware.php";
-const char* u_fingerprint = "D1 2B 16 C7 6F D3 CF B3 7E 50 F8 CE C4 9F 83 CA 09 9B 03 07";
+const char* u_fingerprint = "D1:2B:16:C7:6F:D3:CF:B3:7E:50:F8:CE:C4:9F:83:CA:09:9B:03:07";
 const int u_httpsPort = 443;
 
 // Get running firmware version from build tag environment variable
@@ -374,7 +374,7 @@ void handleRst() {
 void handleUpdateCheck() {
   Serial.println("Running firmware: " + currentfirmware);
 
-  // Send data to Emoncms server
+  // Get latest firmware version number
   String latestfirmware = get_https(u_fingerprint, u_host, u_url, u_httpsPort);
 
 
@@ -420,7 +420,7 @@ String get_https(const char* fingerprint,const char* host, String url, int https
   // Use WiFiClient class to create TCP connections
 
   if (!client.connect(host, httpsPort)) {
-    return("\nConnection error " + String(host));
+    return("Connection error");
   }
   if (client.verify(fingerprint, host)) {
     client.print(String("GET ") + url + " HTTP/1.1\r\n" + "Host: " + host + "\r\n" + "Connection: close\r\n\r\n");
@@ -429,19 +429,20 @@ String get_https(const char* fingerprint,const char* host, String url, int https
     while (client.available() == 0) {
       if (millis() - timeout > 5000) {
         client.stop();
-        return("\nClient Timeout " + String(host));
+        return("Client Timeout");
       }
     }
     // Handle message receive
     while(client.available()){
       String line = client.readStringUntil('\r');
+      Serial.println(line); //debug
       if (line.startsWith("HTTP/1.1 200 OK")) {
         return("OK");
       }
     }
   }
   else {
-    return("\nHTTP fingerprint doesn't match ");
+    return("HTTP fingerprint doesn't match");
   }
   return("error" + String(host));
 } // end httt_get
