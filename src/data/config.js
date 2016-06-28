@@ -202,6 +202,7 @@ for (var i = 0; i < networkcheckboxes.length; i++) {
 // URL /firmware
 // -----------------------------------------------------------------------
 document.getElementById("updatecheck").addEventListener("click", function(e) {
+    document.getElementById("firmware-version").innerHTML = "<tr><td>-</td><td>Connecting...</td></tr>";
     var r = new XMLHttpRequest();
     r.open("POST", "firmware", true);
     r.onreadystatechange = function () {
@@ -209,7 +210,7 @@ document.getElementById("updatecheck").addEventListener("click", function(e) {
         var str = r.responseText;
         console.log(str);
         var firmware = JSON.parse(r.responseText);
-        document.getElementById("firmware-version").innerHTML = "<tr><td>"+"v"+firmware.current+"</td><td>"+firmware.latest+"</td></tr>";
+        document.getElementById("firmware-version").innerHTML = "<tr><td>"+"v"+firmware.current+"</td><td>"+"v"+firmware.latest+"</td></tr>";
 	  };
     r.send();
 });

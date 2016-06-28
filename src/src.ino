@@ -391,6 +391,7 @@ void handleUpdateCheck() {
 // url: /update
 // -------------------------------------------------------------------
 void handleUpdate() {
+  SPIFFS.end(); // unmount filesystem
   String update_URL = "http://" + uhost + uurl + "?tag=" + currentfirmware;
   t_httpUpdate_return ret = ESPhttpUpdate.update(update_URL);
   String str="error";
@@ -409,6 +410,7 @@ void handleUpdate() {
   }
   Serial.println(str);
   server.send(400,"text/html",str);
+  SPIFFS.begin(); //mount-file system
 }
 
 // -------------------------------------------------------------------
@@ -420,6 +422,7 @@ String get_https(const char* fingerprint,const char* host, String url, int https
   // Use WiFiClient class to create TCP connections
 
   if (!client.connect(host, httpsPort)) {
+    Serial.print(host + httpsPort);
     return("Connection error");
   }
   if (client.verify(fingerprint, host)) {
