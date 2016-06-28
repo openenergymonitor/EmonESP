@@ -33,8 +33,9 @@
 #include <ESP8266httpUpdate.h>
 
 ESP8266WebServer server(80);
-// Use WiFiClientSecure class to create HTTPS TCP connections
+// Create class to for HTTPS nand http TCP connections
 WiFiClientSecure client;
+WiFiClient clienthttp;
 
 //Default SSID and PASSWORD for AP Access Point Mode
 const char* ssid = "emonESP";
@@ -63,16 +64,10 @@ const char* fingerprint = "B6:44:19:FF:B8:F2:62:46:60:39:9D:21:C6:FB:F5:6A:F3:D9
 //--------------------------------------------------------------OTA UPDATE SETTINGS-------------------------------------------------------
 //----------------------------------------------------------------------------------------------------------------------------------------
 //UPDATE SERVER strings and interfers for upate server
-
-// String used for update
-String uhost = "update.openenergymonitor.org";
-String uurl = "/esp/firmware.php";
-
 // Array of strings Used to check firmware version
-const char* u_host = "update.openenergymonitor.org";
+const char* u_host = "lab.megni.co.uk";
 const char* u_url = "/esp/firmware.php";
-const char* u_fingerprint = "D1:2B:16:C7:6F:D3:CF:B3:7E:50:F8:CE:C4:9F:83:CA:09:9B:03:07";
-const int u_httpsPort = 443;
+const int httpPort = 80;
 
 // Get running firmware version from build tag environment variable
 #define TEXTIFY(A) #A
@@ -375,8 +370,8 @@ void handleUpdateCheck() {
   Serial.println("Running firmware: " + currentfirmware);
 
   // Get latest firmware version number
-  String latestfirmware = get_https(u_fingerprint, u_host, u_url, u_httpsPort);
-
+  String url = u_url;
+  String latestfirmware = get_http(u_host, url, httpPort);
 
   String s = "{"; // Update web interface with current firmware version & update URL in JSON, .js gets latet firmware version
   s += "\"current\":\""+currentfirmware+"\",";
@@ -392,8 +387,7 @@ void handleUpdateCheck() {
 // -------------------------------------------------------------------
 void handleUpdate() {
   SPIFFS.end(); // unmount filesystem
-  String update_URL = "http://" + uhost + uurl + "?tag=" + currentfirmware;
-  t_httpUpdate_return ret = ESPhttpUpdate.update(update_URL);
+  t_httpUpdate_return ret = ESPhttpUpdate.update(String ("http://") + u_host + u_url + String("?tag=") + String(currentfirmware));
   String str="error";
   switch(ret) {
       case HTTP_UPDATE_FAILED:
@@ -414,7 +408,7 @@ void handleUpdate() {
 }
 
 // -------------------------------------------------------------------
-// HTTPS GET Request
+// HTTPS SECURE GET Request
 // url: N/A
 // -------------------------------------------------------------------
 
@@ -422,7 +416,7 @@ String get_https(const char* fingerprint,const char* host, String url, int https
   // Use WiFiClient class to create TCP connections
 
   if (!client.connect(host, httpsPort)) {
-    Serial.print(host + httpsPort);
+    Serial.print(host + httpsPort); //debug
     return("Connection error");
   }
   if (client.verify(fingerprint, host)) {
@@ -448,9 +442,49 @@ String get_https(const char* fingerprint,const char* host, String url, int https
     return("HTTP fingerprint doesn't match");
   }
   return("error" + String(host));
-} // end httt_get
+} // end https_get
 
+// -------------------------------------------------------------------
+// HTTP GET Request
+// url: N/A
+// -------------------------------------------------------------------
 
+String get_http(const char* host, String url, int httpPort){
+  // Use WiFiClient class to create TCP connections
+
+  if (!client.connect(host, httpPort)) {
+    Serial.print(host + httpsPort); //debug
+    return("Connection error");
+  }
+  client.print(String("GET ") + url + " HTTP/1.1\r\n" + "Host: " + host + "\r\n" + "Connection: close\r\n\r\n");
+   // Handle wait for reply and timeout
+  unsigned long timeout = millis();
+  while (client.available() == 0) {
+    if (millis() - timeout > 5000) {
+      client.stop();
+      return("Client Timeout");
+    }
+  }
+  // Handle message receive
+  while(client.available()){
+    String line = client.readStringUntil('\r');
+    Serial.println(line); //debug
+    if (line.startsWith("HTTP/1.1 200 OK")) {
+      return("OK");
+    }
+  }
+  return("error" + String(host));
+} // end http_get
+
+// -------------------------------------------------------------------
+// Remount SPIFFS after update https://github.com/esp8266/Arduino/issues/1657
+// url: N/A
+// -------------------------------------------------------------------
+/*ArduinoOTA.onEnd([]() {
+  if (SPIFFS.begin()) {
+    // write config files to spiffs again
+  }
+});*/
 
 // -------------------------------------------------------------------
 // SETUP
