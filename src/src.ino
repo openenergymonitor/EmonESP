@@ -386,7 +386,7 @@ void handleUpdateCheck() {
 // url: /update
 // -------------------------------------------------------------------
 void handleUpdate() {
-  SPIFFS.end(); // unmount filesystem
+  //SPIFFS.end(); // unmount filesystem
   t_httpUpdate_return ret = ESPhttpUpdate.update(String ("http://") + u_host + u_url + String("?tag=") + String(currentfirmware));
   String str="error";
   switch(ret) {
@@ -404,7 +404,7 @@ void handleUpdate() {
   }
   Serial.println(str);
   server.send(400,"text/html",str);
-  SPIFFS.begin(); //mount-file system
+  //SPIFFS.begin(); //mount-file system
 }
 
 // -------------------------------------------------------------------
