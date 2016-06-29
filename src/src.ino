@@ -388,13 +388,10 @@ String handleUpdateCheck() {
 // -------------------------------------------------------------------
 void handleUpdate() {
   SPIFFS.end(); // unmount filesystem
-  String latestfirmware = handleUpdateCheck(); //get latest firmware version
-  String str = "UPDATE " + currentfirmware + " > " + latestfirmware;
-  Serial.println(str);
-  server.send(400,"text/html",str);
-  delay(1000);
+  Serial.println("UPDATING...");
+  delay(500);
   t_httpUpdate_return ret = ESPhttpUpdate.update("http://" + String(u_host) + String(u_url) + "?tag=" + currentfirmware);
-  str="error";
+  String str="error";
   switch(ret) {
       case HTTP_UPDATE_FAILED:
           str = printf("Update failed error (%d): %s", ESPhttpUpdate.getLastError(), ESPhttpUpdate.getLastErrorString().c_str());
@@ -406,8 +403,8 @@ void handleUpdate() {
           str="Update done!";
           break;
   }
-  Serial.println(str);
   server.send(400,"text/html",str);
+  Serial.println(str);
   SPIFFS.begin(); //mount-file system
 }
 

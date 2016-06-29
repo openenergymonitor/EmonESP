@@ -223,26 +223,23 @@ document.getElementById("updatecheck").addEventListener("click", function(e) {
 // -----------------------------------------------------------------------
 document.getElementById("update").addEventListener("click", function(e) {
   
-  // get latest version
+  /*// get latest version
   document.getElementById("firmware-version").innerHTML = "<tr><td>-</td><td>Connecting...</td></tr>";
     var r = new XMLHttpRequest();
     r.open("POST", "firmware", true);
     r.onreadystatechange = function () {
         if (r.readyState != 4 || r.status != 200) return;
         var str = r.responseText;
-        console.log(str);
         var firmware = JSON.parse(r.responseText);
-        document.getElementById("firmware").style.display = '';
-        document.getElementById("update").style.display = '';
-        document.getElementById("firmware-version").innerHTML = "<tr><td>"+"v"+firmware.current+"</td><td>"+"v"+firmware.latest+"</td></tr>";
+        document.getElementById("firmware-version").innerHTML = "<tr><td>"+firmware.current+"</td><td>"+firmware.latest+"</td></tr>";
 	  };
-    r.send();
+    r.send();*/
   
-  
+    document.getElementById("update-info").innerHTML = "UPDATING..."
     var r1 = new XMLHttpRequest();
     r1.open("POST", "update", true);
     r1.onreadystatechange = function () {
-        if (r1.readyState != 4 || r.status != 200) return;
+        if (r1.readyState != 4 || r1.status != 200) return;
         var str1 = r1.responseText;
         document.getElementById("update-info").innerHTML = str1
         console.log(str1);
