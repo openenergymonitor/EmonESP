@@ -27,7 +27,7 @@ The easiest way if running Linux is to install use the install script, this inst
 
 Standalone built on GitHub Atom IDE, or use PlatformIO Atom IDE plug-in if you already have Atom installed. The IDE is nice, easy and self-explanitory.
 
-[Download PlatfomIO IDE](http://platformio.org/platformio-ide),
+[Download PlatfomIO IDE](http://platformio.org/platformio-ide)
 
 #### 2. Clone this repo
 
