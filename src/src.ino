@@ -387,7 +387,7 @@ String handleUpdateCheck() {
 // url: /update
 // -------------------------------------------------------------------
 void handleUpdate() {
-  //SPIFFS.end(); // unmount filesystem
+  SPIFFS.end(); // unmount filesystem
   String latestfirmware = handleUpdateCheck(); //get latest firmware version
   String str = "UPDATE " + currentfirmware + " > " + latestfirmware;
   Serial.println(str);
@@ -408,7 +408,7 @@ void handleUpdate() {
   }
   Serial.println(str);
   server.send(400,"text/html",str);
-  //SPIFFS.begin(); //mount-file system
+  SPIFFS.begin(); //mount-file system
 }
 
 // -------------------------------------------------------------------

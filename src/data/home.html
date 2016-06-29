@@ -64,15 +64,17 @@
 
             <div class="box380">
                 <h2>Firmware</h2>
+                <div id="firmware" style="display:none">
                 <table>
                     <tr><th>Running</th><th>Latest</th></tr>
-                    <tbody id="firmware-version"></tbody>
+                    <tbody id="firmware-version" ></tbody></tbody>
                 </table>
                 <br>
                 <a href="https://github.com/openenergymonitor/EmonESP/releases">View changelog</a>
-                <br> <br>
+                <br> </div><br>
                 <button id="updatecheck">Check for Updates</button>
-                <button id="update">Apply Update</button>
+                <button id="update" style="display:none">Apply Update</button>
+                <p><span id="update-info"></span></p>
             </div>
 
             <div style="clear:both"></div>
