@@ -23,14 +23,16 @@
  * Boston, MA 02111-1307, USA.
  */
 
-#include <ESP8266WiFi.h>
-#include <WiFiClientSecure.h>
-#include <ESP8266WebServer.h>
-#include <EEPROM.h>
-#include "FS.h"
-#include <ArduinoOTA.h>
-#include <ESP8266mDNS.h>
-#include <ESP8266httpUpdate.h>
+
+// Arduino espressif libs (tested with V2.3.0)
+#include <ESP8266WiFi.h>              // Connect to Wifi
+#include <WiFiClientSecure.h>         // Secure https GET request
+#include <ESP8266WebServer.h>         // Config portal
+#include <EEPROM.h>                   // Save config settings
+#include "FS.h"                       // SPIFFS file-system: store web server html, CSS etc.
+#include <ArduinoOTA.h>               // local OTA update from Arduino IDE
+#include <ESP8266mDNS.h>              // Resolve URL for update server etc.
+#include <ESP8266httpUpdate.h>        // remote OTA update from server
 
 ESP8266WebServer server(80);
 // Create class to for HTTPS nand http TCP connections
@@ -66,7 +68,7 @@ const char* fingerprint = "B6:44:19:FF:B8:F2:62:46:60:39:9D:21:C6:FB:F5:6A:F3:D9
 //----------------------------------------------------------------------------------------------------------------------------------------
 //UPDATE SERVER strings and interfers for upate server
 // Array of strings Used to check firmware version
-const char* u_host = "lab.megni.co.uk";
+const char* u_host = "217.9.195.227";
 const char* u_url = "/esp/firmware.php";
 
 // Get running firmware version from build tag environment variable
