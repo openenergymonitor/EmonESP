@@ -34,24 +34,28 @@
 #include <ESP8266mDNS.h>              // Resolve URL for update server etc.
 #include <ESP8266httpUpdate.h>        // remote OTA update from server
 #include <ESP8266HTTPUpdateServer.h>  // upload update
+#include <DNSServer.h>                // Required for captive portal
 
 ESP8266WebServer server(80);          //Create class for Web server
 WiFiClientSecure client;              // Create class for HTTPS TCP connections get_https()
 HTTPClient http;                      // Create class for HTTP TCP connections get_http()
 ESP8266HTTPUpdateServer httpUpdater;  // Create class for webupdate handleWebUpdate()
+DNSServer dnsServer;                  // Create class DNS server, captive portal re-direct
+const byte DNS_PORT = 53;
 
-//Default SSID and PASSWORD for AP Access Point Mode
-const char* ssid = "emonESP";
-const char* password = "emonesp";
+// Access Point SSID, password & IP address
+const char *softAP_ssid = "emonESP";
+const char* softAP_password = "";
+IPAddress apIP(192, 168, 4, 1);
+IPAddress netMsk(255, 255, 255, 0);
 
 // Web server authentication (leave blank for none)
 const char* www_username = "emonesp";
 const char* www_password = "emon";
 String st;
 
-
-// EmonESP Hostname http://emonesp
-const char* esp_hostname = "emonesp";
+/* hostname for mDNS. Should work at least on windows. Try http://emonesp.local */
+const char *esp_hostname = "emonesp";
 
 String esid = "";
 String epass = "";
@@ -152,7 +156,13 @@ void startAP() {
     if (i<n-1) st += ",";
   }
   delay(100);
-  WiFi.softAP(ssid, password);
+  
+  WiFi.softAPConfig(apIP, apIP, netMsk);
+  WiFi.softAP(softAP_ssid, softAP_password);
+    /* Setup the DNS server redirecting all the domains to the apIP */
+  dnsServer.setErrorReplyCode(DNSReplyCode::NoError);
+  dnsServer.start(DNS_PORT, "*", apIP);
+  
   IPAddress myIP = WiFi.softAPIP();
   char tmpStr[40];
   sprintf(tmpStr,"%d.%d.%d.%d",myIP[0],myIP[1],myIP[2],myIP[3]);
@@ -283,7 +293,12 @@ void handleSaveNetwork() {
 
     // Startup in STA + AP mode
     WiFi.mode(WIFI_AP_STA);
-    WiFi.softAP(ssid, password);
+    WiFi.softAPConfig(apIP, apIP, netMsk);
+    WiFi.softAP(softAP_ssid, softAP_password);
+
+    /* Setup the DNS server redirecting all the domains to the apIP */
+    dnsServer.setErrorReplyCode(DNSReplyCode::NoError);
+    dnsServer.start(DNS_PORT, "*", apIP);
     wifi_mode = 3;
     startClient();
   }
@@ -518,7 +533,13 @@ void setup() {
   ArduinoOTA.begin();
   
   // Start hostname broadcast
-  MDNS.begin(esp_hostname);
+  if (!MDNS.begin(esp_hostname)) {
+          Serial.println("MDNS responder error");
+        } else {
+          // Add service to MDNS-SD
+          MDNS.addService("http", "tcp", 80);
+        }
+          
   
   // Setup firmware upload
   httpUpdater.setup(&server, firmware_update_path);
@@ -539,6 +560,8 @@ void setup() {
   server.on("/apoff",handleAPOff);
   server.on("/firmware",handleUpdateCheck);
   server.on("/update",handleUpdate);
+  server.on("/generate_204", handleHome);  //Android captive portal. Maybe not needed. Might be handled by notFound
+  server.on("/fwlink", handleHome);  //Microsoft captive portal. Maybe not needed. Might be handled by notFound
   server.onNotFound([](){
   if(!handleFileRead(server.uri()))
     server.send(404, "text/plain", "NotFound");
@@ -555,7 +578,8 @@ void setup() {
 // -------------------------------------------------------------------
 void loop() {
   ArduinoOTA.handle();
-  server.handleClient();
+  server.handleClient();          // Web server
+  dnsServer.processNextRequest(); // Captive portal DNS re-dierct
 
   // Remain in AP mode for 5 Minutes before resetting
   if (wifi_mode == 1){
