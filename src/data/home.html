@@ -23,9 +23,8 @@
                 <div id="client-view" style="display:none">
                     <p><b>Network SSID:</b><br><span id="sta-ssid"></span></p>
                     <p><b>IP Address:</b><br><span id="sta-ip"></span></p>
-                    <p><b>Successful packets:</b><br><span id="sta-psuccess"></span> of <span id="sta-psent"></span></p>
                     <button id="apoff" style="display:none">Turn off Access Point</button>
-                    <button id="reset">Reset config and Reboot</button>
+                    <button id="reset">Factory Reset</button>
                 </div>
 
                 <div id="ap-view" style="display:none">
@@ -51,6 +50,7 @@
                 <p><b>Write apikey:</b><br>
                 <input id="apikey" type="text" style="width:280px;">
                 <button id="save-apikey">Save</button>
+                <p><b>Successful packets:</b><br><span id="sta-psuccess"></span> / <span id="sta-psent"  ></span></p>
                 </p>
             </div>
 
@@ -66,7 +66,7 @@
                 <h2>Firmware</h2>
                 <div id="firmware" style="display:none">
                 <table>
-                    <tr><th>Running V</th><th>Latest V</th></tr>
+                    <tr><th>Running</th><th>Latest</th></tr>
                     <tbody id="firmware-version" ></tbody></tbody>
                 </table>
                 <br>
@@ -76,6 +76,12 @@
                 <button id="update" style="display:none">Apply Update</button>
                 <p><span id="update-info"></span></p>
                 <button id="upload">Upload</button>
+            </div>
+            
+            <div class="box380">
+                <h2>System info</h2>
+                <p><b>Free Heap:</b><br><span id="free_heap"></span>B</p>
+                
             </div>
 
             <div style="clear:both"></div>

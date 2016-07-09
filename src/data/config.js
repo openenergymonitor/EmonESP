@@ -11,6 +11,7 @@ r1.onreadystatechange = function () {
 
   document.getElementById("passkey").value = status.pass;
   document.getElementById("apikey").value = status.apikey;
+  document.getElementById("free_heap").innerHTML = status.free_heap;
 
   if (status.mode=="AP") {
       document.getElementById("mode").innerHTML = "Access Point (AP)";
@@ -66,15 +67,16 @@ function update() {
     };
     r.send();
 
-    var r1 = new XMLHttpRequest();
-    r1.open("GET", "status", false);
-    r1.onreadystatechange = function () {
-    if (r1.readyState != 4 || r1.status != 200) return;
-      var status = JSON.parse(r1.responseText);
+    var r2 = new XMLHttpRequest();
+    r2.open("GET", "status", false);
+    r2.onreadystatechange = function () {
+    if (r2.readyState != 4 || r2.status != 200) return;
+      var status = JSON.parse(r2.responseText);
       document.getElementById("sta-psent").innerHTML = status.packets_sent;
       document.getElementById("sta-psuccess").innerHTML = status.packets_success;
+      document.getElementById("free_heap").value = status.free_heap;
     };
-    r1.send();
+    r2.send();
 }
 
 function updateStatus() {

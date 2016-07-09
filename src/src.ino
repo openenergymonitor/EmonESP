@@ -138,7 +138,7 @@ bool handleFileRead(String path){
 }
 
 // -------------------------------------------------------------------
-// Start Access Point, starts on 192.168.4.1
+// Start Access Point
 // Access point is used for wifi network selection
 // -------------------------------------------------------------------
 void startAP() {
@@ -368,7 +368,8 @@ void handleStatus() {
   s += "\"apikey\":\""+apikey+"\",";
   s += "\"ipaddress\":\""+ipaddress+"\",";
   s += "\"packets_sent\":\""+String(packets_sent)+"\",";
-  s += "\"packets_success\":\""+String(packets_success)+"\"";
+  s += "\"packets_success\":\""+String(packets_success)+"\",";
+  s += "\"free_heap\":\""+String(ESP.getFreeHeap())+"\"";
   s += "}";
   server.send(200, "text/html", s);
 }
