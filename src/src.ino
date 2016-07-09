@@ -33,19 +33,25 @@
 #include <ArduinoOTA.h>               // local OTA update from Arduino IDE
 #include <ESP8266mDNS.h>              // Resolve URL for update server etc.
 #include <ESP8266httpUpdate.h>        // remote OTA update from server
+#include <ESP8266HTTPUpdateServer.h>  // upload update
 
-ESP8266WebServer server(80);
-// Create class to for HTTPS nand http TCP connections
-WiFiClientSecure client;
-WiFiClient clienthttp;
-HTTPClient http;
+ESP8266WebServer server(80);          //Create class for Web server
+WiFiClientSecure client;              // Create class for HTTPS TCP connections get_https()
+HTTPClient http;                      // Create class for HTTP TCP connections get_http()
+ESP8266HTTPUpdateServer httpUpdater;  // Create class for webupdate handleWebUpdate()
 
 //Default SSID and PASSWORD for AP Access Point Mode
 const char* ssid = "emonESP";
 const char* password = "emonesp";
-const char* www_username = "";
-const char* www_password = "";
+
+// Web server authentication (leave blank for none)
+const char* www_username = "emonesp";
+const char* www_password = "emon";
 String st;
+
+
+// EmonESP Hostname http://emonesp
+const char* esp_hostname = "emonesp";
 
 String esid = "";
 String epass = "";
@@ -70,6 +76,8 @@ const char* fingerprint = "B6:44:19:FF:B8:F2:62:46:60:39:9D:21:C6:FB:F5:6A:F3:D9
 // Array of strings Used to check firmware version
 const char* u_host = "217.9.195.227";
 const char* u_url = "/esp/firmware.php";
+
+const char* firmware_update_path = "/upload";
 
 // Get running firmware version from build tag environment variable
 #define TEXTIFY(A) #A
@@ -130,7 +138,7 @@ bool handleFileRead(String path){
 // Access point is used for wifi network selection
 // -------------------------------------------------------------------
 void startAP() {
-  Serial.print("Starting Access Point");
+  Serial.print("Starting AP");
   WiFi.mode(WIFI_STA);
   WiFi.disconnect();
   delay(100);
@@ -148,7 +156,7 @@ void startAP() {
   IPAddress myIP = WiFi.softAPIP();
   char tmpStr[40];
   sprintf(tmpStr,"%d.%d.%d.%d",myIP[0],myIP[1],myIP[2],myIP[3]);
-  Serial.print("Access Point IP Address: ");
+  Serial.print("AP IP Address: ");
   Serial.println(tmpStr);
   ipaddress = tmpStr;
 }
@@ -157,7 +165,7 @@ void startAP() {
 // Start Client, attempt to connect to Wifi network
 // -------------------------------------------------------------------
 void startClient() {
-  Serial.print("Connecting as Wifi Client to ");
+  Serial.print("Connecting as client to ");
   Serial.print(esid.c_str());
   Serial.print(" epass:");
   Serial.println(epass.c_str());
@@ -173,7 +181,7 @@ void startClient() {
     t++;
     if (t >= 20){
       Serial.println(" ");
-      Serial.println("Trying Again...");
+      Serial.println("Try Again...");
       delay(2000);
       WiFi.disconnect();
       WiFi.begin(esid.c_str(), epass.c_str());
@@ -192,7 +200,7 @@ void startClient() {
     IPAddress myAddress = WiFi.localIP();
     char tmpStr[40];
     sprintf(tmpStr,"%d.%d.%d.%d",myAddress[0],myAddress[1],myAddress[2],myAddress[3]);
-    Serial.print("Connected, IP Address: ");
+    Serial.print("Connected, IP: ");
     Serial.println(tmpStr);
     // Copy the connected network and ipaddress to global strings for use in status request
     connected_network = esid;
@@ -228,8 +236,8 @@ void handleHome() {
 // url: /apoff
 // -------------------------------------------------------------------
 void handleAPOff() {
-  server.send(200, "text/html", "Turning Access Point Off");
-  Serial.println("Turning Access Point Off");
+  server.send(200, "text/html", "Turning AP Off");
+  Serial.println("Turning AP Off");
   WiFi.disconnect();
   delay(1000);
   ESP.reset();
@@ -369,11 +377,11 @@ void handleRst() {
 // url: /firmware
 // -------------------------------------------------------------------
 String handleUpdateCheck() {
-  Serial.println("Running firmware: " + currentfirmware);
+  Serial.println("Running: " + currentfirmware);
   // Get latest firmware version number
   String url = u_url;
   String latestfirmware = get_http(u_host, url);
-  Serial.println("Latest firmware: " + latestfirmware);
+  Serial.println("Latest: " + latestfirmware);
   // Update web interface with firmware version(s)
   String s = "{";
   s += "\"current\":\""+currentfirmware+"\",";
@@ -399,7 +407,7 @@ void handleUpdate() {
           str = printf("Update failed error (%d): %s", ESPhttpUpdate.getLastError(), ESPhttpUpdate.getLastErrorString().c_str());
           break;
       case HTTP_UPDATE_NO_UPDATES:
-          str="No update, already running latest firmware";
+          str="No update, running latest firmware";
           break;
       case HTTP_UPDATE_OK:
           str="Update done!";
@@ -441,7 +449,7 @@ String get_https(const char* fingerprint,const char* host, String url, int https
     }
   }
   else {
-    return("HTTP fingerprint doesn't match");
+    return("HTTPS fingerprint no match");
   }
   return("error" + String(host));
 } // end https_get
@@ -460,7 +468,7 @@ String get_http(const char* host, String url){
   }
   else{
     http.end();
-    return("server error: "+httpCode);
+    return("server error: "+String(httpCode));
   }
 } // end http_get
 
@@ -472,7 +480,7 @@ void setup() {
 	delay(2000);
 	Serial.begin(115200);
   Serial.println();
-  Serial.println("EmonESP Startup");
+  Serial.println("EmonESP");
   Serial.println("Firmware: "+ currentfirmware);
 
   // Read saved settings from EEPROM
@@ -505,7 +513,17 @@ void setup() {
     wifi_mode = 0;
     startClient();
   }
+  
+  // Start local OTA update server
   ArduinoOTA.begin();
+  
+  // Start hostname broadcast
+  MDNS.begin(esp_hostname);
+  
+  // Setup firmware upload
+  httpUpdater.setup(&server, firmware_update_path);
+ 
+  // Start server & server root html /
   server.on("/", [](){
     if(www_username!="" && !server.authenticate(www_username, www_password))
       return server.requestAuthentication();
@@ -523,11 +541,11 @@ void setup() {
   server.on("/update",handleUpdate);
   server.onNotFound([](){
   if(!handleFileRead(server.uri()))
-    server.send(404, "text/plain", "FileNotFound");
+    server.send(404, "text/plain", "NotFound");
   });
 
 	server.begin();
-	Serial.println("HTTP server started");
+	Serial.println("Server started");
   delay(100);
   Timer = millis();
 } // end setup
