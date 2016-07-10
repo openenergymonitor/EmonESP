@@ -396,16 +396,6 @@ void setup() {
     return server.requestAuthentication();
   handleLastValues();
   });
-  server.on("/reset", [](){
-  if(!server.authenticate(www_username, www_password))
-    return server.requestAuthentication();
-  handleRst();
-  });
-  server.on("/reset", [](){
-  if(!server.authenticate(www_username, www_password))
-    return server.requestAuthentication();
-  handleRst();
-  });
   
   server.on("/savenetwork", handleSaveNetwork);
   server.on("/saveapikey", handleSaveApikey);
