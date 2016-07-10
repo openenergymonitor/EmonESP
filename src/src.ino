@@ -602,19 +602,34 @@ void setup() {
       return server.requestAuthentication();
     handleHome();
   });
+
   // Handle HTTP web interface button presses
   server.on("/savenetwork", handleSaveNetwork);
   server.on("/saveapikey", handleSaveApikey);
   server.on("/savemqtt", handleSaveMqtt);
-  server.on("/status", handleStatus);
-  server.on("/lastvalues",handleLastValues);
-  server.on("/reset", handleRst);
   server.on("/scan", handleScan);
   server.on("/apoff",handleAPOff);
   server.on("/firmware",handleUpdateCheck);
   server.on("/update",handleUpdate);
   server.on("/generate_204", handleHome);  //Android captive portal. Maybe not needed. Might be handled by notFound
   server.on("/fwlink", handleHome);  //Microsoft captive portal. Maybe not needed. Might be handled by notFound
+
+  server.on("/status", [](){
+  if(!server.authenticate(www_username, www_password))
+    return server.requestAuthentication();
+  handleStatus();
+  });
+  server.on("/lastvalues", [](){
+  if(!server.authenticate(www_username, www_password))
+    return server.requestAuthentication();
+  handleLastValues();
+  });
+  server.on("/reset", [](){
+  if(!server.authenticate(www_username, www_password))
+    return server.requestAuthentication();
+  handleRst();
+  });
+  
   server.onNotFound([](){
   if(!handleFileRead(server.uri()))
     server.send(404, "text/plain", "NotFound");
