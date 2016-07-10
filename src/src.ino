@@ -380,18 +380,38 @@ void setup() {
     startClient();
   }
   ArduinoOTA.begin();
+  
   server.on("/", [](){
     if(www_username!="" && !server.authenticate(www_username, www_password))
       return server.requestAuthentication();
     handleHome();
   });
+  server.on("/status", [](){
+  if(!server.authenticate(www_username, www_password))
+    return server.requestAuthentication();
+  handleStatus();
+  });
+  server.on("/lastvalues", [](){
+  if(!server.authenticate(www_username, www_password))
+    return server.requestAuthentication();
+  handleLastValues();
+  });
+  server.on("/reset", [](){
+  if(!server.authenticate(www_username, www_password))
+    return server.requestAuthentication();
+  handleRst();
+  });
+  server.on("/reset", [](){
+  if(!server.authenticate(www_username, www_password))
+    return server.requestAuthentication();
+  handleRst();
+  });
+  
   server.on("/savenetwork", handleSaveNetwork);
   server.on("/saveapikey", handleSaveApikey);
-  server.on("/status", handleStatus);
-  server.on("/lastvalues",handleLastValues);
-  server.on("/reset", handleRst);
   server.on("/scan", handleScan);
   server.on("/apoff",handleAPOff);
+  
   server.onNotFound([](){
   if(!handleFileRead(server.uri()))
     server.send(404, "text/plain", "FileNotFound");
