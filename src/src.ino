@@ -35,10 +35,13 @@
 #include <ESP8266httpUpdate.h>        // remote OTA update from server
 #include <ESP8266HTTPUpdateServer.h>  // upload update
 #include <DNSServer.h>                // Required for captive portal
+#include <PubSubClient.h>             // MQTT https://github.com/knolleary/pubsubclient PlatformIO lib: 89
 
 ESP8266WebServer server(80);          //Create class for Web server
 WiFiClientSecure client;              // Create class for HTTPS TCP connections get_https()
-HTTPClient http;                      // Create class for HTTP TCP connections get_http()
+HTTPClient http;                      // Create class for HTTP TCP connections get_http
+WiFiClient espClient;                 // Create client for MQTT
+PubSubClient mqttclient(espClient);       // Create client for MQTT
 ESP8266HTTPUpdateServer httpUpdater;  // Create class for webupdate handleWebUpdate()
 DNSServer dnsServer;                  // Create class DNS server, captive portal re-direct
 const byte DNS_PORT = 53;
@@ -72,6 +75,12 @@ const int httpsPort = 443;
 const char* e_url = "/input/post.json?json=";
 const char* fingerprint = "B6:44:19:FF:B8:F2:62:46:60:39:9D:21:C6:FB:F5:6A:F3:D9:1A:79";
 
+//MQTT Settings
+//const char* mqtt_server = "10.10.10.2";
+String mqtt_server = "";
+String mqtt_user = "";
+String mqtt_pass = "";
+long lastMqttReconnectAttempt = 0;
 
 //----------------------------------------------------------------------------------------------------------------------------------------
 //--------------------------------------------------------------OTA UPDATE SETTINGS-------------------------------------------------------
@@ -324,6 +333,29 @@ void handleSaveApikey() {
 }
 
 // -------------------------------------------------------------------
+// Save MQTT Config
+// url: /savemqtt
+// -------------------------------------------------------------------
+void handleSaveMqtt() {
+  mqtt_server = server.arg("server");
+  mqtt_user = server.arg("user");
+  mqtt_pass = server.arg("pass");
+  if (mqtt_server!=0) {
+    //for (int i = 0; i < 32; i++){
+      ///if (i<mqtt_server.length()) {
+        //EEPROM.write(i+96, mqtt_server[i]);
+      //} else {
+      //  EEPROM.write(i+96, 0);
+      //}
+    //}
+    //EEPROM.commit();
+    server.send(200, "text/html", "saved");
+  }
+}
+
+
+
+// -------------------------------------------------------------------
 // Wifi scan /scan not currently used
 // url: /scan
 // -------------------------------------------------------------------
@@ -369,6 +401,10 @@ void handleStatus() {
   s += "\"ipaddress\":\""+ipaddress+"\",";
   s += "\"packets_sent\":\""+String(packets_sent)+"\",";
   s += "\"packets_success\":\""+String(packets_success)+"\",";
+  s += "\"mqtt_server\":\""+String(mqtt_server)+"\",";
+  s += "\"mqtt_user\":\""+String(mqtt_user)+"\",";
+  s += "\"mqtt_pass\":\""+String(mqtt_pass)+"\",";
+  s += "\"mqtt_connected\":\""+String(mqttclient.connected())+"\",";
   s += "\"free_heap\":\""+String(ESP.getFreeHeap())+"\"";
   s += "}";
   server.send(200, "text/html", s);
@@ -488,6 +524,19 @@ String get_http(const char* host, String url){
   }
 } // end http_get
 
+// -------------------------------------------------------------------
+// MQTT Connect
+// -------------------------------------------------------------------
+boolean mqtt_connect() {
+  mqttclient.setServer(mqtt_server.c_str(), 1883);
+  Serial.print("MQTT Connecting...");
+  if (mqttclient.connect("emonesp")) {  // Attempt to connect
+    Serial.println("MQTT connected");
+    mqttclient.publish("emonesp_status", "connected"); // Once connected, publish an announcement..
+  }
+return mqttclient.connected();
+}
+
 
 // -------------------------------------------------------------------
 // SETUP
@@ -554,6 +603,7 @@ void setup() {
   // Handle HTTP web interface button presses
   server.on("/savenetwork", handleSaveNetwork);
   server.on("/saveapikey", handleSaveApikey);
+  server.on("/savemqtt", handleSaveMqtt);
   server.on("/status", handleStatus);
   server.on("/lastvalues",handleLastValues);
   server.on("/reset", handleRst);
@@ -572,6 +622,7 @@ void setup() {
 	Serial.println("Server started");
   delay(100);
   Timer = millis();
+  lastMqttReconnectAttempt = 0;
 } // end setup
 
 // -------------------------------------------------------------------
@@ -581,7 +632,23 @@ void loop() {
   ArduinoOTA.handle();
   server.handleClient();          // Web server
   dnsServer.processNextRequest(); // Captive portal DNS re-dierct
-
+  
+  // If Wifi is connected & MQTT server has been set then connect to mqtt server
+  if ((wifi_mode==0 || wifi_mode==3) && mqtt_server != 0){
+    if (!mqttclient.connected()) {
+      long now = millis();
+      if (now - lastMqttReconnectAttempt > 5000) {
+        lastMqttReconnectAttempt = now;
+        // Attempt to reconnect
+        if (mqtt_connect()) {
+          lastMqttReconnectAttempt = 0;
+        }
+      } else {
+        mqttclient.loop();
+      }
+    }
+  }
+    
   // Remain in AP mode for 5 Minutes before resetting
   if (wifi_mode == 1){
      if ((millis() - Timer) >= 300000){
@@ -619,6 +686,15 @@ void loop() {
         Serial.print(result);
         packets_success++;
       }
+      
+      // Send data to MQTT
+      if (mqtt_server != 0){
+        char* buff = "";
+        data.toCharArray(buff, data.length()-1); // remove new line
+        mqttclient.publish("outTopic", buff);
+      }
+        
+      
     } // end wifi connected
   } // end serial available
 

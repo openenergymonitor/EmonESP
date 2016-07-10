@@ -12,6 +12,7 @@ r1.onreadystatechange = function () {
   document.getElementById("passkey").value = status.pass;
   document.getElementById("apikey").value = status.apikey;
   document.getElementById("free_heap").innerHTML = status.free_heap;
+  document.getElementById("mqtt_connected").value = status.mqtt_connected;
 
   if (status.mode=="AP") {
       document.getElementById("mode").innerHTML = "Access Point (AP)";
@@ -75,6 +76,7 @@ function update() {
       document.getElementById("sta-psent").innerHTML = status.packets_sent;
       document.getElementById("sta-psuccess").innerHTML = status.packets_success;
       document.getElementById("free_heap").value = status.free_heap;
+      document.getElementById("mqtt_connected").value = status.mqtt_connected;
     };
     r2.send();
 }
@@ -142,13 +144,37 @@ document.getElementById("connect").addEventListener("click", function(e) {
 // -----------------------------------------------------------------------
 document.getElementById("save-apikey").addEventListener("click", function(e) {
     var apikey = document.getElementById("apikey").value;
-    if (apikey=="") alert("Please enter apikey");
+    if (apikey.length!=32) {
+      alert("Please enter valid Emoncms apikey");
+    } else {
+      var r = new XMLHttpRequest();
+      r.open("POST", "saveapikey", true);
+      r.setRequestHeader("Content-type","application/x-www-form-urlencoded");
+      r.onreadystatechange = function () {};
+      r.send("&apikey="+apikey);
+      console.log(apikey);
+    }
+});
 
-    var r = new XMLHttpRequest();
-    r.open("POST", "saveapikey", true);
-    r.setRequestHeader("Content-type","application/x-www-form-urlencoded");
-    r.onreadystatechange = function () {};
-    r.send("&apikey="+apikey);
+// -----------------------------------------------------------------------
+// Event: MQTT save
+// -----------------------------------------------------------------------
+document.getElementById("save-mqtt").addEventListener("click", function(e) {
+    var mqtt = {
+      server: document.getElementById("mqtt_server").value,
+      user: document.getElementById("mqtt_user").value,
+      pass: document.getElementById("mqtt_pass").value
+    }
+    if (mqtt.server=="") {
+      alert("Please enter MQTT server");
+    } else {
+      var r = new XMLHttpRequest();
+      r.open("POST", "savemqtt", true);
+      r.setRequestHeader("Content-type","application/x-www-form-urlencoded");
+      r.onreadystatechange = function () {};
+      r.send("&server="+mqtt.server+"&user="+mqtt.user+"&pass="+mqtt.pass);
+      console.log(mqtt);
+    }
 });
 
 // -----------------------------------------------------------------------
