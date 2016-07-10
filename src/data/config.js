@@ -12,7 +12,11 @@ r1.onreadystatechange = function () {
   document.getElementById("passkey").value = status.pass;
   document.getElementById("apikey").value = status.apikey;
   document.getElementById("free_heap").innerHTML = status.free_heap;
-  document.getElementById("mqtt_connected").value = status.mqtt_connected;
+  if (status.mqtt_connected==1){
+   document.getElementById("mqtt_connected").innerHTML = "Yes";
+  } else {
+    document.getElementById("mqtt_connected").innerHTML = "No";
+  }
 
   if (status.mode=="AP") {
       document.getElementById("mode").innerHTML = "Access Point (AP)";
@@ -76,7 +80,11 @@ function update() {
       document.getElementById("sta-psent").innerHTML = status.packets_sent;
       document.getElementById("sta-psuccess").innerHTML = status.packets_success;
       document.getElementById("free_heap").value = status.free_heap;
-      document.getElementById("mqtt_connected").value = status.mqtt_connected;
+      if (status.mqtt_connected=="1"){
+       document.getElementById("mqtt_connected").innerHTML = "Yes";
+      } else {
+       document.getElementById("mqtt_connected").innerHTML = "No";
+      }
     };
     r2.send();
 }

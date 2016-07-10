@@ -401,9 +401,9 @@ void handleStatus() {
   s += "\"ipaddress\":\""+ipaddress+"\",";
   s += "\"packets_sent\":\""+String(packets_sent)+"\",";
   s += "\"packets_success\":\""+String(packets_success)+"\",";
-  s += "\"mqtt_server\":\""+String(mqtt_server)+"\",";
-  s += "\"mqtt_user\":\""+String(mqtt_user)+"\",";
-  s += "\"mqtt_pass\":\""+String(mqtt_pass)+"\",";
+  s += "\"mqtt_server\":\""+mqtt_server+"\",";
+  s += "\"mqtt_user\":\""+mqtt_user+"\",";
+  s += "\"mqtt_pass\":\""+mqtt_pass+"\",";
   s += "\"mqtt_connected\":\""+String(mqttclient.connected())+"\",";
   s += "\"free_heap\":\""+String(ESP.getFreeHeap())+"\"";
   s += "}";
@@ -529,12 +529,14 @@ String get_http(const char* host, String url){
 // -------------------------------------------------------------------
 boolean mqtt_connect() {
   mqttclient.setServer(mqtt_server.c_str(), 1883);
-  Serial.print("MQTT Connecting...");
-  if (mqttclient.connect("emonesp")) {  // Attempt to connect
+  Serial.println("MQTT Connecting...");
+  if (mqttclient.connect("emonesp", mqtt_user.c_str(), mqtt_pass.c_str())) {  // Attempt to connect
     Serial.println("MQTT connected");
     mqttclient.publish("emonesp_status", "connected"); // Once connected, publish an announcement..
+    return true;
+  } else {
+    return false;
   }
-return mqttclient.connected();
 }
 
 
@@ -639,8 +641,7 @@ void loop() {
       long now = millis();
       if (now - lastMqttReconnectAttempt > 5000) {
         lastMqttReconnectAttempt = now;
-        // Attempt to reconnect
-        if (mqtt_connect()) {
+        if (mqtt_connect()) { // Attempt to reconnect
           lastMqttReconnectAttempt = 0;
         }
       } else {

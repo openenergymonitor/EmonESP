@@ -47,24 +47,30 @@
 
             <div class="box380">
                 <h2>Emoncms Config</h2>
+                <p><b>Emoncms Server:</b><br>
+                <input id="emoncms_server" type="text" value="emoncms.org" style="width:280px;">
+                </p>e.g 'emoncms.org', 'emonpi/emoncms', or '192.168.1.4/emoncms'<br>
                 <p><b>Write apikey:</b><br>
                 <input id="apikey" type="text" style="width:280px;">
                 <button id="save-apikey">Save</button>
+                <p><b>Connected:</b><br><span id="emoncms_connected"></span></p>
+                <p><b>Successful packets:</b><br><span id="sta-psuccess"></span> / <span id="sta-psent"  ></span></p>
                 </p>
             </div>
             
             <div class="box380">
                 <h2>MQTT Config</h2>
                 <p><b>MQTT Server (port 1883):</b><br>
-                E.g 'emonpi', 'test.mosquitto.org', or '192.168.1.4'<br>
                 <input id="mqtt_server" type="text" style="width:280px;">
+                </p>e.g 'emonpi', 'test.mosquitto.org', or '192.168.1.4'<br>
                 <p><b>Username:</b><br>
-                Leave blank for no authentication<br>
                 <input id="mqtt_user" type="text" style="width:280px;">
+                </p>Leave blank for no authentication<br>
                 <p><b>Password:</b><br>
-                Leave blank for no authentication<br>
                 <input id="mqtt_pass" type="text" style="width:280px;">
+                </p>Leave blank for no authentication<br><p></p>
                 <button id="save-mqtt">Save</button>
+                <p><b>Connected:</b><br><span id="mqtt_connected"></span></p>
                 </p>
             </div>
             
@@ -98,8 +104,6 @@
             <div class="box380">
                 <h2>System info</h2>
                 <p><b>Free Heap:</b><br><span id="free_heap"></span>B</p>
-                <p><b>MQTT connected:</b><br><span id="mqtt_connected"></span></p>
-                <p><b>Successful Emoncms packets:</b><br><span id="sta-psuccess"></span> / <span id="sta-psent"  ></span></p>
                 
             </div>
 
