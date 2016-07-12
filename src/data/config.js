@@ -12,6 +12,8 @@ r1.onreadystatechange = function () {
   document.getElementById("passkey").value = status.pass;
   document.getElementById("apikey").value = status.apikey;
   document.getElementById("free_heap").innerHTML = status.free_heap;
+  document.getElementById("free_heap").innerHTML = status.flash_size;
+  document.getElementById("vcc").innerHTML = status.vcc;
   if (status.mqtt_connected==1){
    document.getElementById("mqtt_connected").innerHTML = "Yes";
   } else {
@@ -25,7 +27,8 @@ r1.onreadystatechange = function () {
 
       var out = "";
       for (var z in status.networks) {
-          out += "<tr><td><input class='networkcheckbox' name='"+status.networks[z]+"' type='checkbox'></td><td>"+status.networks[z]+"</td></tr>";
+        if (status.rssi[z]="undefined") status.rssi[z]="";
+        out += "<tr><td><input class='networkcheckbox' name='"+status.networks[z]+"' type='checkbox'></td><td>"+status.networks[z]+"</td><td>"+status.rssi[z]+"</td></tr>";
       }
       document.getElementById("networks").innerHTML = out;
   } else {
@@ -80,6 +83,9 @@ function update() {
       document.getElementById("sta-psent").innerHTML = status.packets_sent;
       document.getElementById("sta-psuccess").innerHTML = status.packets_success;
       document.getElementById("free_heap").value = status.free_heap;
+      document.getElementById("free_heap").innerHTML = status.free_heap;
+      document.getElementById("free_heap").innerHTML = status.flash_size;
+      document.getElementById("vcc").innerHTML = status.vcc;
       if (status.mqtt_connected=="1"){
        document.getElementById("mqtt_connected").innerHTML = "Yes";
       } else {
@@ -140,6 +146,7 @@ document.getElementById("connect").addEventListener("click", function(e) {
 	        if (r.readyState != 4 || r.status != 200) return;
 	        var str = r.responseText;
 	        console.log(str);
+	        document.getElementById("connect").innerHTML = "Connecting...please wait 10s";
 
 	        statusupdate = setInterval(updateStatus,5000);
         };
@@ -151,6 +158,7 @@ document.getElementById("connect").addEventListener("click", function(e) {
 // Event: Apikey save
 // -----------------------------------------------------------------------
 document.getElementById("save-apikey").addEventListener("click", function(e) {
+    document.getElementById("save-apikey").innerHTML = "Saving...";
     var apikey = document.getElementById("apikey").value;
     if (apikey.length!=32) {
       alert("Please enter valid Emoncms apikey");
@@ -160,7 +168,10 @@ document.getElementById("save-apikey").addEventListener("click", function(e) {
       r.setRequestHeader("Content-type","application/x-www-form-urlencoded");
       r.onreadystatechange = function () {};
       r.send("&apikey="+apikey);
-      console.log(apikey);
+      var str = r.responseText;
+	    console.log(str);
+	    if (str!=0) document.getElementById("save-apikey").innerHTML = str;
+      
     }
 });
 
@@ -168,6 +179,7 @@ document.getElementById("save-apikey").addEventListener("click", function(e) {
 // Event: MQTT save
 // -----------------------------------------------------------------------
 document.getElementById("save-mqtt").addEventListener("click", function(e) {
+  document.getElementById("save-mqtt").innerHTML = "Connecting...";
     var mqtt = {
       server: document.getElementById("mqtt_server").value,
       user: document.getElementById("mqtt_user").value,
@@ -182,6 +194,9 @@ document.getElementById("save-mqtt").addEventListener("click", function(e) {
       r.onreadystatechange = function () {};
       r.send("&server="+mqtt.server+"&user="+mqtt.user+"&pass="+mqtt.pass);
       console.log(mqtt);
+      var str = r.responseText;
+	    console.log(str);
+	    if (str!=0) document.getElementById("save-mqtt").innerHTML = str;
     }
 });
 

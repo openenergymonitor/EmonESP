@@ -1,14 +1,14 @@
 /*
  * -------------------------------------------------------------------
- * EmonESP Serial to emoncms gateway
+ * EmonESP Serial to Emoncms gateway
  * -------------------------------------------------------------------
  * Adaptation of Chris Howells OpenEVSE ESP Wifi
- * by Trystan Lea, OpenEnergyMonitor
+ * by Trystan Lea, Glyn Hudson, OpenEnergyMonitor
  * All adaptation GNU General Public License as below.
  *
  * -------------------------------------------------------------------
  *
- * This file is part of OpenEnergyMonitor project.
+ * This file is part of OpenEnergyMonitor.org project.
  * EmonESP is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 3, or (at your option)
@@ -55,7 +55,8 @@ IPAddress netMsk(255, 255, 255, 0);
 // Web server authentication (leave blank for none)
 const char* www_username = "emonesp";
 const char* www_password = "emon";
-String st;
+String st, rssi;
+
 
 /* hostname for mDNS. Should work at least on windows. Try http://emonesp.local */
 const char *esp_hostname = "emonesp";
@@ -82,9 +83,9 @@ String mqtt_user = "";
 String mqtt_pass = "";
 long lastMqttReconnectAttempt = 0;
 
-//----------------------------------------------------------------------------------------------------------------------------------------
-//--------------------------------------------------------------OTA UPDATE SETTINGS-------------------------------------------------------
-//----------------------------------------------------------------------------------------------------------------------------------------
+// -------------------------------------------------------------------
+//OTA UPDATE SETTINGS
+// -------------------------------------------------------------------
 //UPDATE SERVER strings and interfers for upate server
 // Array of strings Used to check firmware version
 const char* u_host = "217.9.195.227";
@@ -96,10 +97,8 @@ const char* firmware_update_path = "/upload";
 #define TEXTIFY(A) #A
 #define ESCAPEQUOTE(A) TEXTIFY(A)
 String currentfirmware = ESCAPEQUOTE(BUILD_TAG);
+// -------------------------------------------------------------------
 
-
-//----------------------------------------------------------------------------------------------------------------------------------------
-//----------------------------------------------------------------------------------------------------------------------------------------
 
 // Wifi mode
 // 0 - STA (Client)
@@ -344,7 +343,6 @@ void handleSaveNetwork() {
   qsid.replace('+', ' ');
 
   if (qsid != 0){
-
     for (int i = 0; i < 32; i++){
       if (i<qsid.length()) {
         EEPROM.write(i+0, qsid[i]);
@@ -430,11 +428,14 @@ void handleScan() {
   Serial.print(n);
   Serial.println(" networks found");
   st = "";
+  rssi = "";
   for (int i = 0; i < n; ++i){
     st += "\""+WiFi.SSID(i)+"\"";
+    rssi += "\""+String(WiFi.RSSI(i))+"\"";
     if (i<n-1) st += ",";
+    if (i<n-1) rssi += ",";
   }
-  server.send(200, "text/plain","["+st+"]");
+  server.send(200, "text/plain","[" +st+ "],[" +rssi+"]");
 }
 
 // -------------------------------------------------------------------
@@ -460,6 +461,7 @@ void handleStatus() {
     s += "\"mode\":\"STA+AP\",";
   }
   s += "\"networks\":["+st+"],";
+  s += "\"rssi\":["+rssi+"],";
   s += "\"ssid\":\""+esid+"\",";
   s += "\"pass\":\""+epass+"\",";
   s += "\"apikey\":\""+apikey+"\",";
@@ -470,9 +472,9 @@ void handleStatus() {
   s += "\"mqtt_user\":\""+mqtt_user+"\",";
   s += "\"mqtt_pass\":\""+mqtt_pass+"\",";
   s += "\"mqtt_connected\":\""+String(mqttclient.connected())+"\",";
-  s += "\"free_heap\":\""+String(ESP.getFreeHeap())+"\"";
-  s += "\"flash_size\":\""+String(ESP.getFlashChipSize())+"\"";
-  s += "\"vcc\":\""+String(ESP.getFreeHeap())+"\"";
+  s += "\"free_heap\":\""+String(ESP.getFreeHeap())+"\",";
+  s += "\"flash_size\":\""+String(ESP.getFlashChipSize())+"\",";
+  s += "\"vcc\":\""+String(ESP.getVcc())+"\"";
   s += "}";
   server.send(200, "text/html", s);
 }
