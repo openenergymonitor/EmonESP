@@ -275,8 +275,73 @@ void handleSaveNetwork() {
   esid = qsid;
   epass = qpass;
 
+  qpass.replace("%21", "!");
+//  qpass.replace("%22", '"');
   qpass.replace("%23", "#");
+  qpass.replace("%24", "$");
+  qpass.replace("%25", "%");
+  qpass.replace("%26", "&");
+  qpass.replace("%27", "'");
+  qpass.replace("%28", "(");
+  qpass.replace("%29", ")");
+  qpass.replace("%2A", "*");
+  qpass.replace("%2B", "+");
+  qpass.replace("%2C", ",");
+  qpass.replace("%2D", "-");
+  qpass.replace("%2E", ".");
+  qpass.replace("%2F", "/");
+  qpass.replace("%3A", ":");
+  qpass.replace("%3B", ";");
+  qpass.replace("%3C", "<");
+  qpass.replace("%3D", "=");
+  qpass.replace("%3E", ">");
+  qpass.replace("%3F", "?");
+  qpass.replace("%40", "@");
+  qpass.replace("%5B", "[");
+  qpass.replace("%5C", "'\'");
+  qpass.replace("%5D", "]");
+  qpass.replace("%5E", "^");
+  qpass.replace("%5F", "_");
+  qpass.replace("%60", "`");
+  qpass.replace("%7B", "{");
+  qpass.replace("%7C", "|");
+  qpass.replace("%7D", "}");
+  qpass.replace("%7E", "~");
   qpass.replace('+', ' ');
+
+  qsid.replace("%21", "!");
+//  qsid.replace("%22", '"');
+  qsid.replace("%23", "#");
+  qsid.replace("%24", "$");
+  qsid.replace("%25", "%");
+  qsid.replace("%26", "&");
+  qsid.replace("%27", "'");
+  qsid.replace("%28", "(");
+  qsid.replace("%29", ")");
+  qsid.replace("%2A", "*");
+  qsid.replace("%2B", "+");
+  qsid.replace("%2C", ",");
+  qsid.replace("%2D", "-");
+  qsid.replace("%2E", ".");
+  qsid.replace("%2F", "/");
+  qsid.replace("%3A", ":");
+  qsid.replace("%3B", ";");
+  qsid.replace("%3C", "<");
+  qsid.replace("%3D", "=");
+  qsid.replace("%3E", ">");
+  qsid.replace("%3F", "?");
+  qsid.replace("%40", "@");
+  qsid.replace("%5B", "[");
+  qsid.replace("%5C", "'\'");
+  qsid.replace("%5D", "]");
+  qsid.replace("%5E", "^");
+  qsid.replace("%5F", "_");
+  qsid.replace("%60", "`");
+  qsid.replace("%7B", "{");
+  qsid.replace("%7C", "|");
+  qsid.replace("%7D", "}");
+  qsid.replace("%7E", "~");
+  qsid.replace('+', ' ');
 
   if (qsid != 0){
 
@@ -406,6 +471,8 @@ void handleStatus() {
   s += "\"mqtt_pass\":\""+mqtt_pass+"\",";
   s += "\"mqtt_connected\":\""+String(mqttclient.connected())+"\",";
   s += "\"free_heap\":\""+String(ESP.getFreeHeap())+"\"";
+  s += "\"flash_size\":\""+String(ESP.getFlashChipSize())+"\"";
+  s += "\"vcc\":\""+String(ESP.getFreeHeap())+"\"";
   s += "}";
   server.send(200, "text/html", s);
 }
