@@ -10,7 +10,7 @@ r1.onreadystatechange = function () {
   var status = JSON.parse(r1.responseText);
 
   document.getElementById("passkey").value = status.pass;
-  document.getElementById("apikey").value = status.apikey;
+  document.getElementById("emoncms_apikey").value = status.emoncms_apikey;
   document.getElementById("free_heap").innerHTML = status.free_heap;
   document.getElementById("free_heap").innerHTML = status.flash_size;
   document.getElementById("vcc").innerHTML = status.vcc;
@@ -103,7 +103,7 @@ function updateStatus() {
     if (r1.readyState != 4 || r1.status != 200) return;
     var status = JSON.parse(r1.responseText);
 
-    document.getElementById("apikey").value = status.apikey;
+    document.getElementById("emoncms_apikey").value = emoncms_apikey;
 
     if (status.mode=="STA+AP" || status.mode=="STA") {
         // Hide waiting message
@@ -155,44 +155,51 @@ document.getElementById("connect").addEventListener("click", function(e) {
 });
 
 // -----------------------------------------------------------------------
-// Event: Apikey save
+// Event: Emoncms save
 // -----------------------------------------------------------------------
-document.getElementById("save-apikey").addEventListener("click", function(e) {
-    document.getElementById("save-apikey").innerHTML = "Saving...";
-    var apikey = document.getElementById("apikey").value;
-    if (apikey.length!=32) {
-      alert("Please enter valid Emoncms apikey");
-    } else {
-      var r = new XMLHttpRequest();
-      r.open("POST", "saveapikey", true);
-      r.setRequestHeader("Content-type","application/x-www-form-urlencoded");
-      r.onreadystatechange = function () {};
-      r.send("&apikey="+apikey);
-      var str = r.responseText;
-	    console.log(str);
-	    if (str!=0) document.getElementById("save-apikey").innerHTML = str;
-      
+document.getElementById("save-emoncms").addEventListener("click", function(e) {
+    var emoncms = {
+      server: document.getElementById("emoncms_server").value,
+      apikey: document.getElementById("emoncms_apikey").value,
+      node: document.getElementById("emoncms_node").value
     }
+    if (emoncms.server=="" || emoncms.node==""){
+        alert("Please enter Emoncms server and node");
+      } else if (emoncms.apikey.length!=32) {
+          alert("Please enter valid Emoncms apikey");
+        } else {
+          document.getElementById("save-emoncms").innerHTML = "Saving...";
+          var r = new XMLHttpRequest();
+          r.open("POST", "saveemoncms", true);
+          r.setRequestHeader("Content-type","application/x-www-form-urlencoded");
+          r.onreadystatechange = function () {};
+          r.send("&server="+emoncms.server+"&apikey="+emoncms.apikey+"&node="+emoncms.node);
+          var str = r.responseText;
+    	    console.log(str);
+    	    if (str!=0) document.getElementById("save-emoncms").innerHTML = str;
+        }
+    
 });
 
 // -----------------------------------------------------------------------
 // Event: MQTT save
 // -----------------------------------------------------------------------
 document.getElementById("save-mqtt").addEventListener("click", function(e) {
-  document.getElementById("save-mqtt").innerHTML = "Connecting...";
     var mqtt = {
       server: document.getElementById("mqtt_server").value,
+      topic: document.getElementById("mqtt_topic").value,
       user: document.getElementById("mqtt_user").value,
       pass: document.getElementById("mqtt_pass").value
     }
     if (mqtt.server=="") {
       alert("Please enter MQTT server");
     } else {
+      document.getElementById("save-mqtt").innerHTML = "Connecting...";
       var r = new XMLHttpRequest();
       r.open("POST", "savemqtt", true);
       r.setRequestHeader("Content-type","application/x-www-form-urlencoded");
       r.onreadystatechange = function () {};
-      r.send("&server="+mqtt.server+"&user="+mqtt.user+"&pass="+mqtt.pass);
+      r.send("&server="+mqtt.server+"&topic"=mqtt.topic+"&user="+mqtt.user+"&pass="+mqtt.pass);
       console.log(mqtt);
       var str = r.responseText;
 	    console.log(str);

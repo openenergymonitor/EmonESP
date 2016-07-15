@@ -63,7 +63,7 @@ const char *esp_hostname = "emonesp";
 
 String esid = "";
 String epass = "";
-String apikey = "";
+
 
 String connected_network = "";
 String last_datastr = "";
@@ -71,14 +71,18 @@ String status_string = "";
 String ipaddress = "";
 
 //EMONCMS SERVER strings and interfers for emoncms.org
-const char* host = "emoncms.org";
-const int httpsPort = 443;
 const char* e_url = "/input/post.json?json=";
-const char* fingerprint = "B6:44:19:FF:B8:F2:62:46:60:39:9D:21:C6:FB:F5:6A:F3:D9:1A:79";
+const char* emoncmsorg_fingerprint = "B6:44:19:FF:B8:F2:62:46:60:39:9D:21:C6:FB:F5:6A:F3:D9:1A:79";
+
+String emoncms_server = "";
+String emoncms_node = "";
+String emoncms_apikey = "";
+boolean emoncms_connected = false;
 
 //MQTT Settings
 //const char* mqtt_server = "10.10.10.2";
 String mqtt_server = "";
+String mqtt_topic = "";
 String mqtt_user = "";
 String mqtt_pass = "";
 long lastMqttReconnectAttempt = 0;
@@ -377,15 +381,17 @@ void handleSaveNetwork() {
 }
 
 // -------------------------------------------------------------------
-// Save apikey
-// url: /saveapikey
+// Save Emoncms
+// url: /saveemoncms
 // -------------------------------------------------------------------
-void handleSaveApikey() {
-  apikey = server.arg("apikey");
-  if (apikey!=0) {
+void handleSaveEmoncms() {
+  emoncms_server = server.arg("server");
+  emoncms_node = server.arg("node");
+  emoncms_apikey = server.arg("apikey");
+  if (emoncms_apikey!=0) {
     for (int i = 0; i < 32; i++){
-      if (i<apikey.length()) {
-        EEPROM.write(i+96, apikey[i]);
+      if (i<emoncms_apikey.length()) {
+        EEPROM.write(i+96, emoncms_apikey[i]);
       } else {
         EEPROM.write(i+96, 0);
       }
@@ -401,6 +407,7 @@ void handleSaveApikey() {
 // -------------------------------------------------------------------
 void handleSaveMqtt() {
   mqtt_server = server.arg("server");
+  mqtt_topic = server.arg("topic");
   mqtt_user = server.arg("user");
   mqtt_pass = server.arg("pass");
   if (mqtt_server!=0) {
@@ -464,17 +471,24 @@ void handleStatus() {
   s += "\"rssi\":["+rssi+"],";
   s += "\"ssid\":\""+esid+"\",";
   s += "\"pass\":\""+epass+"\",";
-  s += "\"apikey\":\""+apikey+"\",";
   s += "\"ipaddress\":\""+ipaddress+"\",";
+  
+  s += "\"emoncms_server\":\""+emoncms_server+"\",";
+  s += "\"emoncms_node\":\""+emoncms_node+"\",";
+  s += "\"emoncms_apikey\":\""+emoncms_apikey+"\",";
+  s += "\"emoncms_connected\":\""+String(emoncms_connected)+"\",";
   s += "\"packets_sent\":\""+String(packets_sent)+"\",";
   s += "\"packets_success\":\""+String(packets_success)+"\",";
+  
   s += "\"mqtt_server\":\""+mqtt_server+"\",";
   s += "\"mqtt_user\":\""+mqtt_user+"\",";
   s += "\"mqtt_pass\":\""+mqtt_pass+"\",";
   s += "\"mqtt_connected\":\""+String(mqttclient.connected())+"\",";
+  
   s += "\"free_heap\":\""+String(ESP.getFreeHeap())+"\",";
   s += "\"flash_size\":\""+String(ESP.getFlashChipSize())+"\",";
   s += "\"vcc\":\""+String(ESP.getVcc())+"\"";
+  
   s += "}";
   server.send(200, "text/html", s);
 }
@@ -544,7 +558,7 @@ void handleUpdate() {
 // url: N/A
 // -------------------------------------------------------------------
 
-String get_https(const char* fingerprint,const char* host, String url, int httpsPort){
+String get_https(const char* fingerprint, const char* host, String url, int httpsPort){
   // Use WiFiClient class to create TCP connections
   if (!client.connect(host, httpsPort)) {
     Serial.print(host + httpsPort); //debug
@@ -584,8 +598,14 @@ String get_http(const char* host, String url){
   int httpCode = http.GET();
   if((httpCode > 0) && (httpCode == HTTP_CODE_OK)){
     String payload = http.getString();
+    String line = client.readStringUntil('\r');
+    Serial.println(line); //debug
     http.end();
-    return(payload);
+    if (line.startsWith("HTTP/1.1 200 OK")){
+      return("OK"); //emoncms
+    } else {
+      return(payload);
+    }
   }
   else{
     http.end();
@@ -632,7 +652,7 @@ void setup() {
   }
   for (int i = 96; i < 128; ++i){
     byte c = EEPROM.read(i);
-    if (c!=0 && c!=255) apikey += (char) c;
+    if (c!=0 && c!=255) emoncms_apikey += (char) c;
   }
 
   WiFi.disconnect();
@@ -674,7 +694,7 @@ void setup() {
 
   // Handle HTTP web interface button presses
   server.on("/savenetwork", handleSaveNetwork);
-  server.on("/saveapikey", handleSaveApikey);
+  server.on("/saveemoncms", handleSaveEmoncms);
   server.on("/savemqtt", handleSaveMqtt);
   server.on("/scan", handleScan);
   server.on("/apoff",handleAPOff);
@@ -747,7 +767,7 @@ void loop() {
     // Could check for string integrity here
     last_datastr = data;
     // If Wifi connected
-    if ((wifi_mode==0 || wifi_mode==3) && apikey != 0){
+    if ((wifi_mode==0 || wifi_mode==3) && emoncms_apikey != 0){
       // We now create a URL for server data upload
       String url = e_url;
       url += "{";
@@ -760,16 +780,27 @@ void loop() {
       url += ",psuccess:";
       url += packets_success;
       url += "}&apikey=";
-      url += apikey.c_str();
+      url += emoncms_apikey.c_str();
 
       Serial.print("Emoncms request: ");
       packets_sent++;
 
       // Send data to Emoncms server
-      String result = get_https(fingerprint, host, url, httpsPort);
+      String result="";
+      if (emoncms_server="emoncms.org"){
+        // HTTPS on port 443 if emoncms.org
+        result = get_https(emoncmsorg_fingerprint, emoncms_server.c_str(), url, 443);
+      } else {
+        // Plain HTTP if other emoncms server e.g EmonPi
+        result = get_http(emoncms_server.c_str(), url);
+      }
       if (result == "OK"){
         Serial.print(result);
         packets_success++;
+        emoncms_connected = true;
+      }
+      else{
+        emoncms_connected=false;
       }
       
       // Send data to MQTT
