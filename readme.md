@@ -102,7 +102,9 @@ Required to include `data` folder with HTML etc in the upload
 - Unpack the plug-in into `ESP8266FS` directory (the path will look like `<home_dir>/Arduino/tools/ESP8266FS/tool/esp8266fs.jar`)
 - Restart Arduino IDE
 
-#### 3. Clone this repo
+#### 3. Download EmonESP (this repository)
+
+Download this repository and place in your Arduino Sketchbook folder. Or use git clone:
 
 `$ git clone https://github.com/openenergymonitor/EmonESP`
 
