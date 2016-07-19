@@ -12,9 +12,16 @@ r1.onreadystatechange = function () {
   document.getElementById("passkey").value = status.pass;
   document.getElementById("emoncms_apikey").value = status.emoncms_apikey;
   document.getElementById("free_heap").innerHTML = status.free_heap;
-  document.getElementById("free_heap").innerHTML = status.flash_size;
+  document.getElementById("flash_size").innerHTML = status.flash_size;
   document.getElementById("vcc").innerHTML = status.vcc;
-  if (status.mqtt_connected==1){
+  
+  if (status.emoncms_connected == "1"){
+   document.getElementById("emoncms_connected").innerHTML = "Yes";
+  } else {
+    document.getElementById("emoncms_connected").innerHTML = "No";
+  }
+  
+  if (status.mqtt_connected == "1"){
    document.getElementById("mqtt_connected").innerHTML = "Yes";
   } else {
     document.getElementById("mqtt_connected").innerHTML = "No";
@@ -82,11 +89,18 @@ function update() {
       var status = JSON.parse(r2.responseText);
       document.getElementById("sta-psent").innerHTML = status.packets_sent;
       document.getElementById("sta-psuccess").innerHTML = status.packets_success;
-      document.getElementById("free_heap").value = status.free_heap;
       document.getElementById("free_heap").innerHTML = status.free_heap;
-      document.getElementById("free_heap").innerHTML = status.flash_size;
+      document.getElementById("flash_size").innerHTML = status.flash_size;
       document.getElementById("vcc").innerHTML = status.vcc;
-      if (status.mqtt_connected=="1"){
+      
+      
+      if (status.emoncms_connected == "1"){
+       document.getElementById("emoncms_connected").innerHTML = "Yes";
+      } else {
+        document.getElementById("emoncms_connected").innerHTML = "No";
+      }
+  
+      if (status.mqtt_connected == "1"){
        document.getElementById("mqtt_connected").innerHTML = "Yes";
       } else {
        document.getElementById("mqtt_connected").innerHTML = "No";
