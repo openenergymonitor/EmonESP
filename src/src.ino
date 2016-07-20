@@ -163,6 +163,7 @@ void startAP() {
   Serial.print(n);
   Serial.println(" networks found");
   st = "";
+  rssi = "";
   for (int i = 0; i < n; ++i){
     st += "\""+WiFi.SSID(i)+"\"";
     rssi += "\""+String(WiFi.RSSI(i))+"\"";
@@ -675,15 +676,13 @@ void setup() {
   // Start local OTA update server
   ArduinoOTA.begin();
   
-  // Start hostname broadcast when in STA mode
-  if (wifi_mode == 0){
-    if (!MDNS.begin(esp_hostname)) {
-            Serial.println("MDNS responder error");
-          } else {
-            // Add service to MDNS-SD
-            MDNS.addService("http", "tcp", 80);
-          }
-  }
+  // Start hostname broadcast
+  if (!MDNS.begin(esp_hostname)) {
+          Serial.println("MDNS responder error");
+        } else {
+          // Add service to MDNS-SD
+          MDNS.addService("http", "tcp", 80);
+        }
   
   // Setup firmware upload
   httpUpdater.setup(&server, firmware_update_path);
