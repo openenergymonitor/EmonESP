@@ -165,7 +165,9 @@ void startAP() {
   st = "";
   for (int i = 0; i < n; ++i){
     st += "\""+WiFi.SSID(i)+"\"";
+    rssi += "\""+String(WiFi.RSSI(i))+"\"";
     if (i<n-1) st += ",";
+    if (i<n-1) rssi += ",";
   }
   delay(100);
   
@@ -687,7 +689,7 @@ void setup() {
  
   // Start server & server root html /
   server.on("/", [](){
-    if(www_username!="" && !server.authenticate(www_username, www_password))
+    if(www_username!="" && !server.authenticate(www_username, www_password) && wifi_mode == 0)
       return server.requestAuthentication();
     handleHome();
   });
@@ -704,17 +706,17 @@ void setup() {
   server.on("/fwlink", handleHome);  //Microsoft captive portal. Maybe not needed. Might be handled by notFound
 
   server.on("/status", [](){
-  if(!server.authenticate(www_username, www_password))
+  if(www_username!="" && !server.authenticate(www_username, www_password) && wifi_mode == 0)
     return server.requestAuthentication();
   handleStatus();
   });
   server.on("/lastvalues", [](){
-  if(!server.authenticate(www_username, www_password))
+  if(www_username!="" && !server.authenticate(www_username, www_password) && wifi_mode == 0)
     return server.requestAuthentication();
   handleLastValues();
   });
   server.on("/reset", [](){
-  if(!server.authenticate(www_username, www_password))
+  if(www_username!="" && !server.authenticate(www_username, www_password) && wifi_mode == 0)
     return server.requestAuthentication();
   handleRst();
   });

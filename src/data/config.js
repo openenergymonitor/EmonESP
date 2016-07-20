@@ -186,11 +186,13 @@ document.getElementById("save-emoncms").addEventListener("click", function(e) {
           var r = new XMLHttpRequest();
           r.open("POST", "saveemoncms", true);
           r.setRequestHeader("Content-type","application/x-www-form-urlencoded");
-          r.onreadystatechange = function () {};
-          r.send("&server="+emoncms.server+"&apikey="+emoncms.apikey+"&node="+emoncms.node);
-          var str = r.responseText;
-    	    console.log(str);
-    	    if (str!=0) document.getElementById("save-emoncms").innerHTML = str;
+          r.onreadystatechange = function () {
+            if (r.readyState != 4 || r.status != 200) return;
+            r.send("&server="+emoncms.server+"&apikey="+emoncms.apikey+"&node="+emoncms.node);
+            var str = r.responseText;
+      	    console.log(str);
+      	    if (str!=0) document.getElementById("save-emoncms").innerHTML = str;
+          };
         }
     
 });
@@ -212,12 +214,14 @@ document.getElementById("save-mqtt").addEventListener("click", function(e) {
       var r = new XMLHttpRequest();
       r.open("POST", "savemqtt", true);
       r.setRequestHeader("Content-type","application/x-www-form-urlencoded");
-      r.onreadystatechange = function () {};
-      r.send("&server="+mqtt.server+"&topic"=mqtt.topic+"&user="+mqtt.user+"&pass="+mqtt.pass);
-      console.log(mqtt);
-      var str = r.responseText;
-	    console.log(str);
-	    if (str!=0) document.getElementById("save-mqtt").innerHTML = str;
+      r.onreadystatechange = function () {
+        if (r.readyState != 4 || r.status != 200) return;
+        r.send("&server="+mqtt.server+"&topic="+mqtt.topic+"&user="+mqtt.user+"&pass="+mqtt.pass);
+        console.log(mqtt);
+        var str = r.responseText;
+  	    console.log(str);
+  	    if (str!=0) document.getElementById("save-mqtt").innerHTML = str;
+      };
     }
 });
 
