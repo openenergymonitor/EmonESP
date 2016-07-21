@@ -833,6 +833,7 @@ void loop() {
       }
       else{
         emoncms_connected=false;
+        Serial.println("Emoncms error")
       }
 
       // Send data to MQTT
