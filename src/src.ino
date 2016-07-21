@@ -394,9 +394,9 @@ void handleSaveEmoncms() {
   emoncms_apikey = server.arg("apikey");
   if (emoncms_apikey!=0) {
     char tmpStr[80];
-    sprintf(tmpStr,"Saved Emoncms: %s %s %s %s",emoncms_server.c_str(),emoncms_node.c_str(),emoncms_apikey.c_str());
+    sprintf(tmpStr,"Save: %s %s %s %s",emoncms_server.c_str(),emoncms_node.c_str(),emoncms_apikey.c_str());
     Serial.println(tmpStr);
-    server.send(200, "text/html", "tmpStr");
+    server.send(200, "text/html", tmpStr);
 
     // save to EEPROM
     for (int i = 0; i < 32; i++){
@@ -429,9 +429,9 @@ void handleSaveMqtt() {
     //}
     //EEPROM.commit();
     char tmpStr[80];
-    sprintf(tmpStr,"Saved MQTT: %s %s %s %s",mqtt_server.c_str(),mqtt_topic.c_str(),mqtt_user.c_str(),mqtt_pass.c_str());
+    sprintf(tmpStr,"Saved: %s %s %s %s",mqtt_server.c_str(),mqtt_topic.c_str(),mqtt_user.c_str(),mqtt_pass.c_str());
     Serial.println(tmpStr);
-    server.send(200, "text/html", "tmpStr");
+    server.send(200, "text/html", tmpStr);
   }
 }
 
@@ -591,7 +591,7 @@ String get_https(const char* fingerprint, const char* host, String url, int http
       String line = client.readStringUntil('\r');
       Serial.println(line); //debug
       if (line.startsWith("HTTP/1.1 200 OK")) {
-        return("OK");
+        return("ok");
       }
     }
   }
@@ -610,14 +610,9 @@ String get_http(const char* host, String url){
   int httpCode = http.GET();
   if((httpCode > 0) && (httpCode == HTTP_CODE_OK)){
     String payload = http.getString();
-    String line = client.readStringUntil('\r');
-    Serial.println(line); //debug
+    Serial.println(payload);
     http.end();
-    if (line.startsWith("HTTP/1.1 200 OK")){
-      return("OK"); //emoncms
-    } else {
-      return(payload);
-    }
+    return(payload);
   }
   else{
     http.end();
@@ -791,14 +786,20 @@ void loop() {
   }
   // If data received on serial
   while(Serial.available() || test_serial !="") {
-    String data = Serial.readStringUntil('\n');
-    // Could check for string integrity here
+    String data = "";
+  // Could check for string integrity here
+    if (Serial.available()){
+      data = Serial.readStringUntil('\n');
+      last_datastr = data;
+    }
+
     if (test_serial !=""){
-      last_datastr = test_serial;
+      data = test_serial;
       test_serial = "";
     }
+
     last_datastr = data;
-    // If Wifi connected
+    // If Wifi connected & emoncms server details are present
     if ((wifi_mode==0 || wifi_mode==3) && emoncms_apikey != 0){
       // We now create a URL for server data upload
       String url = e_url;
@@ -812,22 +813,21 @@ void loop() {
       url += ",psuccess:";
       url += packets_success;
       url += "}&apikey=";
-      url += emoncms_apikey.c_str();
+      url += emoncms_apikey;
 
-      Serial.print("Emoncms request: ");
+      Serial.println(url);
       packets_sent++;
 
       // Send data to Emoncms server
       String result="";
-      if (emoncms_server="emoncms.org"){
+      if (emoncms_server=="emoncms.org"){
         // HTTPS on port 443 if emoncms.org
         result = get_https(emoncmsorg_fingerprint, emoncms_server.c_str(), url, 443);
       } else {
         // Plain HTTP if other emoncms server e.g EmonPi
         result = get_http(emoncms_server.c_str(), url);
       }
-      if (result == "OK"){
-        Serial.print(result);
+      if (result == "ok"){
         packets_success++;
         emoncms_connected = true;
       }
