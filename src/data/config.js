@@ -11,6 +11,8 @@ r1.onreadystatechange = function () {
 
   document.getElementById("passkey").value = status.pass;
   document.getElementById("emoncms_apikey").value = status.emoncms_apikey;
+  document.getElementById("emoncms_server").value = status.emoncms_server;
+  document.getElementById("emoncms_node").value = status.emoncms_node;
   document.getElementById("free_heap").innerHTML = status.free_heap;
   document.getElementById("flash_size").innerHTML = status.flash_size;
   document.getElementById("vcc").innerHTML = status.vcc;
@@ -117,7 +119,9 @@ function updateStatus() {
     if (r1.readyState != 4 || r1.status != 200) return;
     var status = JSON.parse(r1.responseText);
 
-    document.getElementById("emoncms_apikey").value = emoncms_apikey;
+    document.getElementById("emoncms_apikey").value = status.emoncms_apikey;
+    document.getElementById("emoncms_server").value = status.emoncms_server;
+    document.getElementById("emoncms_node").value = status.emoncms_node;
 
     if (status.mode=="STA+AP" || status.mode=="STA") {
         // Hide waiting message
@@ -186,9 +190,9 @@ document.getElementById("save-emoncms").addEventListener("click", function(e) {
           var r = new XMLHttpRequest();
           r.open("POST", "saveemoncms", true);
           r.setRequestHeader("Content-type","application/x-www-form-urlencoded");
+          r.send("&server="+emoncms.server+"&apikey="+emoncms.apikey+"&node="+emoncms.node);
           r.onreadystatechange = function () {
             if (r.readyState != 4 || r.status != 200) return;
-            r.send("&server="+emoncms.server+"&apikey="+emoncms.apikey+"&node="+emoncms.node);
             var str = r.responseText;
       	    console.log(str);
       	    if (str!=0) document.getElementById("save-emoncms").innerHTML = str;
@@ -213,10 +217,10 @@ document.getElementById("save-mqtt").addEventListener("click", function(e) {
       var r = new XMLHttpRequest();
       r.open("POST", "savemqtt", true);
       r.setRequestHeader("Content-type","application/x-www-form-urlencoded");
+      r.send("&server="+mqtt.server+"&topic="+mqtt.topic+"&user="+mqtt.user+"&pass="+mqtt.pass);
       r.onreadystatechange = function () {
-        if (r.readyState != 4 || r.status != 200) return;
-        r.send("&server="+mqtt.server+"&topic="+mqtt.topic+"&user="+mqtt.user+"&pass="+mqtt.pass);
         console.log(mqtt);
+        if (r.readyState != 4 || r.status != 200) return;
         var str = r.responseText;
   	    console.log(str);
   	    if (str!=0) document.getElementById("save-mqtt").innerHTML = str;

@@ -16,6 +16,14 @@ html, body {
     box-sizing: border-box;
 }
 
+table {
+    border-collapse: collapse;
+}
+
+table, th, td {
+   border: 1px solid #777777;
+}
+
 .flex-container {
     display: -webkit-flex;
     display: flex;
@@ -33,7 +41,7 @@ html, body {
     margin-left: auto;
     margin-top: 10px;
     width: 400px;
-    height: 800px;
+    height: 650px;
     background-color: #dedede;
     box-sizing: border-box;
     padding: 20px;
@@ -47,13 +55,21 @@ html, body {
     font-style: italic;
 }
 
+.box h3 {
+    font-weight: bold;
+    font-family: Arial,"sans-serif";
+    font-size: 18px;
+    color: #777777;
+    text-align: center;
+}
+
 .flex-item h2 {
-    font-size: 30px;
+    font-size: 20px;
     color: #777777;
 }
 
 .box h1 {
-    font-size: 22px;
+    font-size: 40px;
     font-weight: bold;
     font-family: Arial,"sans-serif";
     color: #777777;
@@ -77,11 +93,11 @@ button {
     box-shadow: 3px 3px 10px #888888;
     border: none;
     color: #ffffff;
-    padding: 15px 25px;
+    padding: 13px 28px;
     text-align: center;
     text-decoration: none;
     display: inline-block;
-    font-size: 20px;
+    font-size: 15px;
     font-weight: bold;
     margin: 4px 2px;
     cursor: pointer;
