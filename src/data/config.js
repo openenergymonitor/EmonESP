@@ -14,13 +14,13 @@ r1.onreadystatechange = function () {
   document.getElementById("free_heap").innerHTML = status.free_heap;
   document.getElementById("flash_size").innerHTML = status.flash_size;
   document.getElementById("vcc").innerHTML = status.vcc;
-  
+
   if (status.emoncms_connected == "1"){
    document.getElementById("emoncms_connected").innerHTML = "Yes";
   } else {
     document.getElementById("emoncms_connected").innerHTML = "No";
   }
-  
+
   if (status.mqtt_connected == "1"){
    document.getElementById("mqtt_connected").innerHTML = "Yes";
   } else {
@@ -92,14 +92,14 @@ function update() {
       document.getElementById("free_heap").innerHTML = status.free_heap;
       document.getElementById("flash_size").innerHTML = status.flash_size;
       document.getElementById("vcc").innerHTML = status.vcc;
-      
-      
+
+
       if (status.emoncms_connected == "1"){
        document.getElementById("emoncms_connected").innerHTML = "Yes";
       } else {
         document.getElementById("emoncms_connected").innerHTML = "No";
       }
-  
+
       if (status.mqtt_connected == "1"){
        document.getElementById("mqtt_connected").innerHTML = "Yes";
       } else {
@@ -192,9 +192,8 @@ document.getElementById("save-emoncms").addEventListener("click", function(e) {
             var str = r.responseText;
       	    console.log(str);
       	    if (str!=0) document.getElementById("save-emoncms").innerHTML = str;
-          };
+          }
         }
-    
 });
 
 // -----------------------------------------------------------------------

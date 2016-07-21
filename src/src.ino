@@ -78,6 +78,7 @@ String emoncms_server = "";
 String emoncms_node = "";
 String emoncms_apikey = "";
 boolean emoncms_connected = false;
+String test_serial="";
 
 //MQTT Settings
 //const char* mqtt_server = "10.10.10.2";
@@ -171,13 +172,13 @@ void startAP() {
     if (i<n-1) rssi += ",";
   }
   delay(100);
-  
+
   WiFi.softAPConfig(apIP, apIP, netMsk);
   WiFi.softAP(softAP_ssid, softAP_password);
     /* Setup the DNS server redirecting all the domains to the apIP */
   dnsServer.setErrorReplyCode(DNSReplyCode::NoError);
   dnsServer.start(DNS_PORT, "*", apIP);
-  
+
   IPAddress myIP = WiFi.softAPIP();
   char tmpStr[40];
   sprintf(tmpStr,"%d.%d.%d.%d",myIP[0],myIP[1],myIP[2],myIP[3]);
@@ -392,6 +393,12 @@ void handleSaveEmoncms() {
   emoncms_node = server.arg("node");
   emoncms_apikey = server.arg("apikey");
   if (emoncms_apikey!=0) {
+    char tmpStr[80];
+    sprintf(tmpStr,"Saved Emoncms: %s %s %s %s",emoncms_server.c_str(),emoncms_node.c_str(),emoncms_apikey.c_str());
+    Serial.println(tmpStr);
+    server.send(200, "text/html", "tmpStr");
+
+    // save to EEPROM
     for (int i = 0; i < 32; i++){
       if (i<emoncms_apikey.length()) {
         EEPROM.write(i+96, emoncms_apikey[i]);
@@ -400,7 +407,6 @@ void handleSaveEmoncms() {
       }
     }
     EEPROM.commit();
-    server.send(200, "text/html", "saved");
   }
 }
 
@@ -422,7 +428,10 @@ void handleSaveMqtt() {
       //}
     //}
     //EEPROM.commit();
-    server.send(200, "text/html", "saved");
+    char tmpStr[80];
+    sprintf(tmpStr,"Saved MQTT: %s %s %s %s",mqtt_server.c_str(),mqtt_topic.c_str(),mqtt_user.c_str(),mqtt_pass.c_str());
+    Serial.println(tmpStr);
+    server.send(200, "text/html", "tmpStr");
   }
 }
 
@@ -475,23 +484,23 @@ void handleStatus() {
   s += "\"ssid\":\""+esid+"\",";
   s += "\"pass\":\""+epass+"\",";
   s += "\"ipaddress\":\""+ipaddress+"\",";
-  
+
   s += "\"emoncms_server\":\""+emoncms_server+"\",";
   s += "\"emoncms_node\":\""+emoncms_node+"\",";
   s += "\"emoncms_apikey\":\""+emoncms_apikey+"\",";
   s += "\"emoncms_connected\":\""+String(emoncms_connected)+"\",";
   s += "\"packets_sent\":\""+String(packets_sent)+"\",";
   s += "\"packets_success\":\""+String(packets_success)+"\",";
-  
+
   s += "\"mqtt_server\":\""+mqtt_server+"\",";
   s += "\"mqtt_user\":\""+mqtt_user+"\",";
   s += "\"mqtt_pass\":\""+mqtt_pass+"\",";
   s += "\"mqtt_connected\":\""+String(mqttclient.connected())+"\",";
-  
+
   s += "\"free_heap\":\""+String(ESP.getFreeHeap())+"\",";
   s += "\"flash_size\":\""+String(ESP.getFlashChipSize())+"\",";
   s += "\"vcc\":\""+String(ESP.getVcc())+"\"";
-  
+
   s += "}";
   server.send(200, "text/html", s);
 }
@@ -631,6 +640,17 @@ boolean mqtt_connect() {
   }
 }
 
+// -------------------------------------------------------------------
+// Simulate Serial Input from emonTx
+// -------------------------------------------------------------------
+void handleTest(){
+  test_serial = server.arg("serial");
+  server.send(200, "text/html", test_serial);
+  Serial.println(test_serial);
+}
+
+
+
 
 // -------------------------------------------------------------------
 // SETUP
@@ -672,10 +692,10 @@ void setup() {
     wifi_mode = 0;
     startClient();
   }
-  
+
   // Start local OTA update server
   ArduinoOTA.begin();
-  
+
   // Start hostname broadcast
   if (!MDNS.begin(esp_hostname)) {
           Serial.println("MDNS responder error");
@@ -683,10 +703,10 @@ void setup() {
           // Add service to MDNS-SD
           MDNS.addService("http", "tcp", 80);
         }
-  
+
   // Setup firmware upload
   httpUpdater.setup(&server, firmware_update_path);
- 
+
   // Start server & server root html /
   server.on("/", [](){
     if(www_username!="" && !server.authenticate(www_username, www_password) && wifi_mode == 0)
@@ -720,7 +740,13 @@ void setup() {
     return server.requestAuthentication();
   handleRst();
   });
-  
+
+  server.on("/test", [](){
+  if(www_username!="" && !server.authenticate(www_username, www_password) && wifi_mode == 0)
+    return server.requestAuthentication();
+  handleTest();
+  });
+
   server.onNotFound([](){
   if(!handleFileRead(server.uri()))
     server.send(404, "text/plain", "NotFound");
@@ -740,7 +766,7 @@ void loop() {
   ArduinoOTA.handle();
   server.handleClient();          // Web server
   dnsServer.processNextRequest(); // Captive portal DNS re-dierct
-  
+
   // If Wifi is connected & MQTT server has been set then connect to mqtt server
   if ((wifi_mode==0 || wifi_mode==3) && mqtt_server != 0){
     if (!mqttclient.connected()) {
@@ -755,7 +781,7 @@ void loop() {
       }
     }
   }
-    
+
   // Remain in AP mode for 5 Minutes before resetting
   if (wifi_mode == 1){
      if ((millis() - Timer) >= 300000){
@@ -764,9 +790,13 @@ void loop() {
      }
   }
   // If data received on serial
-  while(Serial.available()) {
+  while(Serial.available() || test_serial !="") {
     String data = Serial.readStringUntil('\n');
     // Could check for string integrity here
+    if (test_serial !=""){
+      last_datastr = test_serial;
+      test_serial = "";
+    }
     last_datastr = data;
     // If Wifi connected
     if ((wifi_mode==0 || wifi_mode==3) && emoncms_apikey != 0){
@@ -804,15 +834,15 @@ void loop() {
       else{
         emoncms_connected=false;
       }
-      
+
       // Send data to MQTT
       if (mqtt_server != 0){
         char* buff = "";
         data.toCharArray(buff, data.length()-1); // remove new line
         mqttclient.publish("outTopic", buff);
       }
-        
-      
+
+
     } // end wifi connected
   } // end serial available
 
