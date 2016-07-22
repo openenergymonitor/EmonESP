@@ -195,7 +195,7 @@ document.getElementById("save-emoncms").addEventListener("click", function(e) {
             if (r.readyState != 4 || r.status != 200) return;
             var str = r.responseText;
       	    console.log(str);
-      	    if (str!=0) document.getElementById("save-emoncms").innerHTML = str;
+      	    if (str!=0) document.getElementById("save-emoncms").innerHTML = "Saved";
           }
         }
 });
@@ -213,7 +213,7 @@ document.getElementById("save-mqtt").addEventListener("click", function(e) {
     if (mqtt.server=="") {
       alert("Please enter MQTT server");
     } else {
-      document.getElementById("save-mqtt").innerHTML = "Connecting...";
+      document.getElementById("save-mqtt").innerHTML = "Saving...";
       var r = new XMLHttpRequest();
       r.open("POST", "savemqtt", true);
       r.setRequestHeader("Content-type","application/x-www-form-urlencoded");
@@ -223,7 +223,7 @@ document.getElementById("save-mqtt").addEventListener("click", function(e) {
         if (r.readyState != 4 || r.status != 200) return;
         var str = r.responseText;
   	    console.log(str);
-  	    if (str!=0) document.getElementById("save-mqtt").innerHTML = str;
+  	    if (str!=0) document.getElementById("save-mqtt").innerHTML = "Saved";
       };
     }
 });
