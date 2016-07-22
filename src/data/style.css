@@ -17,7 +17,7 @@ html,body {
 
 #one,#two,#three,#four,#five,#six {
     width: 100%;
-    background-color: #f1f1f1;
+    background-color: #f6f6f6;
     box-shadow: 3px 3px 10px #888888;
     box-sizing: border-box;
     margin-bottom: 15px;
@@ -29,7 +29,7 @@ table {
 }
 
 table, td, th {
-   border: 2px solid #ffffff;
+   border: 2px solid #777777;
    padding: 10px;
 
 }
@@ -37,12 +37,19 @@ table, td, th {
 .flex-container {
     display: -webkit-flex;
     display: flex;
-    flex-direction: row;
+    flex-direction: column;
     flex-wrap: wrap;
-    justify-content: center;
+    justify-content: flex-start;
     align-items: flex-start;
     width: 100%;
-    background-color: #ffffff;
+    height: 2180px;
+}
+
+@media screen and (min-width: 1242px) {
+    .flex-container {
+        height: 800px;
+        overflow-x: scroll;
+    }
 }
 
 .flex-item {
@@ -50,14 +57,6 @@ table, td, th {
     margin-left: auto;
     width: 400px;
 }
-
-
-@media screen and (max-width: 400px) {
-    .flex-item {
-        width: 350px;
-    }
-}
-
 
 .flex-item p {
     padding-top: 10px;
@@ -72,6 +71,9 @@ table, td, th {
 }
 
 .box {
+    box-sizing: border-box;
+    padding-top: 5px;
+    padding-bottom: 5px;
     margin-top: -10px;
 }
 
