@@ -65,10 +65,6 @@ table, td, th {
     padding-top: 10px;
 }
 
-.flex-item span {
-    font-style: italic;
-}
-
 .flex-item h2 {
     font-size: 20px;
     color: #ffffff;
@@ -129,6 +125,6 @@ input {
     margin-top: 10px;
 }
 
-#upload {
+#update {
     background-color: red;
 }
