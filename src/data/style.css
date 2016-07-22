@@ -61,7 +61,7 @@ table, td, th {
 
 @media screen and (max-width: 420px) {
     .flex-item {
-        width: 300px;
+        width: 92vw;
     }
 }
 
