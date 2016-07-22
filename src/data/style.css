@@ -4,7 +4,7 @@ html,body {
     font-family: "sans-serif";
     font-size: 14px;
     background-color: #ffffff;
-    color:#ffffff;
+    color:#777777;
     margin: 0;
 }
 
@@ -17,12 +17,11 @@ html,body {
 
 #one,#two,#three,#four,#five,#six {
     width: 100%;
-    background-color: #777777;
+    background-color: #f1f1f1;
     box-shadow: 3px 3px 10px #888888;
     box-sizing: border-box;
-    border-radius: 10px;
-    padding: 20px;
     margin-bottom: 15px;
+    padding: 25px;
 }
 
 table {
@@ -42,7 +41,6 @@ table, td, th {
     flex-wrap: wrap;
     justify-content: center;
     align-items: flex-start;
-    align-content: stretch;
     width: 100%;
     background-color: #ffffff;
 }
@@ -71,7 +69,6 @@ table, td, th {
 
 .flex-item h2 {
     font-size: 20px;
-    color: #ffffff;
 }
 
 .box {
@@ -82,7 +79,6 @@ table, td, th {
     font-size: 40px;
     font-weight: bold;
     font-family: Arial,"sans-serif";
-    color: #777777;
     text-align: center;
 }
 
@@ -129,6 +125,6 @@ input {
     margin-top: 10px;
 }
 
-#upload {
+#update {
     background-color: red;
 }
