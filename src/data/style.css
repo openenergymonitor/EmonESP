@@ -16,11 +16,11 @@ html,body {
 }
 
 #one,#two,#three,#four,#five,#six {
-    width: 100%;
+    width: 98%;
     background-color: #f6f6f6;
-    box-shadow: 3px 3px 10px #888888;
+    box-shadow: 1px 1px 10px #888888;
     box-sizing: border-box;
-    margin-bottom: 15px;
+    margin: 10px auto;
     padding: 25px;
 }
 
@@ -47,21 +47,32 @@ table, td, th {
 
 @media screen and (min-width: 1242px) {
     .flex-container {
+        width: 1242px;
         height: 800px;
         flex-wrap: wrap;
-        overflow-x: scroll;
+        margin: 0 auto;
     }
 }
 
-.flex-item {
-    margin-right: auto;
-    margin-left: auto;
-    width: 400px;
+
+@media screen and (min-width: 800px) and (max-width: 1242px)  {
+    .flex-container {
+        width: 800px;
+        height: 1600px;
+        flex-wrap: wrap;
+        margin: 0 auto;
+    }
 }
 
-@media screen and (max-width: 420px) {
+
+.flex-item {
+    margin: 0 auto;
+    width: 100%;
+}
+
+@media screen and (min-width: 800px) {
     .flex-item {
-        width: 92vw;
+        width: 400px;
     }
 }
 
