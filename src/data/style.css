@@ -31,12 +31,22 @@ table {
     max-height: 100px;
 }
 
-table, td, th {
-   border: 2px solid #777777;
-   padding: 8px;
+table {
+   border-style: none;
+}
+
+th {
    background-color: #777777;
    color: #ffffff;
+   border: 1px solid #f1f1f1;
+   padding: 8px;
+}
 
+td {
+   background-color: #ffffff;
+   color: #777777;
+   border: 1px solid #f1f1f1;
+   padding: 8px;
 }
 
 .flex-container {
@@ -45,25 +55,15 @@ table, td, th {
     flex-direction: column;
     flex-wrap: nowrap;
     justify-content: flex-start;
-    align-items: flex-start;
+    align-items: center;
     width: 100%;
-    max-height: 2180px;
+    max-height: 2400px;
 }
 
-@media screen and (min-width: 1200px) {
-    .flex-container {
-        width: 1200px;
-        height: 700px;
-        flex-wrap: wrap;
-        margin: 0 auto;
-    }
-}
-
-
-@media screen and (min-width: 800px) and (max-width: 1200px)  {
+@media screen and (min-width: 800px) {
     .flex-container {
         width: 800px;
-        height: 1400px;
+        max-height: 1400px;
         flex-wrap: wrap;
         margin: 0 auto;
     }
