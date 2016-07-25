@@ -111,9 +111,10 @@ td {
 }
 
 .box h3 {
+    padding-top: 7px;
     font-weight: bold;
     font-family: Arial,"sans-serif";
-    font-size: 18px;
+    font-size: 19px;
     text-align: center;
     color: #b6b6b6;
     margin: -8px 0 0 0;
