@@ -392,13 +392,8 @@ void handleSaveEmoncms() {
   emoncms_server = server.arg("server");
   emoncms_node = server.arg("node");
   emoncms_apikey = server.arg("apikey");
-  if (emoncms_apikey!=0) {
-    char tmpStr[80];
-    sprintf(tmpStr,"Save: %s %s %s %s",emoncms_server.c_str(),emoncms_node.c_str(),emoncms_apikey.c_str());
-    Serial.println(tmpStr);
-    server.send(200, "text/html", tmpStr);
-
-    // save to EEPROM
+  if (emoncms_apikey!=0 && emoncms_server!=0 && emoncms_node!=0) {
+    // save apikey to EEPROM
     for (int i = 0; i < 32; i++){
       if (i<emoncms_apikey.length()) {
         EEPROM.write(i+96, emoncms_apikey[i]);
@@ -406,7 +401,27 @@ void handleSaveEmoncms() {
         EEPROM.write(i+96, 0);
       }
     }
+    // save emoncms server to EEPROM max 45 characters
+    for (int i = 0; i < 45; i++){
+      if (i<emoncms_server.length()) {
+        EEPROM.write(i+128, emoncms_server[i]);
+      } else {
+        EEPROM.write(i+128, 0);
+      }
+    }
+    // save emoncms node to EEPROM max 32 characters
+    for (int i = 0; i < 32; i++){
+      if (i<emoncms_node.length()) {
+        EEPROM.write(i+173, emoncms_node[i]);
+      } else {
+        EEPROM.write(i+173, 0);
+      }
+    }
     EEPROM.commit();
+    char tmpStr[109];
+    sprintf(tmpStr,"Saved: %s %s %s %s",emoncms_server.c_str(),emoncms_node.c_str(),emoncms_apikey.c_str());
+    Serial.println(tmpStr);
+    server.send(200, "text/html", tmpStr);
   }
 }
 
@@ -419,15 +434,41 @@ void handleSaveMqtt() {
   mqtt_topic = server.arg("topic");
   mqtt_user = server.arg("user");
   mqtt_pass = server.arg("pass");
-  if (mqtt_server!=0) {
-    //for (int i = 0; i < 32; i++){
-      ///if (i<mqtt_server.length()) {
-        //EEPROM.write(i+96, mqtt_server[i]);
-      //} else {
-      //  EEPROM.write(i+96, 0);
-      //}
-    //}
-    //EEPROM.commit();
+  if (mqtt_server!=0 && mqtt_topic!=0) {
+    // Save MQTT server max 45 characters
+    for (int i = 0; i < 45; i++){
+      if (i<mqtt_server.length()) {
+        EEPROM.write(i+205, mqtt_server[i]);
+      } else {
+        EEPROM.write(i+205, 0);
+      }
+    }
+    // Save MQTT topic max 32 characters
+    for (int i = 0; i < 32; i++){
+      if (i<mqtt_topic.length()) {
+        EEPROM.write(i+250, mqtt_topic[i]);
+      } else {
+        EEPROM.write(i+250, 0);
+      }
+    }
+    // Save MQTT username max 32 characters
+    for (int i = 0; i < 32; i++){
+      if (i<mqtt_user.length()) {
+        EEPROM.write(i+282, mqtt_user[i]);
+      } else {
+        EEPROM.write(i+282, 0);
+      }
+    }
+    // Save MQTT pass max 32 characters
+    for (int i = 0; i < 32; i++){
+      if (i<mqtt_pass.length()) {
+        EEPROM.write(i+314, mqtt_pass[i]);
+      } else {
+        EEPROM.write(i+314, 0);
+      }
+    }
+
+    EEPROM.commit();
     char tmpStr[80];
     sprintf(tmpStr,"Saved: %s %s %s %s",mqtt_server.c_str(),mqtt_topic.c_str(),mqtt_user.c_str(),mqtt_pass.c_str());
     Serial.println(tmpStr);

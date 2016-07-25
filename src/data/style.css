@@ -85,10 +85,6 @@ td {
     padding-top: 10px;
 }
 
-.flex-item span {
-    font-style: italic;
-}
-
 .flex-item h2 {
     font-size: 20px;
     background-color: #777777;
@@ -159,4 +155,3 @@ input[type="password"] {
 #update {
     background-color: red;
 }
-

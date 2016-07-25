@@ -3,7 +3,7 @@
 <html lang="en">
 
 <head>
-  
+
 <meta charset="utf-8">
 <title>emonESP</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -18,71 +18,71 @@
 <body>
 
   <div id="page">
-    
+
     <div class="box">
-      
+
       <h1>emon<span>ESP</span></h1>
       <h3>WiFi Emoncms Link</h3>
-      
+
     </div>
-    
+
     <div class="flex-container">
-            
+
 <!--//////////////////////////////////////////////////////////////////////////////////-->
-              
+
       <div class="flex-item">
-      
+
         <div id="one">
           
           <h2>Wifi Config</h2>
-          
+
           <div class="itembody-wrapper">
-            
+
             <p><b>Mode:</b> <span id="mode"></span></p>
-  
+
             <div id="client-view" style="display:none">
-              
+
               <p><b>Network SSID:</b><br><span id="sta-ssid"></span></p>
               <p><b>IP Address:</b><br><span id="sta-ip"></span></p>
               <button id="apoff" style="display:none">Turn off Access Point</button>
               <button id="reset">Factory Reset</button>
-            
+
             </div>
-    
+
             <div id="ap-view" style="display:none">
-              
+
               <p>Connect to network:</p>
-              
+
               <table>
                   <tr> <th>Select</th> <th>Network</th> <th>RSSI</th> </tr>
                   <tbody id="networks"></tbody>
               </table>
-    
+
               <p><b>Passkey:</b><br>
               <input id="passkey" type="text">
               <button id="connect">Connect</button>
               </p>
-          
+
             </div>
-    
+
             <div id="wait-view" style="display:none">
-              
+
               <p>Connecting to WiFi Network...Please wait 10s</p>
-          
+
             </div>
-            
+
           </div>
-        
+
         </div>
-    
+
       </div>
 
 <!--//////////////////////////////////////////////////////////////////////////////////-->
 
       <div class="flex-item">
-                            
+
         <div id="two">
-          
+
           <h2>Emoncms Config</h2>
 
           <div class="itembody-wrapper">
@@ -98,21 +98,21 @@
           <button id="save-emoncms">Save</button>
           <b>&nbsp; Connected:&nbsp;<span id="emoncms_connected"></span></b>;
           <p><b>Successful posts: </b><br><span id="sta-psuccess"></span> / <span id="sta-psent"></span></p>
-            
+
          </div>
-        
+
         </div>
-        
+
       </div>
-            
+
 <!--//////////////////////////////////////////////////////////////////////////////////-->
-            
+
       <div class="flex-item">
-                            
+
         <div id="three">
 
           <h2>MQTT Config</h2>
-          
+
           <div class="itembody-wrapper">
 
           <p><b>MQTT Server*:</b><br>
@@ -129,30 +129,30 @@
           </p><span>Leave blank for no authentication</span><br><p>
           <button id="save-mqtt">Save</button>
           <b>&nbsp; Connected:&nbsp;<span id="mqtt_connected"></span></b>
-          
+
           </div>
-            
+
         </div>
-            
+
       </div>
-            
+
 <!--//////////////////////////////////////////////////////////////////////////////////-->
-      
+
       <div class="flex-item">
-                            
+
         <div id="four">
 
           <h2>Firmware</h2>
-          
+
           <div class="itembody-wrapper">
-          
+
             <div id="firmware" style="display:none">
-              
+
               <table>
                   <tr><th>Running</th><th>Latest</th></tr>
                   <tbody id="firmware-version" ></tbody>
               </table>
-              
+
               <br>
               <a href="https://github.com/openenergymonitor/EmonESP/releases">View changelog</a>
               <br> </div><br>
@@ -160,10 +160,10 @@
               <button id="update" style="display:none">Apply Update</button>
               <p><span id="update-info"></span></p>
               <button id="upload">Upload</button>
-           
-           
+
+
           </div>
-        
+
         </div>
 
       </div>
@@ -171,20 +171,20 @@
 <!--//////////////////////////////////////////////////////////////////////////////////-->
 
       <div class="flex-item">
-                            
+
         <div id="five">
 
           <h2>Latest Data</h2>
-          
+
           <div class="itembody-wrapper">
-          
+
           <table>
           <tr><th>Key</th><th>Value</th></tr>
           <tbody id="datavalues"></tbody>
           </table>
-          
+
           </div>
-            
+
         </div>
 
       </div>
@@ -192,29 +192,29 @@
 <!--//////////////////////////////////////////////////////////////////////////////////-->
 
       <div class="flex-item">
-                            
+
         <div id="six">
-  
+
           <h2>ESP info</h2>
-          
+
           <div class="itembody-wrapper">
-          
+
           <p><b>Flash Size:</b><br><span id="flash_size"></span>B</p>
           <p><b>Vcc:</b><br><span id="vcc"></span>V</p>
           <p><b>Free RAM:</b><br><span id="free_heap"></span>B</p>
-        
+
           </div>
-           
+
         </div>
-        
+
       </div>
-    
+
     </div>
-     
+
   </div>
 
 <script type="text/javascript" src="config.js"></script>
-  
+
 </body>
 
 </html>

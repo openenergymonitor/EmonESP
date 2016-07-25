@@ -3,6 +3,8 @@ var selected_network_ssid = "";
 var lastmode = "";
 var ipaddress = "";
 
+
+
 var r1 = new XMLHttpRequest();
 r1.open("GET", "status", false);
 r1.onreadystatechange = function () {
@@ -10,15 +12,22 @@ r1.onreadystatechange = function () {
   var status = JSON.parse(r1.responseText);
 
   document.getElementById("passkey").value = status.pass;
-  document.getElementById("emoncms_apikey").value = status.emoncms_apikey;
-  document.getElementById("emoncms_server").value = status.emoncms_server;
-  document.getElementById("emoncms_node").value = status.emoncms_node;
+
+  if ((status.emoncms_server!=0) & (status.emoncms_apikey!=0)){
+    document.getElementById("emoncms_apikey").value = status.emoncms_apikey;
+    document.getElementById("emoncms_server").value = status.emoncms_server;
+    document.getElementById("emoncms_node").value = status.emoncms_node;
+  }
   document.getElementById("free_heap").innerHTML = status.free_heap;
   document.getElementById("flash_size").innerHTML = status.flash_size;
   document.getElementById("vcc").innerHTML = status.vcc;
 
+
   if (status.emoncms_connected == "1"){
    document.getElementById("emoncms_connected").innerHTML = "Yes";
+   if  ((status.packets_success!="undefined") & (status.packets_sent!="undefined")){
+     document.getElementById("psuccess").innerHTML = "Successful posts: " + status.packets_success + " / " + status.packets_sent;
+   }
   } else {
     document.getElementById("emoncms_connected").innerHTML = "No";
   }
@@ -48,8 +57,6 @@ r1.onreadystatechange = function () {
       if (status.mode=="STA") document.getElementById("mode").innerHTML = "Client (STA)";
       document.getElementById("sta-ssid").innerHTML = status.ssid;
       document.getElementById("sta-ip").innerHTML = "<a href='http://"+status.ipaddress+"'>"+status.ipaddress+"</a>";
-      document.getElementById("sta-psent").innerHTML = status.packets_sent;
-      document.getElementById("sta-psuccess").innerHTML = status.packets_success;
       document.getElementById("ap-view").style.display = 'none';
       document.getElementById("client-view").style.display = '';
       ipaddress = status.ipaddress;
@@ -89,8 +96,7 @@ function update() {
     r2.onreadystatechange = function () {
     if (r2.readyState != 4 || r2.status != 200) return;
       var status = JSON.parse(r2.responseText);
-      document.getElementById("sta-psent").innerHTML = status.packets_sent;
-      document.getElementById("sta-psuccess").innerHTML = status.packets_success;
+
       document.getElementById("free_heap").innerHTML = status.free_heap;
       document.getElementById("flash_size").innerHTML = status.flash_size;
       document.getElementById("vcc").innerHTML = status.vcc;
@@ -98,6 +104,9 @@ function update() {
 
       if (status.emoncms_connected == "1"){
        document.getElementById("emoncms_connected").innerHTML = "Yes";
+       if  ((status.packets_success!="undefined") & (status.packets_sent!="undefined")){
+         document.getElementById("psuccess").innerHTML = "Successful posts: " + status.packets_success + " / " + status.packets_sent;
+       }
       } else {
         document.getElementById("emoncms_connected").innerHTML = "No";
       }
@@ -119,9 +128,11 @@ function updateStatus() {
     if (r1.readyState != 4 || r1.status != 200) return;
     var status = JSON.parse(r1.responseText);
 
-    document.getElementById("emoncms_apikey").value = status.emoncms_apikey;
-    document.getElementById("emoncms_server").value = status.emoncms_server;
-    document.getElementById("emoncms_node").value = status.emoncms_node;
+    if ((status.emoncms_server!=0) & (status.emoncms_apikey!=0)){
+      document.getElementById("emoncms_apikey").value = status.emoncms_apikey;
+      document.getElementById("emoncms_server").value = status.emoncms_server;
+      document.getElementById("emoncms_node").value = status.emoncms_node;
+    }
 
     if (status.mode=="STA+AP" || status.mode=="STA") {
         // Hide waiting message
