@@ -14,7 +14,6 @@ body {
 }
 
 #one,#two,#three,#four,#five,#six {
-    width: 98%;
     background-color: #f1f1f1;
     box-sizing: border-box;
     margin: 5px 5px 5px 5px;
