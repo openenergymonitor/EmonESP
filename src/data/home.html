@@ -3,6 +3,7 @@
 <html lang="en">
 
 <head>
+
 <meta charset="utf-8">
 <title>emonESP</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -11,6 +12,7 @@
 <meta name="author" content="OpenEnergyMonitor">
 <meta name="theme-color" content="#000000" />
 <link rel="stylesheet" type="text/css" href="style.css">
+
 </head>
 
 <body>
@@ -31,39 +33,43 @@
       <div class="flex-item">
 
         <div id="one">
-
+          
           <h2>Wifi Config</h2>
-          <p><b>Mode:</b> <span id="mode"></span></p>
 
-          <div id="client-view" style="display:none">
+          <div class="itembody-wrapper">
 
-            <p><b>Network SSID:</b><br><span id="sta-ssid"></span></p>
-            <p><b>IP Address:</b><br><span id="sta-ip"></span></p>
-            <button id="apoff" style="display:none">Turn off Access Point</button>
+            <p><b>Mode:</b> <span id="mode"></span></p>
 
-            <button id="reset">Factory Reset</button>
+            <div id="client-view" style="display:none">
 
-          </div>
+              <p><b>Network SSID:</b><br><span id="sta-ssid"></span></p>
+              <p><b>IP Address:</b><br><span id="sta-ip"></span></p>
+              <button id="apoff" style="display:none">Turn off Access Point</button>
+              <button id="reset">Factory Reset</button>
 
-          <div id="ap-view" style="display:none">
+            </div>
 
-            <p>Connect to network:</p>
+            <div id="ap-view" style="display:none">
 
-            <table>
-                <tr> <th>Select</th> <th>Network</th> <th>RSSI</th> </tr>
-                <tbody id="networks"></tbody>
-            </table>
+              <p>Connect to network:</p>
 
-            <p><b>Passkey:</b><br>
-            <input id="passkey" type="text" style="width:280px;">
-            <button id="connect">Connect</button>
-            </p>
+              <table>
+                  <tr> <th>Select</th> <th>Network</th> <th>RSSI</th> </tr>
+                  <tbody id="networks"></tbody>
+              </table>
 
-          </div>
+              <p><b>Passkey:</b><br>
+              <input id="passkey" type="text">
+              <button id="connect">Connect</button>
+              </p>
 
-          <div id="wait-view" style="display:none">
+            </div>
 
-            <p>Connecting to WiFi Network...Please wait 10s</p>
+            <div id="wait-view" style="display:none">
+
+              <p>Connecting to WiFi Network...Please wait 10s</p>
+
+            </div>
 
           </div>
 
@@ -73,97 +79,142 @@
 
 <!--//////////////////////////////////////////////////////////////////////////////////-->
 
-            <div class="flex-item">
-                            <div id="two">
+      <div class="flex-item">
 
-                <h2>Emoncms Config</h2>
-                <p><b>Emoncms Server:</b><br>
-                <input id="emoncms_server" type="text" value="emoncms.org" style="width:280px;">
-                </p><span>e.g 'emoncms.org', 'emonpi/emoncms', or '192.168.1.4/emoncms'</span><br>
-                <p><b>Node Name:</b><br>
-                <input id="emoncms_node" type="text" value="emonesp" style="width:280px;">
-                </p><span>E.g 'emonesp' or 'heatpump'</span>
-                <p><b>Write apikey:</b><br>
-                <input id="emoncms_apikey" type="password" style="width:280px;"><br><br>
-                <button id="save-emoncms">Save</button>
-                <b>&nbsp; Connected:&nbsp;<span id="emoncms_connected"></span></b><br><br>
-                <span id="psuccess"></span>
-            </div>
-            </div>
+        <div id="two">
 
-<!--//////////////////////////////////////////////////////////////////////////////////-->
+          <h2>Emoncms Config</h2>
 
-            <div class="flex-item">
-                            <div id="three">
+          <div class="itembody-wrapper">
 
-                <h2>MQTT Config</h2>
-                <p><b>MQTT Server*:</b><br>
-                <input id="mqtt_server" type="text" style="width:280px;">
-                </p><span>e.g 'emonpi', 'test.mosquitto.org', or '192.168.1.4'</span><br>
-                <p><b>MQTT Topic*:</b><br>
-                <input id="mqtt_topic" type="text" style="width:280px;">
-                </p><span>Base topic e.g 'emonesp', 'emon/heatpump'</span><br>
-                <p><b>Username:</b><br>
-                <input id="mqtt_user" type="text" style="width:280px;">
-                </p><span>Leave blank for no authentication</span><br>
-                <p><b>Password:</b><br>
-                <input id="mqtt_pass" type="password" style="width:280px;">
-                </p><span>Leave blank for no authentication</span><br><p>
-                <button id="save-mqtt">Save</button>
-                <b>&nbsp; Connected:&nbsp;<span id="mqtt_connected"></span></b>
-            </div>
-            </div>
+          <p><b>Emoncms Server:</b><br>
+          <input id="emoncms_server" type="text" value="emoncms.org">
+          </p><span>e.g 'emoncms.org', 'emonpi/emoncms', or '192.168.1.4/emoncms'</span><br>
+          <p><b>Node Name:</b><br>
+          <input id="emoncms_node" type="text" value="emonesp">
+          </p><span>E.g 'emonesp' or 'heatpump'</span>
+          <p><b>Write apikey:</b><br>
+          <input id="emoncms_apikey" type="password"><br><br>
+          <button id="save-emoncms">Save</button>
+          <b>&nbsp; Connected:&nbsp;<span id="emoncms_connected"></span></b>;
+          <p><b>Successful posts: </b><br><span id="sta-psuccess"></span> / <span id="sta-psent"></span></p>
 
-<!--//////////////////////////////////////////////////////////////////////////////////-->
+         </div>
 
-            <div class="flex-item">
-                            <div id="four">
-
-                <h2>Latest Data</h2>
-                <table>
-                    <tr><th>Key</th><th>Value</th></tr>
-                    <tbody id="datavalues"></tbody>
-                </table>
-            </div>
-</div>
-
-<!--//////////////////////////////////////////////////////////////////////////////////-->
-
-            <div class="flex-item">
-                            <div id="five">
-
-                <h2>Firmware</h2>
-                <div id="firmware" style="display:none">
-                <table>
-                    <tr><th>Running</th><th>Latest</th></tr>
-                    <tbody id="firmware-version" ></tbody>
-                </table>
-                <br>
-                <a href="https://github.com/openenergymonitor/EmonESP/releases">View changelog</a>
-                <br> </div><br>
-                <button id="updatecheck">Check for Updates</button>
-                <button id="update" style="display:none">Apply Update</button>
-                <p><span id="update-info"></span></p>
-                <button id="upload">Upload</button>
-
-            </div>
-</div>
-
-<!--//////////////////////////////////////////////////////////////////////////////////-->
-
-            <div class="flex-item">
-                            <div id="six">
-
-                <h2>ESP info</h2>
-                <p><b>Flash Size:</b><br><span id="flash_size"></span>B</p>
-                <p><b>Vcc:</b><br><span id="vcc"></span>V</p>
-                <p><b>Free RAM:</b><br><span id="free_heap"></span>B</p>
-</div>
-            </div>
         </div>
-     </div>
 
-  <script type="text/javascript" src="config.js"></script>
+      </div>
 
-  </body>
+<!--//////////////////////////////////////////////////////////////////////////////////-->
+
+      <div class="flex-item">
+
+        <div id="three">
+
+          <h2>MQTT Config</h2>
+
+          <div class="itembody-wrapper">
+
+          <p><b>MQTT Server*:</b><br>
+          <input id="mqtt_server" type="text">
+          </p><span>e.g 'emonpi', 'test.mosquitto.org', or '192.168.1.4'</span><br>
+          <p><b>MQTT Topic*:</b><br>
+          <input id="mqtt_topic" type="text">
+          </p><span>Base topic e.g 'emonesp', 'emon/heatpump'</span><br>
+          <p><b>Username:</b><br>
+          <input id="mqtt_user" type="text">
+          </p><span>Leave blank for no authentication</span><br>
+          <p><b>Password:</b><br>
+          <input id="mqtt_pass" type="password">
+          </p><span>Leave blank for no authentication</span><br><p>
+          <button id="save-mqtt">Save</button>
+          <b>&nbsp; Connected:&nbsp;<span id="mqtt_connected"></span></b>
+
+          </div>
+
+        </div>
+
+      </div>
+
+<!--//////////////////////////////////////////////////////////////////////////////////-->
+
+      <div class="flex-item">
+
+        <div id="four">
+
+          <h2>Firmware</h2>
+
+          <div class="itembody-wrapper">
+
+            <div id="firmware" style="display:none">
+
+              <table>
+                  <tr><th>Running</th><th>Latest</th></tr>
+                  <tbody id="firmware-version" ></tbody>
+              </table>
+
+              <br>
+              <a href="https://github.com/openenergymonitor/EmonESP/releases">View changelog</a>
+              <br> </div><br>
+              <button id="updatecheck">Check for Updates</button>
+              <button id="update" style="display:none">Apply Update</button>
+              <p><span id="update-info"></span></p>
+              <button id="upload">Upload</button>
+
+
+          </div>
+
+        </div>
+
+      </div>
+
+<!--//////////////////////////////////////////////////////////////////////////////////-->
+
+      <div class="flex-item">
+
+        <div id="five">
+
+          <h2>Latest Data</h2>
+
+          <div class="itembody-wrapper">
+
+          <table>
+          <tr><th>Key</th><th>Value</th></tr>
+          <tbody id="datavalues"></tbody>
+          </table>
+
+          </div>
+
+        </div>
+
+      </div>
+
+<!--//////////////////////////////////////////////////////////////////////////////////-->
+
+      <div class="flex-item">
+
+        <div id="six">
+
+          <h2>ESP info</h2>
+
+          <div class="itembody-wrapper">
+
+          <p><b>Flash Size:</b><br><span id="flash_size"></span>B</p>
+          <p><b>Vcc:</b><br><span id="vcc"></span>V</p>
+          <p><b>Free RAM:</b><br><span id="free_heap"></span>B</p>
+
+          </div>
+
+        </div>
+
+      </div>
+
+    </div>
+
+  </div>
+
+<script type="text/javascript" src="config.js"></script>
+
+</body>
+
 </html>
