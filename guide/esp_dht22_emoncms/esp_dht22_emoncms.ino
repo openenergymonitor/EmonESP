@@ -8,8 +8,6 @@
 #define DHTPIN 12    
 
 
-// Data wire is plugged into port 7 on the Arduino
-// Connect a 4.7K resistor between VCC and the data pin (strong pullup)
 #define DHTTYPE DHT22   // DHT 22  (AM2302), AM2321
 
 
