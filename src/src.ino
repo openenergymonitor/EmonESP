@@ -243,6 +243,48 @@ void ResetEEPROM(){
   EEPROM.commit();
 }
 
+void load_EEPROM_settings(){
+  
+  EEPROM.begin(512);
+  for (int i = 0; i < 32; ++i){
+    byte c = EEPROM.read(i);
+    if (c!=0 && c!=255) esid += (char) c;
+  }
+
+  for (int i = 32; i < 96; ++i){
+    byte c = EEPROM.read(i);
+    if (c!=0 && c!=255) epass += (char) c;
+  }
+  for (int i = 96; i < 128; ++i){
+    byte c = EEPROM.read(i);
+    if (c!=0 && c!=255) emoncms_apikey += (char) c;
+  }
+  for (int i = 128; i < 173; ++i){
+    byte c = EEPROM.read(i);
+    if (c!=0 && c!=255) emoncms_server += (char) c;
+  }
+  for (int i = 173; i < 205; ++i){
+    byte c = EEPROM.read(i);
+    if (c!=0 && c!=255) emoncms_node += (char) c;
+  }
+  for (int i = 205; i < 250; ++i){
+    byte c = EEPROM.read(i);
+    if (c!=0 && c!=255) mqtt_server += (char) c;
+  }
+  for (int i = 250; i < 282; ++i){
+    byte c = EEPROM.read(i);
+    if (c!=0 && c!=255) mqtt_topic += (char) c;
+  }
+  for (int i = 282; i < 314; ++i){
+    byte c = EEPROM.read(i);
+    if (c!=0 && c!=255) mqtt_user += (char) c;
+  }
+  for (int i = 314; i < 346; ++i){
+    byte c = EEPROM.read(i);
+    if (c!=0 && c!=255) mqtt_pass += (char) c;
+  }
+}
+
 // -------------------------------------------------------------------
 // Load SPIFFS Home page
 // url: /
@@ -669,11 +711,9 @@ boolean mqtt_connect() {
   Serial.println("MQTT Connecting...");
   if (mqttclient.connect("emonesp", mqtt_user.c_str(), mqtt_pass.c_str())) {  // Attempt to connect
     Serial.println("MQTT connected");
-    mqttclient.publish("emonesp_status", "connected"); // Once connected, publish an announcement..
-    return true;
-  } else {
-    return false;
+    mqttclient.publish(mqtt_topic.c_str(), "connected"); // Once connected, publish an announcement..
   }
+  return mqttclient.connected();
 }
 
 // -------------------------------------------------------------------
@@ -699,21 +739,8 @@ void setup() {
   Serial.println("Firmware: "+ currentfirmware);
 
   // Read saved settings from EEPROM
-  EEPROM.begin(512);
-  for (int i = 0; i < 32; ++i){
-    byte c = EEPROM.read(i);
-    if (c!=0 && c!=255) esid += (char) c;
-  }
-
-  for (int i = 32; i < 96; ++i){
-    byte c = EEPROM.read(i);
-    if (c!=0 && c!=255) epass += (char) c;
-  }
-  for (int i = 96; i < 128; ++i){
-    byte c = EEPROM.read(i);
-    if (c!=0 && c!=255) emoncms_apikey += (char) c;
-  }
-
+  load_EEPROM_settings();
+  
   WiFi.disconnect();
   // 1) If no network configured start up access point
   if (esid == 0 || esid == "")
@@ -805,7 +832,7 @@ void loop() {
 
   // If Wifi is connected & MQTT server has been set then connect to mqtt server
   if ((wifi_mode==0 || wifi_mode==3) && mqtt_server != 0){
-    if (!mqttclient.connected()) {
+    if (mqttclient.connected()!=1) {
       long now = millis();
       if (now - lastMqttReconnectAttempt > 5000) {
         lastMqttReconnectAttempt = now;
@@ -853,6 +880,8 @@ void loop() {
       url += packets_sent;
       url += ",psuccess:";
       url += packets_success;
+      url += ",freeram:";
+      url += String(ESP.getFreeHeap());
       url += "}&apikey=";
       url += emoncms_apikey;
 
@@ -881,7 +910,7 @@ void loop() {
       if (mqtt_server != 0){
         char* buff = "";
         data.toCharArray(buff, data.length()-1); // remove new line
-        mqttclient.publish("outTopic", buff);
+        mqttclient.publish(mqtt_topic.c_str(), buff);
       }
 
 
