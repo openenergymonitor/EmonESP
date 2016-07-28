@@ -911,9 +911,13 @@ void loop() {
 
       // Send data to MQTT
       if (mqtt_server != 0){
-        char* buff = "";
-        data.toCharArray(buff, data.length()-1); // remove new line
-        mqttclient.publish(mqtt_topic.c_str(), buff);
+        //char* buff = "";
+        String buff ="";
+        // Copy across, data length -1 to remove new line
+        for (int i = 0; i < data.length()-1; ++i){
+          buff += data[i];
+        }
+        mqttclient.publish(mqtt_topic.c_str(), buff.c_str());
       }
 
 
