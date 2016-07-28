@@ -41,7 +41,7 @@ ESP8266WebServer server(80);          //Create class for Web server
 WiFiClientSecure client;              // Create class for HTTPS TCP connections get_https()
 HTTPClient http;                      // Create class for HTTP TCP connections get_http
 WiFiClient espClient;                 // Create client for MQTT
-PubSubClient mqttclient(espClient);       // Create client for MQTT
+PubSubClient mqttclient(espClient);   // Create client for MQTT
 ESP8266HTTPUpdateServer httpUpdater;  // Create class for webupdate handleWebUpdate()
 DNSServer dnsServer;                  // Create class DNS server, captive portal re-direct
 const byte DNS_PORT = 53;
@@ -461,7 +461,7 @@ void handleSaveEmoncms() {
     }
     EEPROM.commit();
     char tmpStr[109];
-    sprintf(tmpStr,"Saved: %s %s %s %s",emoncms_server.c_str(),emoncms_node.c_str(),emoncms_apikey.c_str());
+    sprintf(tmpStr,"Saved: %s %s %s",emoncms_server.c_str(),emoncms_node.c_str(),emoncms_apikey.c_str());
     Serial.println(tmpStr);
     server.send(200, "text/html", tmpStr);
   }
@@ -576,6 +576,7 @@ void handleStatus() {
   s += "\"packets_success\":\""+String(packets_success)+"\",";
 
   s += "\"mqtt_server\":\""+mqtt_server+"\",";
+  s += "\"mqtt_topic\":\""+mqtt_topic+"\",";
   s += "\"mqtt_user\":\""+mqtt_user+"\",";
   s += "\"mqtt_pass\":\""+mqtt_pass+"\",";
   s += "\"mqtt_connected\":\""+String(mqttclient.connected())+"\",";
@@ -713,7 +714,7 @@ boolean mqtt_connect() {
     Serial.println("MQTT connected");
     mqttclient.publish(mqtt_topic.c_str(), "connected"); // Once connected, publish an announcement..
   }
-  return mqttclient.connected();
+  return (mqttclient.connected());
 }
 
 // -------------------------------------------------------------------
@@ -832,17 +833,18 @@ void loop() {
 
   // If Wifi is connected & MQTT server has been set then connect to mqtt server
   if ((wifi_mode==0 || wifi_mode==3) && mqtt_server != 0){
-    if (mqttclient.connected()!=1) {
+    if (!mqttclient.connected()) {
       long now = millis();
       if (now - lastMqttReconnectAttempt > 5000) {
         lastMqttReconnectAttempt = now;
         if (mqtt_connect()) { // Attempt to reconnect
           lastMqttReconnectAttempt = 0;
         }
-      } else {
-        mqttclient.loop();
       }
-    }
+    } else {
+      // if MQTT connected
+      mqttclient.loop();
+      }
   }
 
   // Remain in AP mode for 5 Minutes before resetting

@@ -4,7 +4,7 @@ var lastmode = "";
 var ipaddress = "";
 
 
-
+// get statup status and populate input fields
 var r1 = new XMLHttpRequest();
 r1.open("GET", "status", false);
 r1.onreadystatechange = function () {
@@ -18,11 +18,7 @@ r1.onreadystatechange = function () {
     document.getElementById("emoncms_server").value = status.emoncms_server;
     document.getElementById("emoncms_node").value = status.emoncms_node;
   }
-  document.getElementById("free_heap").innerHTML = status.free_heap;
-  document.getElementById("flash_size").innerHTML = status.flash_size;
-  document.getElementById("vcc").innerHTML = status.vcc;
-
-
+  
   if (status.emoncms_connected == "1"){
    document.getElementById("emoncms_connected").innerHTML = "Yes";
    if  ((status.packets_success!="undefined") & (status.packets_sent!="undefined")){
@@ -31,12 +27,26 @@ r1.onreadystatechange = function () {
   } else {
     document.getElementById("emoncms_connected").innerHTML = "No";
   }
-
+  
+  if (status.mqtt_server!=0){
+    document.getElementById("mqtt_server").value = status.mqtt_server;
+    document.getElementById("mqtt_topic").value = status.mqtt_topic;
+    if (status.mqtt_user!=0){
+      document.getElementById("mqtt_user").value = status.mqtt_user;
+      document.getElementById("mqtt_pass").value = status.mqtt_pass;
+    }
+  }
+  
   if (status.mqtt_connected == "1"){
    document.getElementById("mqtt_connected").innerHTML = "Yes";
   } else {
     document.getElementById("mqtt_connected").innerHTML = "No";
   }
+  
+  document.getElementById("free_heap").innerHTML = status.free_heap;
+  document.getElementById("flash_size").innerHTML = status.flash_size;
+  document.getElementById("vcc").innerHTML = status.vcc;
+
 
   if (status.mode=="AP") {
       document.getElementById("mode").innerHTML = "Access Point (AP)";
@@ -119,20 +129,17 @@ function update() {
     };
     r2.send();
 }
+// -----------------------------------------------------------------------
+
 
 function updateStatus() {
+  // Update status on Wifi connection
   var r1 = new XMLHttpRequest();
   r1.open("GET", "status", true);
   r1.timeout = 2000;
   r1.onreadystatechange = function () {
     if (r1.readyState != 4 || r1.status != 200) return;
     var status = JSON.parse(r1.responseText);
-
-    if ((status.emoncms_server!=0) & (status.emoncms_apikey!=0)){
-      document.getElementById("emoncms_apikey").value = status.emoncms_apikey;
-      document.getElementById("emoncms_server").value = status.emoncms_server;
-      document.getElementById("emoncms_node").value = status.emoncms_node;
-    }
 
     if (status.mode=="STA+AP" || status.mode=="STA") {
         // Hide waiting message
@@ -158,7 +165,7 @@ function updateStatus() {
 }
 
 // -----------------------------------------------------------------------
-// Event: Connect
+// Event: WiFi Connect
 // -----------------------------------------------------------------------
 document.getElementById("connect").addEventListener("click", function(e) {
     var passkey = document.getElementById("passkey").value;
@@ -240,7 +247,7 @@ document.getElementById("save-mqtt").addEventListener("click", function(e) {
 });
 
 // -----------------------------------------------------------------------
-// Event: Turn off Access POint
+// Event: Turn off Access Point
 // -----------------------------------------------------------------------
 document.getElementById("apoff").addEventListener("click", function(e) {
     var r = new XMLHttpRequest();
