@@ -835,7 +835,8 @@ void loop() {
   if ((wifi_mode==0 || wifi_mode==3) && mqtt_server != 0){
     if (!mqttclient.connected()) {
       long now = millis();
-      if (now - lastMqttReconnectAttempt > 5000) {
+      // try and reconnect every 10s
+      if (now - lastMqttReconnectAttempt > 10000) {
         lastMqttReconnectAttempt = now;
         if (mqtt_connect()) { // Attempt to reconnect
           lastMqttReconnectAttempt = 0;
