@@ -44,8 +44,6 @@ r1.onreadystatechange = function () {
   }
   
   document.getElementById("free_heap").innerHTML = status.free_heap;
-  document.getElementById("flash_size").innerHTML = status.flash_size;
-  document.getElementById("vcc").innerHTML = status.vcc;
 
 
   if (status.mode=="AP") {
@@ -108,9 +106,6 @@ function update() {
       var status = JSON.parse(r2.responseText);
 
       document.getElementById("free_heap").innerHTML = status.free_heap;
-      document.getElementById("flash_size").innerHTML = status.flash_size;
-      document.getElementById("vcc").innerHTML = status.vcc;
-
 
       if (status.emoncms_connected == "1"){
        document.getElementById("emoncms_connected").innerHTML = "Yes";

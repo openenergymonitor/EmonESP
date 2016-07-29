@@ -582,8 +582,6 @@ void handleStatus() {
   s += "\"mqtt_connected\":\""+String(mqttclient.connected())+"\",";
 
   s += "\"free_heap\":\""+String(ESP.getFreeHeap())+"\",";
-  s += "\"flash_size\":\""+String(ESP.getFlashChipSize())+"\",";
-  s += "\"vcc\":\""+String(ESP.getVcc())+"\"";
 
   s += "}";
   server.send(200, "text/html", s);
@@ -885,7 +883,9 @@ void loop() {
       url += packets_success;
       url += ",freeram:";
       url += String(ESP.getFreeHeap());
-      url += "}&apikey=";
+      url += "}&node=";
+      url += emoncms_node;
+      url += "&apikey=";
       url += emoncms_apikey;
 
       Serial.println(url);
