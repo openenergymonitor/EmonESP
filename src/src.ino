@@ -708,7 +708,8 @@ String get_http(const char* host, String url){
 boolean mqtt_connect() {
   mqttclient.setServer(mqtt_server.c_str(), 1883);
   Serial.println("MQTT Connecting...");
-  if (mqttclient.connect("emonesp", mqtt_user.c_str(), mqtt_pass.c_str())) {  // Attempt to connect
+  String chipID=String(ESP.getChipId());
+  if (mqttclient.connect(chipID.c_str(), mqtt_user.c_str(), mqtt_pass.c_str())) {  // Attempt to connect
     Serial.println("MQTT connected");
     mqttclient.publish(mqtt_topic.c_str(), "connected"); // Once connected, publish an announcement..
   }
@@ -734,7 +735,8 @@ void setup() {
 	delay(2000);
 	Serial.begin(115200);
   Serial.println();
-  Serial.println("EmonESP");
+  Serial.print("EmonESP ");
+  Serial.println(ESP.getChipId());
   Serial.println("Firmware: "+ currentfirmware);
 
   // Read saved settings from EEPROM
