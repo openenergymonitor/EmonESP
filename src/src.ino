@@ -81,7 +81,6 @@ boolean emoncms_connected = false;
 String test_serial="";
 
 //MQTT Settings
-//const char* mqtt_server = "10.10.10.2";
 String mqtt_server = "";
 String mqtt_topic = "";
 String mqtt_user = "";
@@ -174,7 +173,9 @@ void startAP() {
   delay(100);
 
   WiFi.softAPConfig(apIP, apIP, netMsk);
-  WiFi.softAP(softAP_ssid, softAP_password);
+  // Create Unique SSID e.g "emonESP_XXXXXX"
+  String softAP_ssid_ID = String(softAP_ssid)+"_"+String(ESP.getChipId());;
+  WiFi.softAP(softAP_ssid_ID.c_str(), softAP_password);
     /* Setup the DNS server redirecting all the domains to the apIP */
   dnsServer.setErrorReplyCode(DNSReplyCode::NoError);
   dnsServer.start(DNS_PORT, "*", apIP);
@@ -567,7 +568,6 @@ void handleStatus() {
   s += "\"ssid\":\""+esid+"\",";
   s += "\"pass\":\""+epass+"\",";
   s += "\"ipaddress\":\""+ipaddress+"\",";
-//  s += "\"chipid\":\""+String(ESP.getChipId())+"\",";
   s += "\"emoncms_server\":\""+emoncms_server+"\",";
   s += "\"emoncms_node\":\""+emoncms_node+"\",";
   s += "\"emoncms_apikey\":\""+emoncms_apikey+"\",";
@@ -708,8 +708,8 @@ String get_http(const char* host, String url){
 boolean mqtt_connect() {
   mqttclient.setServer(mqtt_server.c_str(), 1883);
   Serial.println("MQTT Connecting...");
-  String chipID=String(ESP.getChipId());
-  if (mqttclient.connect(chipID.c_str(), mqtt_user.c_str(), mqtt_pass.c_str())) {  // Attempt to connect
+  String strID = String(ESP.getChipId());
+  if (mqttclient.connect(strID.c_str(), mqtt_user.c_str(), mqtt_pass.c_str())) {  // Attempt to connect
     Serial.println("MQTT connected");
     mqttclient.publish(mqtt_topic.c_str(), "connected"); // Once connected, publish an announcement..
   }
@@ -890,7 +890,7 @@ void loop() {
       url += "&apikey=";
       url += emoncms_apikey;
 
-      Serial.println(url);
+      //Serial.println(url);
       packets_sent++;
 
       // Send data to Emoncms server
