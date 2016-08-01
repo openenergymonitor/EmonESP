@@ -594,7 +594,7 @@ void handleStatus() {
 void handleRst() {
   ResetEEPROM();
   EEPROM.commit();
-  server.send(200, "text/html", "reset");
+  server.send(200, "text/html", "1");
   WiFi.disconnect();
   delay(1000);
   ESP.reset();

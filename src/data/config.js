@@ -261,14 +261,18 @@ document.getElementById("apoff").addEventListener("click", function(e) {
 // Event: Reset config and reboot
 // -----------------------------------------------------------------------
 document.getElementById("reset").addEventListener("click", function(e) {
-    var r = new XMLHttpRequest();
-    r.open("POST", "reset", true);
-    r.onreadystatechange = function () {
-        if (r.readyState != 4 || r.status != 200) return;
-        var str = r.responseText;
-        console.log(str);
-	  };
-    r.send();
+  
+    if (confirm("Caution: Do you really want to Factory Reset? All setting and config will be lost.")){
+      var r = new XMLHttpRequest();
+      r.open("POST", "reset", true);
+      r.onreadystatechange = function () {
+          if (r.readyState != 4 || r.status != 200) return;
+          var str = r.responseText;
+          console.log(str);
+          if (str!=0) document.getElementById("reset").innerHTML = "Resetting...";
+  	  };
+      r.send();
+    }
 });
 
 // -----------------------------------------------------------------------
