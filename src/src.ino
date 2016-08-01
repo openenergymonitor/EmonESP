@@ -46,7 +46,7 @@ ESP8266HTTPUpdateServer httpUpdater;  // Create class for webupdate handleWebUpd
 DNSServer dnsServer;                  // Create class DNS server, captive portal re-direct
 const byte DNS_PORT = 53;
 
-// Access Point SSID, password & IP address
+// Access Point SSID, password & IP address. SSID will be softAP_ssid + chipID to make SSID unique
 const char *softAP_ssid = "emonESP";
 const char* softAP_password = "";
 IPAddress apIP(192, 168, 4, 1);
@@ -417,7 +417,10 @@ void handleSaveNetwork() {
     // Startup in STA + AP mode
     WiFi.mode(WIFI_AP_STA);
     WiFi.softAPConfig(apIP, apIP, netMsk);
-    WiFi.softAP(softAP_ssid, softAP_password);
+    
+  // Create Unique SSID e.g "emonESP_XXXXXX"
+    String softAP_ssid_ID = String(softAP_ssid)+"_"+String(ESP.getChipId());;
+    WiFi.softAP(softAP_ssid_ID.c_str(), softAP_password);
 
     /* Setup the DNS server redirecting all the domains to the apIP */
     dnsServer.setErrorReplyCode(DNSReplyCode::NoError);
