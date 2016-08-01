@@ -567,8 +567,7 @@ void handleStatus() {
   s += "\"ssid\":\""+esid+"\",";
   s += "\"pass\":\""+epass+"\",";
   s += "\"ipaddress\":\""+ipaddress+"\",";
-  s += "\"chipid\":\""+String(ESP.getChipId())+"\",";
-
+//  s += "\"chipid\":\""+String(ESP.getChipId())+"\",";
   s += "\"emoncms_server\":\""+emoncms_server+"\",";
   s += "\"emoncms_node\":\""+emoncms_node+"\",";
   s += "\"emoncms_apikey\":\""+emoncms_apikey+"\",";
@@ -709,7 +708,7 @@ String get_http(const char* host, String url){
 boolean mqtt_connect() {
   mqttclient.setServer(mqtt_server.c_str(), 1883);
   Serial.println("MQTT Connecting...");
-  String chipID=String(ESP.getChipId();)
+  String chipID=String(ESP.getChipId());
   if (mqttclient.connect(chipID.c_str(), mqtt_user.c_str(), mqtt_pass.c_str())) {  // Attempt to connect
     Serial.println("MQTT connected");
     mqttclient.publish(mqtt_topic.c_str(), "connected"); // Once connected, publish an announcement..
