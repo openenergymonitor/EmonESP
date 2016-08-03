@@ -6,6 +6,10 @@ ESP8266 WIFI serial to emoncms link
 
 ![EmonEsp WiFi AP Setup Portal](docs/emonesp.jpg)
 
+## Requirements
+
+- ESP-12E module with 4M Flash
+
 ## Installation
 
 EmonESP used [ESP8266 Arduino core](https://github.com/esp8266/Arduino)
