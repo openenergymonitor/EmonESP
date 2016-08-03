@@ -519,6 +519,10 @@ void handleSaveMqtt() {
     sprintf(tmpStr,"Saved: %s %s %s %s",mqtt_server.c_str(),mqtt_topic.c_str(),mqtt_user.c_str(),mqtt_pass.c_str());
     Serial.println(tmpStr);
     server.send(200, "text/html", tmpStr);
+    // If connected disconnect MQTT to trigger re-connect with new details
+    if (mqttclient.connected()) {
+      mqttclient.disconnect();
+    }
   }
 }
 
