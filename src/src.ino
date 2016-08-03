@@ -568,8 +568,10 @@ void handleStatus() {
   }
   s += "\"networks\":["+st+"],";
   s += "\"rssi\":["+rssi+"],";
+  
   s += "\"ssid\":\""+esid+"\",";
   s += "\"pass\":\""+epass+"\",";
+  s += "\"srssi\":\""+String(WiFi.RSSI())+"\",";
   s += "\"ipaddress\":\""+ipaddress+"\",";
   s += "\"emoncms_server\":\""+emoncms_server+"\",";
   s += "\"emoncms_node\":\""+emoncms_node+"\",";
@@ -596,11 +598,21 @@ void handleStatus() {
 // -------------------------------------------------------------------
 void handleRst() {
   ResetEEPROM();
-  EEPROM.commit();
   server.send(200, "text/html", "1");
   WiFi.disconnect();
   delay(1000);
   ESP.reset();
+}
+
+// -------------------------------------------------------------------
+// Restart (Reboot)
+// url: /restart
+// -------------------------------------------------------------------
+void handleRestart() {
+  server.send(200, "text/html", "1");
+  delay(1000);
+  WiFi.disconnect();
+  ESP.restart();
 }
 
 
@@ -715,8 +727,11 @@ boolean mqtt_connect() {
   if (mqttclient.connect(strID.c_str(), mqtt_user.c_str(), mqtt_pass.c_str())) {  // Attempt to connect
     Serial.println("MQTT connected");
     mqttclient.publish(mqtt_topic.c_str(), "connected"); // Once connected, publish an announcement..
+  } else {
+    Serial.println("MQTT failed");
+    return(0);
   }
-  return (mqttclient.connected());
+  return (1);
 }
 
 // -------------------------------------------------------------------
@@ -763,13 +778,12 @@ void setup() {
   // Start local OTA update server
   ArduinoOTA.begin();
 
-  // Start hostname broadcast
-  if (!MDNS.begin(esp_hostname)) {
-          Serial.println("MDNS responder error");
-        } else {
-          // Add service to MDNS-SD
-          MDNS.addService("http", "tcp", 80);
-        }
+  // Start hostname broadcast in STA mode
+  if ((wifi_mode==0 || wifi_mode==3)){
+    if (MDNS.begin(esp_hostname)) {
+            MDNS.addService("http", "tcp", 80);
+          }
+  }
 
   // Setup firmware upload
   httpUpdater.setup(&server, firmware_update_path);
@@ -807,6 +821,11 @@ void setup() {
     return server.requestAuthentication();
   handleRst();
   });
+  server.on("/restart", [](){
+  if(www_username!="" && !server.authenticate(www_username, www_password) && wifi_mode == 0)
+    return server.requestAuthentication();
+  handleRestart();
+  });
 
   server.on("/test", [](){
   if(www_username!="" && !server.authenticate(www_username, www_password) && wifi_mode == 0)
@@ -838,8 +857,8 @@ void loop() {
   if ((wifi_mode==0 || wifi_mode==3) && mqtt_server != 0){
     if (!mqttclient.connected()) {
       long now = millis();
-      // try and reconnect every 10s
-      if (now - lastMqttReconnectAttempt > 10000) {
+      // try and reconnect continuously for first 5s then try again once every 10s
+      if ( (now < 50000) || ((now - lastMqttReconnectAttempt)  > 100000) ) {
         lastMqttReconnectAttempt = now;
         if (mqtt_connect()) { // Attempt to reconnect
           lastMqttReconnectAttempt = 0;

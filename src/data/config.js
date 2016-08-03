@@ -63,11 +63,16 @@ r1.onreadystatechange = function () {
           document.getElementById("apoff").style.display = '';
       }
       if (status.mode=="STA") document.getElementById("mode").innerHTML = "Client (STA)";
-      document.getElementById("sta-ssid").innerHTML = status.ssid;
+      
+      var out="";
+      out += "<tr><td>"+status.ssid+"</td><td>"+status.srssi+"</td></tr>"
+      document.getElementById("sta-ssid").innerHTML = out;
       document.getElementById("sta-ip").innerHTML = "<a href='http://"+status.ipaddress+"'>"+status.ipaddress+"</a>";
       document.getElementById("ap-view").style.display = 'none';
       document.getElementById("client-view").style.display = '';
       ipaddress = status.ipaddress;
+      
+      
   }
 };
 r1.send();
@@ -120,6 +125,13 @@ function update() {
        document.getElementById("mqtt_connected").innerHTML = "Yes";
       } else {
        document.getElementById("mqtt_connected").innerHTML = "No";
+      }
+      
+      if ((status.mode=="STA") || (status.mode=="STA+AP")){
+        // Update connected network RSSI
+        var out="";
+        out += "<tr><td>"+status.ssid+"</td><td>"+status.srssi+"</td></tr>"
+        document.getElementById("sta-ssid").innerHTML = out;
       }
     };
     r2.send();
@@ -257,12 +269,13 @@ document.getElementById("apoff").addEventListener("click", function(e) {
 	  };
     r.send();
 });
+
 // -----------------------------------------------------------------------
 // Event: Reset config and reboot
 // -----------------------------------------------------------------------
 document.getElementById("reset").addEventListener("click", function(e) {
   
-    if (confirm("Caution: Do you really want to Factory Reset? All setting and config will be lost.")){
+    if (confirm("CAUTION: Do you really want to Factory Reset? All setting and config will be lost.")){
       var r = new XMLHttpRequest();
       r.open("POST", "reset", true);
       r.onreadystatechange = function () {
@@ -270,6 +283,24 @@ document.getElementById("reset").addEventListener("click", function(e) {
           var str = r.responseText;
           console.log(str);
           if (str!=0) document.getElementById("reset").innerHTML = "Resetting...";
+  	  };
+      r.send();
+    }
+});
+
+// -----------------------------------------------------------------------
+// Event: Restart
+// -----------------------------------------------------------------------
+document.getElementById("restart").addEventListener("click", function(e) {
+  
+    if (confirm("Restart emonESP? Current config will be saved, takes approximately 10s.")){
+      var r = new XMLHttpRequest();
+      r.open("POST", "restart", true);
+      r.onreadystatechange = function () {
+          if (r.readyState != 4 || r.status != 200) return;
+          var str = r.responseText;
+          console.log(str);
+          if (str!=0) document.getElementById("reset").innerHTML = "Restarting";
   	  };
       r.send();
     }
