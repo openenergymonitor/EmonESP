@@ -102,6 +102,9 @@ const char* firmware_update_path = "/upload";
 #define ESCAPEQUOTE(A) TEXTIFY(A)
 String currentfirmware = ESCAPEQUOTE(BUILD_TAG);
 // -------------------------------------------------------------------
+=======
+const char* fingerprint = "7D:82:15:BE:D7:BC:72:58:87:7D:8E:40:D4:80:BA:1A:9F:8B:8D:DA";
+>>>>>>> 2149939... Update src.ino
 
 
 // Wifi mode

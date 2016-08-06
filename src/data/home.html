@@ -95,14 +95,17 @@
 
           <div class="itembody-wrapper">
 
-          <p><b>Emoncms Server:</b><br>
+          <p><b>Emoncms Server*:</b><br>
           <input id="emoncms_server" type="text" value="emoncms.org">
           </p><span>e.g 'emoncms.org', 'emonpi/emoncms', or '192.168.1.4/emoncms'</span><br>
-          <p><b>Node Name:</b><br>
+          <p><b>Node Name*:</b><br>
           <input id="emoncms_node" type="text" value="emonesp">
           </p><span>E.g 'emonesp' or 'heatpump'</span>
-          <p><b>Write apikey:</b><br>
+          <p><b>Write apikey*:</b><br>
           <input id="emoncms_apikey" type="password"><br><br>
+          <p><b>Server HTTPS Fingerprint:</b><br>
+          </p><span>HTTPS will be enabled if present</span>
+          <input id="emoncms_fingerprint" type="text"><br><br>
           <button id="save-emoncms">Save</button>
           <b>&nbsp; Connected:&nbsp;<span id="emoncms_connected"></span></b><br><br>
           <span id="psuccess"></span>
