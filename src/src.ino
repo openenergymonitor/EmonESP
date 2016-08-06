@@ -441,6 +441,7 @@ void handleSaveEmoncms() {
   emoncms_server = server.arg("server");
   emoncms_node = server.arg("node");
   emoncms_apikey = server.arg("apikey");
+  emoncms_fingerprint = server.arg("fingerprint");
   if (emoncms_apikey!=0 && emoncms_server!=0 && emoncms_node!=0) {
     // save apikey to EEPROM
     for (int i = 0; i < 32; i++){
@@ -465,10 +466,19 @@ void handleSaveEmoncms() {
       } else {
         EEPROM.write(i+173, 0);
       }
+    // save emoncms HTTPS fingerprint to EEPROM max 60 characters
+    if (emoncms_fingerprint!=0){
+      for (int i = 0; i < 60; i++){
+        if (i<emoncms_fingerprint.length()) {
+          EEPROM.write(i+346, emoncms_fingerprint[i]);
+        } else {
+          EEPROM.write(i+346, 0);
+        }
+      }
     }
     EEPROM.commit();
     char tmpStr[109];
-    sprintf(tmpStr,"Saved: %s %s %s",emoncms_server.c_str(),emoncms_node.c_str(),emoncms_apikey.c_str());
+    sprintf(tmpStr,"Saved: %s %s %s",emoncms_server.c_str(),emoncms_node.c_str(),emoncms_apikey.c_str(,emoncms_fingerprint.c_str());
     Serial.println(tmpStr);
     server.send(200, "text/html", tmpStr);
   }
@@ -501,22 +511,23 @@ void handleSaveMqtt() {
       }
     }
     // Save MQTT username max 32 characters
-    for (int i = 0; i < 32; i++){
-      if (i<mqtt_user.length()) {
-        EEPROM.write(i+282, mqtt_user[i]);
-      } else {
-        EEPROM.write(i+282, 0);
+    if (mqtt_user!=0 && mqtt_pass!=0){
+      for (int i = 0; i < 32; i++){
+        if (i<mqtt_user.length()) {
+          EEPROM.write(i+282, mqtt_user[i]);
+        } else {
+          EEPROM.write(i+282, 0);
+        }
+      }
+      // Save MQTT pass max 32 characters
+      for (int i = 0; i < 32; i++){
+        if (i<mqtt_pass.length()) {
+          EEPROM.write(i+314, mqtt_pass[i]);
+        } else {
+          EEPROM.write(i+314, 0);
+        }
       }
     }
-    // Save MQTT pass max 32 characters
-    for (int i = 0; i < 32; i++){
-      if (i<mqtt_pass.length()) {
-        EEPROM.write(i+314, mqtt_pass[i]);
-      } else {
-        EEPROM.write(i+314, 0);
-      }
-    }
-
     EEPROM.commit();
     char tmpStr[80];
     sprintf(tmpStr,"Saved: %s %s %s %s",mqtt_server.c_str(),mqtt_topic.c_str(),mqtt_user.c_str(),mqtt_pass.c_str());
