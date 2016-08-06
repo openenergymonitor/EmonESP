@@ -53,7 +53,7 @@ String ipaddress = "";
 const char* host = "emoncms.org";
 const int httpsPort = 443;
 const char* e_url = "/input/post.json?json=";
-const char* fingerprint = "B6:44:19:FF:B8:F2:62:46:60:39:9D:21:C6:FB:F5:6A:F3:D9:1A:79";
+const char* fingerprint = "7D:82:15:BE:D7:BC:72:58:87:7D:8E:40:D4:80:BA:1A:9F:8B:8D:DA";
 
 
 // Wifi mode
