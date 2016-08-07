@@ -235,9 +235,39 @@ void startClient() {
   }
 }
 
+#define EEPROM_ESID_SIZE          32
+#define EEPROM_EPASS_SIZE         64
+#define EEPROM_EMON_API_KEY_SIZE  32
+#define EEPROM_EMON_SERVER_SIZE   45
+#define EEPROM_EMON_NODE_SIZE     32
+#define EEPROM_MQTT_SERVER_SIZE   45
+#define EEPROM_MQTT_TOPIC_SIZE    32
+#define EEPROM_MQTT_USER_SIZE     32
+#define EEPROM_MQTT_PASS_SIZE     64
+#define EEPROM_SIZE 512
+
+#define EEPROM_ESID_START         0
+#define EEPROM_ESID_END           (EEPROM_ESID_START + EEPROM_ESID_SIZE)
+#define EEPROM_EPASS_START        EEPROM_ESID_END
+#define EEPROM_EPASS_END          (EEPROM_EPASS_START + EEPROM_EPASS_SIZE)
+#define EEPROM_EMON_API_KEY_START EEPROM_EPASS_END
+#define EEPROM_EMON_API_KEY_END   (EEPROM_EMON_API_KEY_START + EEPROM_EMON_API_KEY_SIZE)
+#define EEPROM_EMON_SERVER_START  EEPROM_EMON_API_KEY_END
+#define EEPROM_EMON_SERVER_END    (EEPROM_EMON_SERVER_START + EEPROM_EMON_SERVER_SIZE)
+#define EEPROM_EMON_NODE_START    EEPROM_EMON_SERVER_END
+#define EEPROM_EMON_NODE_END      (EEPROM_EMON_NODE_START + EEPROM_EMON_NODE_SIZE)
+#define EEPROM_MQTT_SERVER_START  EEPROM_EMON_NODE_END
+#define EEPROM_MQTT_SERVER_END    (EEPROM_MQTT_SERVER_START + EEPROM_MQTT_SERVER_SIZE)
+#define EEPROM_MQTT_TOPIC_START   EEPROM_MQTT_SERVER_END
+#define EEPROM_MQTT_TOPIC_END     (EEPROM_MQTT_TOPIC_START + EEPROM_MQTT_TOPIC_SIZE)
+#define EEPROM_MQTT_USER_START    EEPROM_MQTT_TOPIC_END
+#define EEPROM_MQTT_USER_END      (EEPROM_MQTT_USER_START + EEPROM_MQTT_USER_SIZE)
+#define EEPROM_MQTT_PASS_START    EEPROM_MQTT_USER_END
+#define EEPROM_MQTT_PASS_END      (EEPROM_MQTT_PASS_START + EEPROM_MQTT_PASS_SIZE)
+
 void ResetEEPROM(){
   //Serial.println("Erasing EEPROM");
-  for (int i = 0; i < 512; ++i) {
+  for (int i = 0; i < EEPROM_SIZE; ++i) {
     EEPROM.write(i, 0);
     //Serial.print("#");
   }
@@ -245,42 +275,42 @@ void ResetEEPROM(){
 }
 
 void load_EEPROM_settings(){
-  
-  EEPROM.begin(512);
-  for (int i = 0; i < 32; ++i){
+
+  EEPROM.begin(EEPROM_SIZE);
+  for (int i = EEPROM_ESID_START; i < EEPROM_ESID_END; ++i){
     byte c = EEPROM.read(i);
     if (c!=0 && c!=255) esid += (char) c;
   }
 
-  for (int i = 32; i < 96; ++i){
+  for (int i = EEPROM_EPASS_START; i < EEPROM_EPASS_END; ++i){
     byte c = EEPROM.read(i);
     if (c!=0 && c!=255) epass += (char) c;
   }
-  for (int i = 96; i < 128; ++i){
+  for (int i = EEPROM_EMON_API_KEY_START; i < EEPROM_EMON_API_KEY_END; ++i){
     byte c = EEPROM.read(i);
     if (c!=0 && c!=255) emoncms_apikey += (char) c;
   }
-  for (int i = 128; i < 173; ++i){
+  for (int i = EEPROM_EMON_SERVER_START; i < EEPROM_EMON_SERVER_END; ++i){
     byte c = EEPROM.read(i);
     if (c!=0 && c!=255) emoncms_server += (char) c;
   }
-  for (int i = 173; i < 205; ++i){
+  for (int i = EEPROM_EMON_NODE_START; i < EEPROM_EMON_NODE_END; ++i){
     byte c = EEPROM.read(i);
     if (c!=0 && c!=255) emoncms_node += (char) c;
   }
-  for (int i = 205; i < 250; ++i){
+  for (int i = EEPROM_MQTT_SERVER_START; i < EEPROM_MQTT_SERVER_END; ++i){
     byte c = EEPROM.read(i);
     if (c!=0 && c!=255) mqtt_server += (char) c;
   }
-  for (int i = 250; i < 282; ++i){
+  for (int i = EEPROM_MQTT_TOPIC_START; i < EEPROM_MQTT_TOPIC_END; ++i){
     byte c = EEPROM.read(i);
     if (c!=0 && c!=255) mqtt_topic += (char) c;
   }
-  for (int i = 282; i < 314; ++i){
+  for (int i = EEPROM_MQTT_USER_START; i < EEPROM_MQTT_USER_END; ++i){
     byte c = EEPROM.read(i);
     if (c!=0 && c!=255) mqtt_user += (char) c;
   }
-  for (int i = 314; i < 346; ++i){
+  for (int i = EEPROM_MQTT_PASS_START; i < EEPROM_MQTT_PASS_END; ++i){
     byte c = EEPROM.read(i);
     if (c!=0 && c!=255) mqtt_pass += (char) c;
   }
@@ -394,19 +424,19 @@ void handleSaveNetwork() {
   qsid.replace('+', ' ');
 
   if (qsid != 0){
-    for (int i = 0; i < 32; i++){
+    for (int i = 0; i < EEPROM_ESID_SIZE; i++){
       if (i<qsid.length()) {
-        EEPROM.write(i+0, qsid[i]);
+        EEPROM.write(i+EEPROM_ESID_START, qsid[i]);
       } else {
-        EEPROM.write(i+0, 0);
+        EEPROM.write(i+EEPROM_ESID_START, 0);
       }
     }
 
-    for (int i = 0; i < 32; i++){
+    for (int i = 0; i < EEPROM_EPASS_SIZE; i++){
       if (i<qpass.length()) {
-        EEPROM.write(i+32, qpass[i]);
+        EEPROM.write(i+EEPROM_EPASS_START, qpass[i]);
       } else {
-        EEPROM.write(i+32, 0);
+        EEPROM.write(i+EEPROM_EPASS_START, 0);
       }
     }
 
@@ -417,7 +447,7 @@ void handleSaveNetwork() {
     // Startup in STA + AP mode
     WiFi.mode(WIFI_AP_STA);
     WiFi.softAPConfig(apIP, apIP, netMsk);
-    
+
   // Create Unique SSID e.g "emonESP_XXXXXX"
     String softAP_ssid_ID = String(softAP_ssid)+"_"+String(ESP.getChipId());;
     WiFi.softAP(softAP_ssid_ID.c_str(), softAP_password);
@@ -440,27 +470,27 @@ void handleSaveEmoncms() {
   emoncms_apikey = server.arg("apikey");
   if (emoncms_apikey!=0 && emoncms_server!=0 && emoncms_node!=0) {
     // save apikey to EEPROM
-    for (int i = 0; i < 32; i++){
+    for (int i = 0; i < EEPROM_EMON_API_KEY_SIZE; i++){
       if (i<emoncms_apikey.length()) {
-        EEPROM.write(i+96, emoncms_apikey[i]);
+        EEPROM.write(i+EEPROM_EMON_API_KEY_START, emoncms_apikey[i]);
       } else {
-        EEPROM.write(i+96, 0);
+        EEPROM.write(i+EEPROM_EMON_API_KEY_START, 0);
       }
     }
     // save emoncms server to EEPROM max 45 characters
-    for (int i = 0; i < 45; i++){
+    for (int i = 0; i < EEPROM_EMON_SERVER_SIZE; i++){
       if (i<emoncms_server.length()) {
-        EEPROM.write(i+128, emoncms_server[i]);
+        EEPROM.write(i+EEPROM_EMON_SERVER_START, emoncms_server[i]);
       } else {
-        EEPROM.write(i+128, 0);
+        EEPROM.write(i+EEPROM_EMON_SERVER_START, 0);
       }
     }
     // save emoncms node to EEPROM max 32 characters
-    for (int i = 0; i < 32; i++){
+    for (int i = 0; i < EEPROM_EMON_NODE_SIZE; i++){
       if (i<emoncms_node.length()) {
-        EEPROM.write(i+173, emoncms_node[i]);
+        EEPROM.write(i+EEPROM_EMON_NODE_START, emoncms_node[i]);
       } else {
-        EEPROM.write(i+173, 0);
+        EEPROM.write(i+EEPROM_EMON_NODE_START, 0);
       }
     }
     EEPROM.commit();
@@ -482,35 +512,35 @@ void handleSaveMqtt() {
   mqtt_pass = server.arg("pass");
   if (mqtt_server!=0 && mqtt_topic!=0) {
     // Save MQTT server max 45 characters
-    for (int i = 0; i < 45; i++){
+    for (int i = 0; i < EEPROM_MQTT_SERVER_SIZE; i++){
       if (i<mqtt_server.length()) {
-        EEPROM.write(i+205, mqtt_server[i]);
+        EEPROM.write(i+EEPROM_MQTT_SERVER_START, mqtt_server[i]);
       } else {
-        EEPROM.write(i+205, 0);
+        EEPROM.write(i+EEPROM_MQTT_SERVER_START, 0);
       }
     }
     // Save MQTT topic max 32 characters
-    for (int i = 0; i < 32; i++){
+    for (int i = 0; i < EEPROM_MQTT_TOPIC_SIZE; i++){
       if (i<mqtt_topic.length()) {
-        EEPROM.write(i+250, mqtt_topic[i]);
+        EEPROM.write(i+EEPROM_MQTT_TOPIC_START, mqtt_topic[i]);
       } else {
-        EEPROM.write(i+250, 0);
+        EEPROM.write(i+EEPROM_MQTT_TOPIC_START, 0);
       }
     }
     // Save MQTT username max 32 characters
-    for (int i = 0; i < 32; i++){
+    for (int i = 0; i < EEPROM_MQTT_USER_SIZE; i++){
       if (i<mqtt_user.length()) {
-        EEPROM.write(i+282, mqtt_user[i]);
+        EEPROM.write(i+EEPROM_MQTT_USER_START, mqtt_user[i]);
       } else {
-        EEPROM.write(i+282, 0);
+        EEPROM.write(i+EEPROM_MQTT_USER_START, 0);
       }
     }
-    // Save MQTT pass max 32 characters
-    for (int i = 0; i < 32; i++){
+    // Save MQTT pass max 64 characters
+    for (int i = 0; i < EEPROM_MQTT_PASS_SIZE; i++){
       if (i<mqtt_pass.length()) {
-        EEPROM.write(i+314, mqtt_pass[i]);
+        EEPROM.write(i+EEPROM_MQTT_PASS_START, mqtt_pass[i]);
       } else {
-        EEPROM.write(i+314, 0);
+        EEPROM.write(i+EEPROM_MQTT_PASS_START, 0);
       }
     }
 
@@ -572,7 +602,7 @@ void handleStatus() {
   }
   s += "\"networks\":["+st+"],";
   s += "\"rssi\":["+rssi+"],";
-  
+
   s += "\"ssid\":\""+esid+"\",";
   s += "\"pass\":\""+epass+"\",";
   s += "\"srssi\":\""+String(WiFi.RSSI())+"\",";
@@ -732,7 +762,8 @@ boolean mqtt_connect() {
     Serial.println("MQTT connected");
     mqttclient.publish(mqtt_topic.c_str(), "connected"); // Once connected, publish an announcement..
   } else {
-    Serial.println("MQTT failed");
+    Serial.print("MQTT failed: ");
+    Serial.println(mqttclient.state());
     return(0);
   }
   return (1);
@@ -763,7 +794,7 @@ void setup() {
 
   // Read saved settings from EEPROM
   load_EEPROM_settings();
-  
+
   WiFi.disconnect();
   // 1) If no network configured start up access point
   if (esid == 0 || esid == "")
@@ -934,7 +965,8 @@ void loop() {
       }
       else{
         emoncms_connected=false;
-        Serial.println("Emoncms error");
+        Serial.print("Emoncms error: ");
+        Serial.println(result);
       }
 
       // Send data to MQTT
