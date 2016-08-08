@@ -77,6 +77,7 @@ const char* emoncmsorg_fingerprint = "7D:82:15:BE:D7:BC:72:58:87:7D:8E:40:D4:80:
 String emoncms_server = "";
 String emoncms_node = "";
 String emoncms_apikey = "";
+String emoncms_fingerprint = "";
 boolean emoncms_connected = false;
 String test_serial="";
 
@@ -102,10 +103,6 @@ const char* firmware_update_path = "/upload";
 #define ESCAPEQUOTE(A) TEXTIFY(A)
 String currentfirmware = ESCAPEQUOTE(BUILD_TAG);
 // -------------------------------------------------------------------
-=======
-const char* fingerprint = "7D:82:15:BE:D7:BC:72:58:87:7D:8E:40:D4:80:BA:1A:9F:8B:8D:DA";
->>>>>>> 2149939... Update src.ino
-
 
 // Wifi mode
 // 0 - STA (Client)
@@ -206,7 +203,6 @@ void startClient() {
   int t = 0;
   int attempt = 0;
   while (WiFi.status() != WL_CONNECTED){
-
     delay(500);
     t++;
     if (t >= 20){
@@ -466,6 +462,7 @@ void handleSaveEmoncms() {
       } else {
         EEPROM.write(i+173, 0);
       }
+    }
     // save emoncms HTTPS fingerprint to EEPROM max 60 characters
     if (emoncms_fingerprint!=0){
       for (int i = 0; i < 60; i++){
@@ -477,8 +474,8 @@ void handleSaveEmoncms() {
       }
     }
     EEPROM.commit();
-    char tmpStr[109];
-    sprintf(tmpStr,"Saved: %s %s %s",emoncms_server.c_str(),emoncms_node.c_str(),emoncms_apikey.c_str(,emoncms_fingerprint.c_str());
+    char tmpStr[169];
+    sprintf(tmpStr,"Saved: %s %s %s",emoncms_server.c_str(),emoncms_node.c_str(),emoncms_apikey.c_str(),emoncms_fingerprint.c_str());
     Serial.println(tmpStr);
     server.send(200, "text/html", tmpStr);
   }
@@ -935,9 +932,9 @@ void loop() {
 
       // Send data to Emoncms server
       String result="";
-      if (emoncms_server=="emoncms.org"){
-        // HTTPS on port 443 if emoncms.org
-        result = get_https(emoncmsorg_fingerprint, emoncms_server.c_str(), url, 443);
+      if (emoncms_fingerprint!=0){
+        // HTTPS on port 443 if HTTPS fingerprint is present
+        result = get_https(emoncms_fingerprint.c_str(), emoncms_server.c_str(), url, 443);
       } else {
         // Plain HTTP if other emoncms server e.g EmonPi
         result = get_http(emoncms_server.c_str(), url);
