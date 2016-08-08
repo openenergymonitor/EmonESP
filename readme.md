@@ -113,7 +113,7 @@ Required to include `data` folder with HTML etc in the upload
 #### 4. Compile and Upload
 
 - Open src/src.ino in the Arduino IDE.
-- Put ESP into bootloder mode
+- Put ESP into bootloader mode
    - On Heatpump monitor use jumper to pull `GPIO0` low then reset then connect power (simulates reset)
    - On other ESP boards (Adafruit HUZZAH) press and hold `GPIO0` button then press Reset, LED should light dimly to indicate bootloader mode
 - **Upload main sketch:** Compile and Upload as normal using Arduino IDE [CTRL + u]
@@ -121,15 +121,41 @@ Required to include `data` folder with HTML etc in the upload
 
 ***
 
-## Opperation
+## First Setup
 
-On first boot, ESP should broadcast a WiFI AP `ESP_XXX`. Connect to this AP and browser to:
-
-http://192.168.4.1
+On first boot, ESP should broadcast a WiFI AP `ESP_XXX`. Connect to this AP and the captive portal should forward you to the log-in page. If this does not happen navigate to `http://192.168.4.1`
 
 *Note: You may need to disable mobile data if connecting via a Android 6 device*
 
+## API Examples
+
+### View units status:
+
+`http://<IP-ADDRESS>/status`
+
+Example return in JSON:
+
+```
+{"mode":"STA","networks":[],"rssi":[],"ssid":"OpenEnergyMonitor","srssi":"-58","ipaddress":"10.0.1.93","emoncms_server":"emoncms.org","emoncms_node":"emonesp","emoncms_apikey":"xxxxxxxx","emoncms_connected":"0","packets_sent":"0","packets_success":"0","mqtt_server":"emonpi","mqtt_topic":"emonesp","mqtt_user":"emonpi","mqtt_pass":"xxxxxx","mqtt_connected":"0","free_heap":"25040"}
+```
+
+### Send test serial string
+
+`http://<IP-ADDRESS>/test?serial=CT1:3935,CT2:325,T1:12.5,T2:16.9,T3:11.2,T4:34.7`
+
+### Save Emoncms server details
+
+`http://<IP-ADDRESS>/saveemoncms?&server=emoncms.org&apikey=xxxxxxxxxxxxxxxxxx&node=emonesp&fingerprint=7D:82:15:BE:D7:BC:72:58:87:7D:8E:40:D4:80:BA:1A:9F:8B:8D:DA`
+
+*SSL SHA-1 fingerprint is optional, HTTPS connection will be enabled if present*
+
+### Save Emoncms MQTT server details
+
+`http://<IP-ADDRESS>/savemqtt?&server=emonpi&topic=emonesp&user=emonpi&pass=emonpimqtt2016`
+
+*MQTT user and pass are optional, leave blank for connection to un-authenticated MQTT servers*
 ***
+
 ### License
 
 GNU General Public License

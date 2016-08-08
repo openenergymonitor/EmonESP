@@ -234,18 +234,19 @@ void startClient() {
   }
 }
 
-#define EEPROM_ESID_SIZE          32
-#define EEPROM_EPASS_SIZE         64
-#define EEPROM_EMON_API_KEY_SIZE  32
-#define EEPROM_EMON_SERVER_SIZE   45
-#define EEPROM_EMON_NODE_SIZE     32
-#define EEPROM_MQTT_SERVER_SIZE   45
-#define EEPROM_MQTT_TOPIC_SIZE    32
-#define EEPROM_MQTT_USER_SIZE     32
-#define EEPROM_MQTT_PASS_SIZE     64
-#define EEPROM_SIZE 512
+#define EEPROM_ESID_SIZE                 32
+#define EEPROM_EPASS_SIZE                64
+#define EEPROM_EMON_API_KEY_SIZE         32
+#define EEPROM_EMON_SERVER_SIZE          45
+#define EEPROM_EMON_NODE_SIZE            32
+#define EEPROM_MQTT_SERVER_SIZE          45
+#define EEPROM_MQTT_TOPIC_SIZE           32
+#define EEPROM_MQTT_USER_SIZE            32
+#define EEPROM_MQTT_PASS_SIZE            64
+#define EEPROM_EMON_FINGERPRINT_SIZE     60
+#define EEPROM_SIZE                      512
 
-#define EEPROM_ESID_START         0
+#define EEPROM_ESID_START                0
 #define EEPROM_ESID_END           (EEPROM_ESID_START + EEPROM_ESID_SIZE)
 #define EEPROM_EPASS_START        EEPROM_ESID_END
 #define EEPROM_EPASS_END          (EEPROM_EPASS_START + EEPROM_EPASS_SIZE)
@@ -263,6 +264,8 @@ void startClient() {
 #define EEPROM_MQTT_USER_END      (EEPROM_MQTT_USER_START + EEPROM_MQTT_USER_SIZE)
 #define EEPROM_MQTT_PASS_START    EEPROM_MQTT_USER_END
 #define EEPROM_MQTT_PASS_END      (EEPROM_MQTT_PASS_START + EEPROM_MQTT_PASS_SIZE)
+#define EEPROM_EMON_FINGERPRINT_START  EEPROM_MQTT_PASS_END
+#define EEPROM_EMON_FINGERPRINT_END    (EEPROM_EMON_FINGERPRINT_START + EEPROM_EMON_FINGERPRINT_SIZE)
 
 void ResetEEPROM(){
   //Serial.println("Erasing EEPROM");
@@ -312,6 +315,10 @@ void load_EEPROM_settings(){
   for (int i = EEPROM_MQTT_PASS_START; i < EEPROM_MQTT_PASS_END; ++i){
     byte c = EEPROM.read(i);
     if (c!=0 && c!=255) mqtt_pass += (char) c;
+  }
+  for (int i = EEPROM_EMON_FINGERPRINT_START; i < EEPROM_EMON_FINGERPRINT_END; ++i){
+    byte c = EEPROM.read(i);
+    if (c!=0 && c!=255) emoncms_fingerprint += (char) c;
   }
 }
 
@@ -495,17 +502,17 @@ void handleSaveEmoncms() {
     }
     // save emoncms HTTPS fingerprint to EEPROM max 60 characters
     if (emoncms_fingerprint!=0){
-      for (int i = 0; i < 60; i++){
+      for (int i = 0; i < EEPROM_EMON_FINGERPRINT_SIZE; i++){
         if (i<emoncms_fingerprint.length()) {
-          EEPROM.write(i+346, emoncms_fingerprint[i]);
+          EEPROM.write(i+EEPROM_EMON_FINGERPRINT_START, emoncms_fingerprint[i]);
         } else {
-          EEPROM.write(i+346, 0);
+          EEPROM.write(i+EEPROM_EMON_FINGERPRINT_START, 0);
         }
       }
     }
     EEPROM.commit();
     char tmpStr[169];
-    sprintf(tmpStr,"Saved: %s %s %s",emoncms_server.c_str(),emoncms_node.c_str(),emoncms_apikey.c_str(),emoncms_fingerprint.c_str());
+    sprintf(tmpStr,"Saved: %s %s %s %s",emoncms_server.c_str(),emoncms_node.c_str(),emoncms_apikey.c_str(),emoncms_fingerprint.c_str());
     Serial.println(tmpStr);
     server.send(200, "text/html", tmpStr);
   }
@@ -616,12 +623,13 @@ void handleStatus() {
   s += "\"rssi\":["+rssi+"],";
 
   s += "\"ssid\":\""+esid+"\",";
-  s += "\"pass\":\""+epass+"\",";
+  //s += "\"pass\":\""+epass+"\",";
   s += "\"srssi\":\""+String(WiFi.RSSI())+"\",";
   s += "\"ipaddress\":\""+ipaddress+"\",";
   s += "\"emoncms_server\":\""+emoncms_server+"\",";
   s += "\"emoncms_node\":\""+emoncms_node+"\",";
   s += "\"emoncms_apikey\":\""+emoncms_apikey+"\",";
+  s += "\"emoncms_fingerprint\":\""+emoncms_fingerprint+"\",";
   s += "\"emoncms_connected\":\""+String(emoncms_connected)+"\",";
   s += "\"packets_sent\":\""+String(packets_sent)+"\",";
   s += "\"packets_success\":\""+String(packets_success)+"\",";
@@ -924,15 +932,16 @@ void loop() {
        Serial.println("WIFI Mode = 1, resetting");
      }
   }
+
   // If data received on serial
   while(Serial.available() || test_serial !="") {
     String data = "";
   // Could check for string integrity here
     if (Serial.available()){
       data = Serial.readStringUntil('\n');
-      last_datastr = data;
-    }
-
+      data.remove(data.length(), 1); //remove new line character
+      }
+    // If serial from test API e.g `http://<IP-ADDRESS>/test?serial=CT1:3935,CT2:325,T1:12.5,T2:16.9,T3:11.2,T4:34.7`
     if (test_serial !=""){
       data = test_serial;
       test_serial = "";
@@ -945,7 +954,7 @@ void loop() {
       String url = e_url;
       url += "{";
       // Copy across, data length -1 to remove new line
-      for (int i = 0; i < data.length()-1; ++i){
+      for (int i = 0; i < data.length(); ++i){
           url += data[i];
       }
       url += ",psent:";
@@ -959,13 +968,14 @@ void loop() {
       url += "&apikey=";
       url += emoncms_apikey;
 
-      //Serial.println(url);
+      Serial.println(url);
       packets_sent++;
 
       // Send data to Emoncms server
       String result="";
       if (emoncms_fingerprint!=0){
         // HTTPS on port 443 if HTTPS fingerprint is present
+        Serial.println("HTTPS Enabled");
         result = get_https(emoncms_fingerprint.c_str(), emoncms_server.c_str(), url, 443);
       } else {
         // Plain HTTP if other emoncms server e.g EmonPi
