@@ -159,13 +159,13 @@ EmonESP can post data to an MQTT server. Each data key:pair value will be publis
 - Click connect
 - After a few seconds `Connected: No` should change to `Connected: Yes` if connection is successful. Re-connection will be attempted every 10s.
 
-Note: `emon/xxxx` should be used as the base-topic if posting to emonPi MQTT server if you want the data to appear in emonPi Emoncms. See [emonPi MQTT docs](https://guide.openenergymonitor.org/technical/mqtt/).
+*Note: `emon/xxxx` should be used as the base-topic if posting to emonPi MQTT server if you want the data to appear in emonPi Emoncms. See [emonPi MQTT docs](https://guide.openenergymonitor.org/technical/mqtt/).*
 
 ## OTA Firmware Update
 
 TBC
 
-## API Examples
+## HTTP API Examples
 
 ### View units status:
 
