@@ -327,7 +327,7 @@ void load_EEPROM_settings(){
   for (int i = EEPROM_EMON_FINGERPRINT_START; i < EEPROM_EMON_FINGERPRINT_END; ++i){
     byte c = EEPROM.read(i);
     if (c!=0 && c!=255) emoncms_fingerprint += (char) c;
-}
+  }
 }
 
 // -------------------------------------------------------------------
@@ -462,11 +462,11 @@ void handleSaveNetwork() {
     WiFi.mode(WIFI_AP_STA);
     WiFi.softAPConfig(apIP, apIP, netMsk);
 
-  // Create Unique SSID e.g "emonESP_XXXXXX"
+    // Create Unique SSID e.g "emonESP_XXXXXX"
     String softAP_ssid_ID = String(softAP_ssid)+"_"+String(ESP.getChipId());;
     WiFi.softAP(softAP_ssid_ID.c_str(), softAP_password);
 
-    /* Setup the DNS server redirecting all the domains to the apIP */
+    // Setup the DNS server redirecting all the domains to the apIP
     dnsServer.setErrorReplyCode(DNSReplyCode::NoError);
     dnsServer.start(DNS_PORT, "*", apIP);
     wifi_mode = 3;
@@ -519,7 +519,7 @@ void handleSaveEmoncms() {
       }
     }
     EEPROM.commit();
-    char tmpStr[169];
+    char tmpStr[200];
     sprintf(tmpStr,"Saved: %s %s %s %s",emoncms_server.c_str(),emoncms_node.c_str(),emoncms_apikey.c_str(),emoncms_fingerprint.c_str());
     DEBUG.println(tmpStr);
     server.send(200, "text/html", tmpStr);
@@ -572,7 +572,7 @@ void handleSaveMqtt() {
     }
     }
     EEPROM.commit();
-    char tmpStr[80];
+    char tmpStr[200];
     sprintf(tmpStr,"Saved: %s %s %s %s",mqtt_server.c_str(),mqtt_topic.c_str(),mqtt_user.c_str(),mqtt_pass.c_str());
     DEBUG.println(tmpStr);
     server.send(200, "text/html", tmpStr);
@@ -709,15 +709,15 @@ void handleUpdate() {
   t_httpUpdate_return ret = ESPhttpUpdate.update("http://" + String(u_host) + String(u_url) + "?tag=" + currentfirmware);
   String str="error";
   switch(ret) {
-      case HTTP_UPDATE_FAILED:
-          str = printf("Update failed error (%d): %s", ESPhttpUpdate.getLastError(), ESPhttpUpdate.getLastErrorString().c_str());
-          break;
-      case HTTP_UPDATE_NO_UPDATES:
-          str="No update, running latest firmware";
-          break;
-      case HTTP_UPDATE_OK:
-          str="Update done!";
-          break;
+    case HTTP_UPDATE_FAILED:
+      str = printf("Update failed error (%d): %s", ESPhttpUpdate.getLastError(), ESPhttpUpdate.getLastErrorString().c_str());
+      break;
+    case HTTP_UPDATE_NO_UPDATES:
+      str="No update, running latest firmware";
+      break;
+    case HTTP_UPDATE_OK:
+      str="Update done!";
+      break;
   }
   server.send(400,"text/html",str);
   DEBUG.println(str);
@@ -818,30 +818,30 @@ void mqtt_publish(String base_topic, String data){
   String topic = base_topic + "/";
   int i=0;
   while (int(data[i])!=0){
-      // Construct MQTT topic e.g. <base_topic>/CT1 e.g. emonesp/CT1
-      while (data[i]!=':'){
-        topic+= data[i];
-        i++;
-        if (int(data[i])==0){
-          break;
-        }
-      }
+    // Construct MQTT topic e.g. <base_topic>/CT1 e.g. emonesp/CT1
+    while (data[i]!=':'){
+      topic+= data[i];
       i++;
-      // Construct data string to publish to above topic
-      while (data[i]!=','){
-        mqtt_data+= data[i];
-        i++;
-        if (int(data[i])==0){
-          break;
-        }
+      if (int(data[i])==0){
+        break;
       }
-      // send data via mqtt
-      delay(100);
-      mqttclient.publish(topic.c_str(), mqtt_data.c_str());
-      topic= base_topic + "/";
-      mqtt_data="";
+    }
+    i++;
+    // Construct data string to publish to above topic
+    while (data[i]!=','){
+      mqtt_data+= data[i];
       i++;
-      if (int(data[i])==0) break;
+      if (int(data[i])==0){
+        break;
+      }
+    }
+    // send data via mqtt
+    delay(100);
+    mqttclient.publish(topic.c_str(), mqtt_data.c_str());
+    topic= base_topic + "/";
+    mqtt_data="";
+    i++;
+    if (int(data[i])==0) break;
   }
 }
 
@@ -884,8 +884,8 @@ void setup() {
   // Start hostname broadcast in STA mode
   if ((wifi_mode==0 || wifi_mode==3)){
     if (MDNS.begin(esp_hostname)) {
-            MDNS.addService("http", "tcp", 80);
-          }
+      MDNS.addService("http", "tcp", 80);
+    }
   }
 
   // Setup firmware upload
@@ -1004,7 +1004,7 @@ void loop() {
       url += "{";
       // Copy across, data length -1 to remove new line
       for (int i = 0; i < data.length(); ++i){
-          url += data[i];
+        url += data[i];
       }
       url += ",psent:";
       url += packets_sent;
@@ -1024,7 +1024,7 @@ void loop() {
       String result="";
       if (emoncms_fingerprint!=0){
         // HTTPS on port 443 if HTTPS fingerprint is present
-        Serial.println("HTTPS Enabled");
+        DEBUG.println("HTTPS Enabled");
         result = get_https(emoncms_fingerprint.c_str(), emoncms_server.c_str(), url, 443);
       } else {
         // Plain HTTP if other emoncms server e.g EmonPi
@@ -1042,17 +1042,14 @@ void loop() {
 
       // Send data to MQTT
       if (mqtt_server != 0){
-        Serial.print("MQTT publish base-topic: "); Serial.println(mqtt_topic);
+        DEBUG.print("MQTT publish base-topic: "); DEBUG.println(mqtt_topic);
         mqtt_publish(mqtt_topic, data);
         String ram_topic = mqtt_topic + "/freeram";
         String free_ram = String(ESP.getFreeHeap());
         mqttclient.publish(ram_topic.c_str(), free_ram.c_str());
         ram_topic = "";
         free_ram ="";
-        }
-
-
+      }
     } // end wifi connected
   } // end serial available
-
 } // end loop
