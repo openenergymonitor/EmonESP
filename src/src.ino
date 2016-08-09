@@ -37,6 +37,13 @@
 #include <DNSServer.h>                // Required for captive portal
 #include <PubSubClient.h>             // MQTT https://github.com/knolleary/pubsubclient PlatformIO lib: 89
 
+#define DEBUG_SERIAL1
+#ifdef DEBUG_SERIAL1
+#define DEBUG Serial1
+#else
+#define DEBUG Serial
+#endif
+
 ESP8266WebServer server(80);          //Create class for Web server
 WiFiClientSecure client;              // Create class for HTTPS TCP connections get_https()
 HTTPClient http;                      // Create class for HTTP TCP connections get_http
@@ -154,14 +161,14 @@ bool handleFileRead(String path){
 // Access point is used for wifi network selection
 // -------------------------------------------------------------------
 void startAP() {
-  Serial.print("Starting AP");
+  DEBUG.print("Starting AP");
   WiFi.mode(WIFI_STA);
   WiFi.disconnect();
   delay(100);
-  Serial.print("Scan: ");
+  DEBUG.print("Scan: ");
   int n = WiFi.scanNetworks();
-  Serial.print(n);
-  Serial.println(" networks found");
+  DEBUG.print(n);
+  DEBUG.println(" networks found");
   st = "";
   rssi = "";
   for (int i = 0; i < n; ++i){
@@ -176,15 +183,16 @@ void startAP() {
   // Create Unique SSID e.g "emonESP_XXXXXX"
   String softAP_ssid_ID = String(softAP_ssid)+"_"+String(ESP.getChipId());;
   WiFi.softAP(softAP_ssid_ID.c_str(), softAP_password);
-    /* Setup the DNS server redirecting all the domains to the apIP */
+
+  // Setup the DNS server redirecting all the domains to the apIP
   dnsServer.setErrorReplyCode(DNSReplyCode::NoError);
   dnsServer.start(DNS_PORT, "*", apIP);
 
   IPAddress myIP = WiFi.softAPIP();
   char tmpStr[40];
   sprintf(tmpStr,"%d.%d.%d.%d",myIP[0],myIP[1],myIP[2],myIP[3]);
-  Serial.print("AP IP Address: ");
-  Serial.println(tmpStr);
+  DEBUG.print("AP IP Address: ");
+  DEBUG.println(tmpStr);
   ipaddress = tmpStr;
 }
 
@@ -192,10 +200,10 @@ void startAP() {
 // Start Client, attempt to connect to Wifi network
 // -------------------------------------------------------------------
 void startClient() {
-  Serial.print("Connecting as client to ");
-  Serial.print(esid.c_str());
-  Serial.print(" epass:");
-  Serial.println(epass.c_str());
+  DEBUG.print("Connecting as client to ");
+  DEBUG.print(esid.c_str());
+  DEBUG.print(" epass:");
+  DEBUG.println(epass.c_str());
   WiFi.begin(esid.c_str(), epass.c_str());
 
   delay(50);
@@ -207,8 +215,8 @@ void startClient() {
     delay(500);
     t++;
     if (t >= 20){
-      Serial.println(" ");
-      Serial.println("Try Again...");
+      DEBUG.println(" ");
+      DEBUG.println("Try Again...");
       delay(2000);
       WiFi.disconnect();
       WiFi.begin(esid.c_str(), epass.c_str());
@@ -227,8 +235,8 @@ void startClient() {
     IPAddress myAddress = WiFi.localIP();
     char tmpStr[40];
     sprintf(tmpStr,"%d.%d.%d.%d",myAddress[0],myAddress[1],myAddress[2],myAddress[3]);
-    Serial.print("Connected, IP: ");
-    Serial.println(tmpStr);
+    DEBUG.print("Connected, IP: ");
+    DEBUG.println(tmpStr);
     // Copy the connected network and ipaddress to global strings for use in status request
     connected_network = esid;
     ipaddress = tmpStr;
@@ -266,10 +274,10 @@ void startClient() {
 #define EEPROM_MQTT_PASS_END      (EEPROM_MQTT_PASS_START + EEPROM_MQTT_PASS_SIZE)
 
 void ResetEEPROM(){
-  //Serial.println("Erasing EEPROM");
+  //DEBUG.println("Erasing EEPROM");
   for (int i = 0; i < EEPROM_SIZE; ++i) {
     EEPROM.write(i, 0);
-    //Serial.print("#");
+    //DEBUG.print("#");
   }
   EEPROM.commit();
 }
@@ -336,7 +344,7 @@ void handleHome() {
 // -------------------------------------------------------------------
 void handleAPOff() {
   server.send(200, "text/html", "Turning AP Off");
-  Serial.println("Turning AP Off");
+  DEBUG.println("Turning AP Off");
   WiFi.disconnect();
   delay(1000);
   ESP.reset();
@@ -496,7 +504,7 @@ void handleSaveEmoncms() {
     EEPROM.commit();
     char tmpStr[109];
     sprintf(tmpStr,"Saved: %s %s %s",emoncms_server.c_str(),emoncms_node.c_str(),emoncms_apikey.c_str());
-    Serial.println(tmpStr);
+    DEBUG.println(tmpStr);
     server.send(200, "text/html", tmpStr);
   }
 }
@@ -547,7 +555,7 @@ void handleSaveMqtt() {
     EEPROM.commit();
     char tmpStr[80];
     sprintf(tmpStr,"Saved: %s %s %s %s",mqtt_server.c_str(),mqtt_topic.c_str(),mqtt_user.c_str(),mqtt_pass.c_str());
-    Serial.println(tmpStr);
+    DEBUG.println(tmpStr);
     server.send(200, "text/html", tmpStr);
     // If connected disconnect MQTT to trigger re-connect with new details
     if (mqttclient.connected()) {
@@ -563,10 +571,10 @@ void handleSaveMqtt() {
 // url: /scan
 // -------------------------------------------------------------------
 void handleScan() {
-  Serial.println("WIFI Scan");
+  DEBUG.println("WIFI Scan");
   int n = WiFi.scanNetworks();
-  Serial.print(n);
-  Serial.println(" networks found");
+  DEBUG.print(n);
+  DEBUG.println(" networks found");
   st = "";
   rssi = "";
   for (int i = 0; i < n; ++i){
@@ -655,11 +663,11 @@ void handleRestart() {
 // url: /firmware
 // -------------------------------------------------------------------
 String handleUpdateCheck() {
-  Serial.println("Running: " + currentfirmware);
+  DEBUG.println("Running: " + currentfirmware);
   // Get latest firmware version number
   String url = u_url;
   String latestfirmware = get_http(u_host, url);
-  Serial.println("Latest: " + latestfirmware);
+  DEBUG.println("Latest: " + latestfirmware);
   // Update web interface with firmware version(s)
   String s = "{";
   s += "\"current\":\""+currentfirmware+"\",";
@@ -676,7 +684,7 @@ String handleUpdateCheck() {
 // -------------------------------------------------------------------
 void handleUpdate() {
   SPIFFS.end(); // unmount filesystem
-  Serial.println("UPDATING...");
+  DEBUG.println("UPDATING...");
   delay(500);
   t_httpUpdate_return ret = ESPhttpUpdate.update("http://" + String(u_host) + String(u_url) + "?tag=" + currentfirmware);
   String str="error";
@@ -692,7 +700,7 @@ void handleUpdate() {
           break;
   }
   server.send(400,"text/html",str);
-  Serial.println(str);
+  DEBUG.println(str);
   SPIFFS.begin(); //mount-file system
 }
 
@@ -704,7 +712,7 @@ void handleUpdate() {
 String get_https(const char* fingerprint, const char* host, String url, int httpsPort){
   // Use WiFiClient class to create TCP connections
   if (!client.connect(host, httpsPort)) {
-    Serial.print(host + httpsPort); //debug
+    DEBUG.print(host + httpsPort); //debug
     return("Connection error");
   }
   if (client.verify(fingerprint, host)) {
@@ -720,7 +728,7 @@ String get_https(const char* fingerprint, const char* host, String url, int http
     // Handle message receive
     while(client.available()){
       String line = client.readStringUntil('\r');
-      Serial.println(line); //debug
+      DEBUG.println(line); //debug
       if (line.startsWith("HTTP/1.1 200 OK")) {
         return("ok");
       }
@@ -741,7 +749,7 @@ String get_http(const char* host, String url){
   int httpCode = http.GET();
   if((httpCode > 0) && (httpCode == HTTP_CODE_OK)){
     String payload = http.getString();
-    Serial.println(payload);
+    DEBUG.println(payload);
     http.end();
     return(payload);
   }
@@ -756,14 +764,14 @@ String get_http(const char* host, String url){
 // -------------------------------------------------------------------
 boolean mqtt_connect() {
   mqttclient.setServer(mqtt_server.c_str(), 1883);
-  Serial.println("MQTT Connecting...");
+  DEBUG.println("MQTT Connecting...");
   String strID = String(ESP.getChipId());
   if (mqttclient.connect(strID.c_str(), mqtt_user.c_str(), mqtt_pass.c_str())) {  // Attempt to connect
-    Serial.println("MQTT connected");
+    DEBUG.println("MQTT connected");
     mqttclient.publish(mqtt_topic.c_str(), "connected"); // Once connected, publish an announcement..
   } else {
-    Serial.print("MQTT failed: ");
-    Serial.println(mqttclient.state());
+    DEBUG.print("MQTT failed: ");
+    DEBUG.println(mqttclient.state());
     return(0);
   }
   return (1);
@@ -775,7 +783,7 @@ boolean mqtt_connect() {
 void handleTest(){
   test_serial = server.arg("serial");
   server.send(200, "text/html", test_serial);
-  Serial.println(test_serial);
+  DEBUG.println(test_serial);
 }
 
 
@@ -787,10 +795,13 @@ void handleTest(){
 void setup() {
 	delay(2000);
 	Serial.begin(115200);
-  Serial.println();
-  Serial.print("EmonESP ");
-  Serial.println(ESP.getChipId());
-  Serial.println("Firmware: "+ currentfirmware);
+  #ifdef DEBUG_SERIAL1
+  Serial1.begin(115200);
+  #endif
+  DEBUG.println();
+  DEBUG.print("EmonESP ");
+  DEBUG.println(ESP.getChipId());
+  DEBUG.println("Firmware: "+ currentfirmware);
 
   // Read saved settings from EEPROM
   load_EEPROM_settings();
@@ -873,8 +884,8 @@ void setup() {
     server.send(404, "text/plain", "NotFound");
   });
 
-	server.begin();
-	Serial.println("Server started");
+  server.begin();
+  DEBUG.println("Server started");
   delay(100);
   Timer = millis();
   lastMqttReconnectAttempt = 0;
@@ -902,14 +913,14 @@ void loop() {
     } else {
       // if MQTT connected
       mqttclient.loop();
-      }
+    }
   }
 
   // Remain in AP mode for 5 Minutes before resetting
   if (wifi_mode == 1){
      if ((millis() - Timer) >= 300000){
        ESP.reset();
-       Serial.println("WIFI Mode = 1, resetting");
+       DEBUG.println("WIFI Mode = 1, resetting");
      }
   }
   // If data received on serial
@@ -925,6 +936,8 @@ void loop() {
       data = test_serial;
       test_serial = "";
     }
+
+    DEBUG.println(data);
 
     last_datastr = data;
     // If Wifi connected & emoncms server details are present
@@ -947,7 +960,7 @@ void loop() {
       url += "&apikey=";
       url += emoncms_apikey;
 
-      //Serial.println(url);
+      //DEBUG.println(url);
       packets_sent++;
 
       // Send data to Emoncms server
@@ -965,8 +978,8 @@ void loop() {
       }
       else{
         emoncms_connected=false;
-        Serial.print("Emoncms error: ");
-        Serial.println(result);
+        DEBUG.print("Emoncms error: ");
+        DEBUG.println(result);
       }
 
       // Send data to MQTT
