@@ -163,3 +163,7 @@ input[type="password"] {
     text-align: center;
     margin-bottom: 5px;
 }
+
+#small-text{
+font-size: 10px;
+}

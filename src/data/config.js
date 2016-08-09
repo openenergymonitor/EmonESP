@@ -17,8 +17,9 @@ r1.onreadystatechange = function () {
     document.getElementById("emoncms_apikey").value = status.emoncms_apikey;
     document.getElementById("emoncms_server").value = status.emoncms_server;
     document.getElementById("emoncms_node").value = status.emoncms_node;
+    document.getElementById("emoncms_fingerprint").value = status.emoncms_fingerprint;
   }
-  
+
   if (status.emoncms_connected == "1"){
    document.getElementById("emoncms_connected").innerHTML = "Yes";
    if  ((status.packets_success!="undefined") & (status.packets_sent!="undefined")){
@@ -27,7 +28,7 @@ r1.onreadystatechange = function () {
   } else {
     document.getElementById("emoncms_connected").innerHTML = "No";
   }
-  
+
   if (status.mqtt_server!=0){
     document.getElementById("mqtt_server").value = status.mqtt_server;
     document.getElementById("mqtt_topic").value = status.mqtt_topic;
@@ -36,13 +37,13 @@ r1.onreadystatechange = function () {
       document.getElementById("mqtt_pass").value = status.mqtt_pass;
     }
   }
-  
+
   if (status.mqtt_connected == "1"){
    document.getElementById("mqtt_connected").innerHTML = "Yes";
   } else {
     document.getElementById("mqtt_connected").innerHTML = "No";
   }
-  
+
   document.getElementById("free_heap").innerHTML = status.free_heap;
 
 
@@ -63,7 +64,7 @@ r1.onreadystatechange = function () {
           document.getElementById("apoff").style.display = '';
       }
       if (status.mode=="STA") document.getElementById("mode").innerHTML = "Client (STA)";
-      
+
       var out="";
       out += "<tr><td>"+status.ssid+"</td><td>"+status.srssi+"</td></tr>"
       document.getElementById("sta-ssid").innerHTML = out;
@@ -71,8 +72,8 @@ r1.onreadystatechange = function () {
       document.getElementById("ap-view").style.display = 'none';
       document.getElementById("client-view").style.display = '';
       ipaddress = status.ipaddress;
-      
-      
+
+
   }
 };
 r1.send();
@@ -126,7 +127,7 @@ function update() {
       } else {
        document.getElementById("mqtt_connected").innerHTML = "No";
       }
-      
+
       if ((status.mode=="STA") || (status.mode=="STA+AP")){
         // Update connected network RSSI
         var out="";
@@ -212,7 +213,7 @@ document.getElementById("save-emoncms").addEventListener("click", function(e) {
       } else if (emoncms.apikey.length!=32) {
           alert("Please enter valid Emoncms apikey");
       } else if (emoncms.fingerprint!="" && emoncms.fingerprint.length!=59) {
-        alert("Please enter valid HTTPS fingerprint");
+        alert("Please enter valid SSL SHA-1 fingerprint");
       } else {
           document.getElementById("save-emoncms").innerHTML = "Saving...";
           var r = new XMLHttpRequest();
@@ -277,7 +278,7 @@ document.getElementById("apoff").addEventListener("click", function(e) {
 // Event: Reset config and reboot
 // -----------------------------------------------------------------------
 document.getElementById("reset").addEventListener("click", function(e) {
-  
+
     if (confirm("CAUTION: Do you really want to Factory Reset? All setting and config will be lost.")){
       var r = new XMLHttpRequest();
       r.open("POST", "reset", true);
@@ -295,7 +296,7 @@ document.getElementById("reset").addEventListener("click", function(e) {
 // Event: Restart
 // -----------------------------------------------------------------------
 document.getElementById("restart").addEventListener("click", function(e) {
-  
+
     if (confirm("Restart emonESP? Current config will be saved, takes approximately 10s.")){
       var r = new XMLHttpRequest();
       r.open("POST", "restart", true);

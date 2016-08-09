@@ -251,6 +251,7 @@ void startClient() {
 #define EEPROM_MQTT_TOPIC_SIZE    32
 #define EEPROM_MQTT_USER_SIZE     32
 #define EEPROM_MQTT_PASS_SIZE     64
+#define EEPROM_EMON_FINGERPRINT_SIZE     60
 #define EEPROM_SIZE 512
 
 #define EEPROM_ESID_START         0
@@ -271,6 +272,8 @@ void startClient() {
 #define EEPROM_MQTT_USER_END      (EEPROM_MQTT_USER_START + EEPROM_MQTT_USER_SIZE)
 #define EEPROM_MQTT_PASS_START    EEPROM_MQTT_USER_END
 #define EEPROM_MQTT_PASS_END      (EEPROM_MQTT_PASS_START + EEPROM_MQTT_PASS_SIZE)
+#define EEPROM_EMON_FINGERPRINT_START  EEPROM_MQTT_PASS_END
+#define EEPROM_EMON_FINGERPRINT_END    (EEPROM_EMON_FINGERPRINT_START + EEPROM_EMON_FINGERPRINT_SIZE)
 
 void ResetEEPROM(){
   //DEBUG.println("Erasing EEPROM");
@@ -321,6 +324,10 @@ void load_EEPROM_settings(){
     byte c = EEPROM.read(i);
     if (c!=0 && c!=255) mqtt_pass += (char) c;
   }
+  for (int i = EEPROM_EMON_FINGERPRINT_START; i < EEPROM_EMON_FINGERPRINT_END; ++i){
+    byte c = EEPROM.read(i);
+    if (c!=0 && c!=255) emoncms_fingerprint += (char) c;
+}
 }
 
 // -------------------------------------------------------------------
@@ -503,17 +510,17 @@ void handleSaveEmoncms() {
     }
     // save emoncms HTTPS fingerprint to EEPROM max 60 characters
     if (emoncms_fingerprint!=0){
-      for (int i = 0; i < 60; i++){
+      for (int i = 0; i < EEPROM_EMON_FINGERPRINT_SIZE; i++){
         if (i<emoncms_fingerprint.length()) {
-          EEPROM.write(i+346, emoncms_fingerprint[i]);
+          EEPROM.write(i+EEPROM_EMON_FINGERPRINT_START, emoncms_fingerprint[i]);
         } else {
-          EEPROM.write(i+346, 0);
+          EEPROM.write(i+EEPROM_EMON_FINGERPRINT_START, 0);
         }
       }
     }
     EEPROM.commit();
     char tmpStr[169];
-    sprintf(tmpStr,"Saved: %s %s %s",emoncms_server.c_str(),emoncms_node.c_str(),emoncms_apikey.c_str(),emoncms_fingerprint.c_str());
+    sprintf(tmpStr,"Saved: %s %s %s %s",emoncms_server.c_str(),emoncms_node.c_str(),emoncms_apikey.c_str(),emoncms_fingerprint.c_str());
     DEBUG.println(tmpStr);
     server.send(200, "text/html", tmpStr);
   }
@@ -624,12 +631,13 @@ void handleStatus() {
   s += "\"rssi\":["+rssi+"],";
 
   s += "\"ssid\":\""+esid+"\",";
-  s += "\"pass\":\""+epass+"\",";
+  //s += "\"pass\":\""+epass+"\",";
   s += "\"srssi\":\""+String(WiFi.RSSI())+"\",";
   s += "\"ipaddress\":\""+ipaddress+"\",";
   s += "\"emoncms_server\":\""+emoncms_server+"\",";
   s += "\"emoncms_node\":\""+emoncms_node+"\",";
   s += "\"emoncms_apikey\":\""+emoncms_apikey+"\",";
+  s += "\"emoncms_fingerprint\":\""+emoncms_fingerprint+"\",";
   s += "\"emoncms_connected\":\""+String(emoncms_connected)+"\",";
   s += "\"packets_sent\":\""+String(packets_sent)+"\",";
   s += "\"packets_success\":\""+String(packets_success)+"\",";
@@ -725,7 +733,7 @@ String get_https(const char* fingerprint, const char* host, String url, int http
   // Use WiFiClient class to create TCP connections
   if (!client.connect(host, httpsPort)) {
     DEBUG.print(host + httpsPort); //debug
-    return("Connection error");
+    return("Connection erromqtt_publishr");
   }
   if (client.verify(fingerprint, host)) {
     client.print(String("GET ") + url + " HTTP/1.1\r\n" + "Host: " + host + "\r\n" + "Connection: close\r\n\r\n");
@@ -798,7 +806,44 @@ void handleTest(){
   DEBUG.println(test_serial);
 }
 
-
+// -------------------------------------------------------------------
+// Publish to MQTT
+// Split up data string into sub topics: e.g
+// data = CT1:3935,CT2:325,T1:12.5,T2:16.9,T3:11.2,T4:34.7
+// base topic = emon/emonesp
+// MQTT Publish: emon/emonesp/CT1 > 3935 etc..
+// -------------------------------------------------------------------
+void mqtt_publish(String base_topic, String data){
+  String mqtt_data = "";
+  String topic = base_topic + "/";
+  int i=0;
+  while (int(data[i])!=0){
+      // Construct MQTT topic e.g. <base_topic>/CT1 e.g. emonesp/CT1
+      while (data[i]!=':'){
+        topic+= data[i];
+        i++;
+        if (int(data[i])==0){
+          break;
+        }
+      }
+      i++;
+      // Construct data string to publish to above topic
+      while (data[i]!=','){
+        mqtt_data+= data[i];
+        i++;
+        if (int(data[i])==0){
+          break;
+        }
+      }
+      // send data via mqtt
+      delay(100);
+      mqttclient.publish(topic.c_str(), mqtt_data.c_str());
+      topic= base_topic + "/";
+      mqtt_data="";
+      i++;
+      if (int(data[i])==0) break;
+  }
+}
 
 
 // -------------------------------------------------------------------
@@ -935,20 +980,20 @@ void loop() {
        DEBUG.println("WIFI Mode = 1, resetting");
      }
   }
+
   // If data received on serial
   while(Serial.available() || test_serial !="") {
     String data = "";
   // Could check for string integrity here
     if (Serial.available()){
       data = Serial.readStringUntil('\n');
-      last_datastr = data;
+      data.remove(data.length(), 1); //remove new line character
     }
-
+    // If serial from test API e.g `http://<IP-ADDRESS>/test?serial=CT1:3935,CT2:325,T1:12.5,T2:16.9,T3:11.2,T4:34.7`
     if (test_serial !=""){
       data = test_serial;
       test_serial = "";
     }
-
     DEBUG.println(data);
 
     last_datastr = data;
@@ -958,7 +1003,7 @@ void loop() {
       String url = e_url;
       url += "{";
       // Copy across, data length -1 to remove new line
-      for (int i = 0; i < data.length()-1; ++i){
+      for (int i = 0; i < data.length(); ++i){
           url += data[i];
       }
       url += ",psent:";
@@ -972,13 +1017,14 @@ void loop() {
       url += "&apikey=";
       url += emoncms_apikey;
 
-      //DEBUG.println(url);
+      DEBUG.println(url);
       packets_sent++;
 
       // Send data to Emoncms server
       String result="";
       if (emoncms_fingerprint!=0){
         // HTTPS on port 443 if HTTPS fingerprint is present
+        Serial.println("HTTPS Enabled");
         result = get_https(emoncms_fingerprint.c_str(), emoncms_server.c_str(), url, 443);
       } else {
         // Plain HTTP if other emoncms server e.g EmonPi
@@ -996,14 +1042,14 @@ void loop() {
 
       // Send data to MQTT
       if (mqtt_server != 0){
-        //char* buff = "";
-        String buff ="";
-        // Copy across, data length -1 to remove new line
-        for (int i = 0; i < data.length()-1; ++i){
-          buff += data[i];
+        Serial.print("MQTT publish base-topic: "); Serial.println(mqtt_topic);
+        mqtt_publish(mqtt_topic, data);
+        String ram_topic = mqtt_topic + "/freeram";
+        String free_ram = String(ESP.getFreeHeap());
+        mqttclient.publish(ram_topic.c_str(), free_ram.c_str());
+        ram_topic = "";
+        free_ram ="";
         }
-        mqttclient.publish(mqtt_topic.c_str(), buff.c_str());
-      }
 
 
     } // end wifi connected
