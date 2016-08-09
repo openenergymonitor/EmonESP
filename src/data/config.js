@@ -204,18 +204,21 @@ document.getElementById("save-emoncms").addEventListener("click", function(e) {
     var emoncms = {
       server: document.getElementById("emoncms_server").value,
       apikey: document.getElementById("emoncms_apikey").value,
-      node: document.getElementById("emoncms_node").value
+      node: document.getElementById("emoncms_node").value,
+      fingerprint: document.getElementById("emoncms_fingerprint").value
     }
     if (emoncms.server=="" || emoncms.node==""){
         alert("Please enter Emoncms server and node");
       } else if (emoncms.apikey.length!=32) {
           alert("Please enter valid Emoncms apikey");
-        } else {
+      } else if (emoncms.fingerprint!="" && emoncms.fingerprint.length!=59) {
+        alert("Please enter valid HTTPS fingerprint");
+      } else {
           document.getElementById("save-emoncms").innerHTML = "Saving...";
           var r = new XMLHttpRequest();
           r.open("POST", "saveemoncms", true);
           r.setRequestHeader("Content-type","application/x-www-form-urlencoded");
-          r.send("&server="+emoncms.server+"&apikey="+emoncms.apikey+"&node="+emoncms.node);
+          r.send("&server="+emoncms.server+"&apikey="+emoncms.apikey+"&node="+emoncms.node+"&fingerprint="+emoncms.fingerprint);
           r.onreadystatechange = function () {
             if (r.readyState != 4 || r.status != 200) return;
             var str = r.responseText;
