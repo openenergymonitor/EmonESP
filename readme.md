@@ -4,7 +4,7 @@
 
 ESP8266 WIFI serial to emoncms link
 
-![EmonEsp WiFi AP Setup Portal](docs/emonesp.jpg)
+![EmonEsp WiFi AP Setup Portal](docs/emonesp.png)
 
 ## Requirements
 
@@ -12,7 +12,7 @@ ESP8266 WIFI serial to emoncms link
 
 ## Installation
 
-EmonESP used [ESP8266 Arduino core](https://github.com/esp8266/Arduino)
+EmonESP uses [ESP8266 Arduino core](https://github.com/esp8266/Arduino)
 
 Firmware can be compiled and uploaded either using PlatfomIO ([see blog post](https://blog.openenergymonitor.org/2016/06/platformio/)) or Arduino IDE.
 
@@ -123,9 +123,47 @@ Required to include `data` folder with HTML etc in the upload
 
 ## First Setup
 
-On first boot, ESP should broadcast a WiFI AP `ESP_XXX`. Connect to this AP and the captive portal should forward you to the log-in page. If this does not happen navigate to `http://192.168.4.1`
+On first boot, ESP should broadcast a WiFI AP `ESP_XXX`. Connect to this AP and the [captive portal](https://en.wikipedia.org/wiki/Captive_portal) should forward you to the log-in page. If this does not happen navigate to `http://192.168.4.1`
 
 *Note: You may need to disable mobile data if connecting via a Android 6 device*
+
+### WiFi Connection
+
+- Select your WiFi network from list of available networks
+- Enter WiFi PSK key then hit save and connect
+- emonESP should now connect to local wifi network and return local IP address.
+- Browse to local IP address by clicking the hyperlink (assuming your computer is on the same WiFi network)
+
+On future boots EmonESP will automatically connect to this network.
+
+**If re-connection fails (e.g. network cannot be found) the EmonESP will automatically revert back to WiFi AP mode after a short while to allow a new network to be re-configued if required. Re-connection to existing network will be attempted every 5min.**
+
+## Emoncms
+
+TBC
+
+Topics to cover:
+- HTTP / HTTPS SHA-1 fingerprint
+- Connection status
+- API format
+- Node name / numerical
+- Status
+- Test API
+
+## MQTT
+
+EmonESP can post data to an MQTT server. Each data key:pair value will be published to a sub-topic of base topic.E.g data `CT1:346` will results in `346` being published to `<base-topic>/CT1`
+
+- Enter MQTT server host and base-topic
+- (Optional) Enter server authentication details if required
+- Click connect
+- After a few seconds `Connected: No` should change to `Connected: Yes` if connection is successful. Re-connection will be attempted every 10s.
+
+Note: `emon/xxxx` should be used as the base-topic if posting to emonPi MQTT server if you want the data to appear in emonPi Emoncms. See [emonPi MQTT docs](https://guide.openenergymonitor.org/technical/mqtt/).
+
+## OTA Firmware Update
+
+TBC
 
 ## API Examples
 

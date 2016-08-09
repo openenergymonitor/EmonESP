@@ -725,7 +725,7 @@ String get_https(const char* fingerprint, const char* host, String url, int http
   // Use WiFiClient class to create TCP connections
   if (!client.connect(host, httpsPort)) {
     Serial.print(host + httpsPort); //debug
-    return("Connection error");
+    return("Connection erromqtt_publishr");
   }
   if (client.verify(fingerprint, host)) {
     client.print(String("GET ") + url + " HTTP/1.1\r\n" + "Host: " + host + "\r\n" + "Connection: close\r\n\r\n");
@@ -798,7 +798,44 @@ void handleTest(){
   Serial.println(test_serial);
 }
 
-
+// -------------------------------------------------------------------
+// Publish to MQTT
+// Split up data string into sub topics: e.g
+// data = CT1:3935,CT2:325,T1:12.5,T2:16.9,T3:11.2,T4:34.7
+// base topic = emon/emonesp
+// MQTT Publish: emon/emonesp/CT1 > 3935 etc..
+// -------------------------------------------------------------------
+void mqtt_publish(String base_topic, String data){
+  String mqtt_data = "";
+  String topic = base_topic + "/";
+  int i=0;
+  while (int(data[i])!=0){
+      // Construct MQTT topic e.g. <base_topic>/CT1 e.g. emonesp/CT1
+      while (data[i]!=':'){
+        topic+= data[i];
+        i++;
+        if (int(data[i])==0){
+          break;
+        }
+      }
+      i++;
+      // Construct data string to publish to above topic
+      while (data[i]!=','){
+        mqtt_data+= data[i];
+        i++;
+        if (int(data[i])==0){
+          break;
+        }
+      }
+      // send data via mqtt
+      delay(100);
+      mqttclient.publish(topic.c_str(), mqtt_data.c_str());
+      topic= base_topic + "/";
+      mqtt_data="";
+      i++;
+      if (int(data[i])==0) break;
+  }
+}
 
 
 // -------------------------------------------------------------------
@@ -946,7 +983,6 @@ void loop() {
       data = test_serial;
       test_serial = "";
     }
-
     last_datastr = data;
     // If Wifi connected & emoncms server details are present
     if ((wifi_mode==0 || wifi_mode==3) && emoncms_apikey != 0){
@@ -993,13 +1029,13 @@ void loop() {
 
       // Send data to MQTT
       if (mqtt_server != 0){
-        //char* buff = "";
-        String buff ="";
-        // Copy across, data length -1 to remove new line
-        for (int i = 0; i < data.length()-1; ++i){
-          buff += data[i];
-        }
-        mqttclient.publish(mqtt_topic.c_str(), buff.c_str());
+        Serial.print("MQTT publish base-topic: "); Serial.println(mqtt_topic);
+        mqtt_publish(mqtt_topic, data);
+        String ram_topic = mqtt_topic + "/freeram";
+        String free_ram = String(ESP.getFreeHeap());
+        mqttclient.publish(ram_topic.c_str(), free_ram.c_str());
+        ram_topic = "";
+        free_ram ="";
       }
 
 
