@@ -69,18 +69,17 @@ String st, rssi;
 /* hostname for mDNS. Should work at least on windows. Try http://emonesp.local */
 const char *esp_hostname = "emonesp";
 
+//
 String esid = "";
 String epass = "";
-
 
 String connected_network = "";
 String last_datastr = "";
 String status_string = "";
 String ipaddress = "";
 
-//EMONCMS SERVER strings and interfers for emoncms.org
+//EMONCMS SERVER strings
 const char* e_url = "/input/post.json?json=";
-const char* emoncmsorg_fingerprint = "7D:82:15:BE:D7:BC:72:58:87:7D:8E:40:D4:80:BA:1A:9F:8B:8D:DA";
 
 String emoncms_server = "";
 String emoncms_node = "";
@@ -103,7 +102,6 @@ long lastMqttReconnectAttempt = 0;
 // Array of strings Used to check firmware version
 const char* u_host = "217.9.195.227";
 const char* u_url = "/esp/firmware.php";
-
 const char* firmware_update_path = "/upload";
 
 // Get running firmware version from build tag environment variable
@@ -276,6 +274,9 @@ void startClient() {
 #define EEPROM_EMON_FINGERPRINT_START  EEPROM_MQTT_PASS_END
 #define EEPROM_EMON_FINGERPRINT_END    (EEPROM_EMON_FINGERPRINT_START + EEPROM_EMON_FINGERPRINT_SIZE)
 
+// -------------------------------------------------------------------
+// Reset EEPROM, wipes all settings
+// -------------------------------------------------------------------
 void ResetEEPROM(){
   //DEBUG.println("Erasing EEPROM");
   for (int i = 0; i < EEPROM_SIZE; ++i) {
@@ -285,6 +286,9 @@ void ResetEEPROM(){
   EEPROM.commit();
 }
 
+// -------------------------------------------------------------------
+// Load saved settings from EEPROM
+// -------------------------------------------------------------------
 void load_EEPROM_settings(){
 
   EEPROM.begin(EEPROM_SIZE);
@@ -768,7 +772,7 @@ String get_https(const char* fingerprint, const char* host, String url, int http
     return("HTTPS fingerprint no match");
   }
   return("error" + String(host));
-} // end https_get
+}
 
 // -------------------------------------------------------------------
 // HTTP GET Request
