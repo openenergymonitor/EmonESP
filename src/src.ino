@@ -37,7 +37,8 @@
 #include <DNSServer.h>                // Required for captive portal
 #include <PubSubClient.h>             // MQTT https://github.com/knolleary/pubsubclient PlatformIO lib: 89
 
-#define DEBUG_SERIAL1
+// Uncomment to use hardware UART 1 for debug else use UART 0
+//#define DEBUG_SERIAL1
 #ifdef DEBUG_SERIAL1
 #define DEBUG Serial1
 #else
@@ -68,18 +69,17 @@ String st, rssi;
 /* hostname for mDNS. Should work at least on windows. Try http://emonesp.local */
 const char *esp_hostname = "emonesp";
 
+//
 String esid = "";
 String epass = "";
-
 
 String connected_network = "";
 String last_datastr = "";
 String status_string = "";
 String ipaddress = "";
 
-//EMONCMS SERVER strings and interfers for emoncms.org
+//EMONCMS SERVER strings
 const char* e_url = "/input/post.json?json=";
-const char* emoncmsorg_fingerprint = "7D:82:15:BE:D7:BC:72:58:87:7D:8E:40:D4:80:BA:1A:9F:8B:8D:DA";
 
 String emoncms_server = "";
 String emoncms_node = "";
@@ -103,7 +103,6 @@ long lastMqttReconnectAttempt = 0;
 // Array of strings Used to check firmware version
 const char* u_host = "217.9.195.227";
 const char* u_url = "/esp/firmware.php";
-
 const char* firmware_update_path = "/upload";
 
 // Get running firmware version from build tag environment variable
@@ -284,6 +283,9 @@ void startClient() {
 #define EEPROM_MQTT_TOPIC_SEP_START  EEPROM_EMON_FINGERPRINT_END
 #define EEPROM_MQTT_TOPIC_SEP_END    (EEPROM_MQTT_TOPIC_SEP_START + EEPROM_MQTT_TOPIC_SEP_SIZE)
 
+// -------------------------------------------------------------------
+// Reset EEPROM, wipes all settings
+// -------------------------------------------------------------------
 void ResetEEPROM(){
   //DEBUG.println("Erasing EEPROM");
   for (int i = 0; i < EEPROM_SIZE; ++i) {
@@ -310,6 +312,9 @@ void EEPROM_write_string(int start, int count, String val) {
   }
 }
 
+// -------------------------------------------------------------------
+// Load saved settings from EEPROM
+// -------------------------------------------------------------------
 void load_EEPROM_settings(){
 
   EEPROM.begin(EEPROM_SIZE);
@@ -333,7 +338,7 @@ void load_EEPROM_settings(){
 }
 
 // -------------------------------------------------------------------
-// Load SPIFFS Home page
+// Load Home page
 // url: /
 // -------------------------------------------------------------------
 void handleHome() {
@@ -344,6 +349,26 @@ void handleHome() {
     server.send(200, "text/html", s);
     f.close();
   }
+}
+
+// -------------------------------------------------------------------
+// Wifi scan /scan not currently used
+// url: /scan
+// -------------------------------------------------------------------
+void handleScan() {
+  DEBUG.println("WIFI Scan");
+  int n = WiFi.scanNetworks();
+  DEBUG.print(n);
+  DEBUG.println(" networks found");
+  st = "";
+  rssi = "";
+  for (int i = 0; i < n; ++i){
+    st += "\""+WiFi.SSID(i)+"\"";
+    rssi += "\""+String(WiFi.RSSI(i))+"\"";
+    if (i<n-1) st += ",";
+    if (i<n-1) rssi += ",";
+  }
+  server.send(200, "text/plain","[" +st+ "],[" +rssi+"]");
 }
 
 // -------------------------------------------------------------------
@@ -537,38 +562,17 @@ void handleSaveMqtt() {
 }
 
 
-
 // -------------------------------------------------------------------
-// Wifi scan /scan not currently used
-// url: /scan
-// -------------------------------------------------------------------
-void handleScan() {
-  DEBUG.println("WIFI Scan");
-  int n = WiFi.scanNetworks();
-  DEBUG.print(n);
-  DEBUG.println(" networks found");
-  st = "";
-  rssi = "";
-  for (int i = 0; i < n; ++i){
-    st += "\""+WiFi.SSID(i)+"\"";
-    rssi += "\""+String(WiFi.RSSI(i))+"\"";
-    if (i<n-1) st += ",";
-    if (i<n-1) rssi += ",";
-  }
-  server.send(200, "text/plain","[" +st+ "],[" +rssi+"]");
-}
-
-// -------------------------------------------------------------------
-// url: /lastvalues
 // Last values on atmega serial
+// url: /lastvalues
 // -------------------------------------------------------------------
 void handleLastValues() {
   server.send(200, "text/html", last_datastr);
 }
 
 // -------------------------------------------------------------------
+// Returns status json
 // url: /status
-// returns wifi status
 // -------------------------------------------------------------------
 void handleStatus() {
 
@@ -631,6 +635,16 @@ void handleRestart() {
   ESP.restart();
 }
 
+// -------------------------------------------------------------------
+// Handle test input API
+// url /test
+// e.g http://192.168.0.75/test?serial=CT1:3935,CT2:325,T1:12.5,T2:16.9,T3:11.2,T4:34.7
+// -------------------------------------------------------------------
+void handleTest(){
+  test_serial = server.arg("serial");
+  server.send(200, "text/html", test_serial);
+  DEBUG.println(test_serial);
+}
 
 // -------------------------------------------------------------------
 // Check for updates and display current version
@@ -712,7 +726,7 @@ String get_https(const char* fingerprint, const char* host, String url, int http
     return("HTTPS fingerprint no match");
   }
   return("error " + String(host));
-} // end https_get
+}
 
 // -------------------------------------------------------------------
 // HTTP GET Request
@@ -749,15 +763,6 @@ boolean mqtt_connect() {
     return(0);
   }
   return (1);
-}
-
-// -------------------------------------------------------------------
-// Simulate Serial Input from emonTx
-// -------------------------------------------------------------------
-void handleTest(){
-  test_serial = server.arg("serial");
-  server.send(200, "text/html", test_serial);
-  DEBUG.println(test_serial);
 }
 
 // -------------------------------------------------------------------
