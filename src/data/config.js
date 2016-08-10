@@ -32,6 +32,7 @@ r1.onreadystatechange = function () {
   if (status.mqtt_server!=0){
     document.getElementById("mqtt_server").value = status.mqtt_server;
     document.getElementById("mqtt_topic").value = status.mqtt_topic;
+    document.getElementById("mqtt_topic_sep").value = status.mqtt_topic_sep;
     if (status.mqtt_user!=0){
       document.getElementById("mqtt_user").value = status.mqtt_user;
       document.getElementById("mqtt_pass").value = status.mqtt_pass;
@@ -236,6 +237,7 @@ document.getElementById("save-mqtt").addEventListener("click", function(e) {
     var mqtt = {
       server: document.getElementById("mqtt_server").value,
       topic: document.getElementById("mqtt_topic").value,
+      sep: document.getElementById("mqtt_topic_sep").value,
       user: document.getElementById("mqtt_user").value,
       pass: document.getElementById("mqtt_pass").value
     }
@@ -246,7 +248,7 @@ document.getElementById("save-mqtt").addEventListener("click", function(e) {
       var r = new XMLHttpRequest();
       r.open("POST", "savemqtt", true);
       r.setRequestHeader("Content-type","application/x-www-form-urlencoded");
-      r.send("&server="+mqtt.server+"&topic="+mqtt.topic+"&user="+mqtt.user+"&pass="+mqtt.pass);
+      r.send("&server="+mqtt.server+"&topic="+mqtt.topic+"&sep="+mqtt.sep+"&user="+mqtt.user+"&pass="+mqtt.pass);
       r.onreadystatechange = function () {
         console.log(mqtt);
         if (r.readyState != 4 || r.status != 200) return;

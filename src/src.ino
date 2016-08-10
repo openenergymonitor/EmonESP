@@ -93,6 +93,7 @@ String mqtt_server = "";
 String mqtt_topic = "";
 String mqtt_user = "";
 String mqtt_pass = "";
+String mqtt_topic_sep = "";
 long lastMqttReconnectAttempt = 0;
 
 // -------------------------------------------------------------------
@@ -116,13 +117,18 @@ String currentfirmware = ESCAPEQUOTE(BUILD_TAG);
 // 1 - AP with STA retry
 // 2 - AP only
 // 3 - AP + STA
-int wifi_mode = 0;
+
+#define WIFI_MODE_STA           0
+#define WIFI_MODE_AP_STA_RETRY  1
+#define WIFI_MODE_AP_ONLY       2
+#define WIFI_MODE_AP_AND_STA    3
+
+int wifi_mode = WIFI_MODE_STA;
 int clientTimeout = 0;
 int i = 0;
 unsigned long Timer;
 unsigned long packets_sent = 0;
 unsigned long packets_success = 0;
-
 
 String getContentType(String filename){
   if(server.hasArg("download")) return "application/octet-stream";
@@ -224,13 +230,13 @@ void startClient() {
       if (attempt >= 5){
         startAP();
         // AP mode with SSID in EEPROM, connection will retry in 5 minutes
-        wifi_mode = 1;
+        wifi_mode = WIFI_MODE_AP_STA_RETRY;
         break;
       }
     }
   }
 
-  if (wifi_mode == 0 || wifi_mode == 3){
+  if (wifi_mode == WIFI_MODE_STA || wifi_mode == WIFI_MODE_AP_AND_STA){
     IPAddress myAddress = WiFi.localIP();
     char tmpStr[40];
     sprintf(tmpStr,"%d.%d.%d.%d",myAddress[0],myAddress[1],myAddress[2],myAddress[3]);
@@ -252,6 +258,7 @@ void startClient() {
 #define EEPROM_MQTT_USER_SIZE     32
 #define EEPROM_MQTT_PASS_SIZE     64
 #define EEPROM_EMON_FINGERPRINT_SIZE     60
+#define EEPROM_MQTT_TOPIC_SEP_SIZE  1
 #define EEPROM_SIZE 512
 
 #define EEPROM_ESID_START         0
@@ -274,6 +281,8 @@ void startClient() {
 #define EEPROM_MQTT_PASS_END      (EEPROM_MQTT_PASS_START + EEPROM_MQTT_PASS_SIZE)
 #define EEPROM_EMON_FINGERPRINT_START  EEPROM_MQTT_PASS_END
 #define EEPROM_EMON_FINGERPRINT_END    (EEPROM_EMON_FINGERPRINT_START + EEPROM_EMON_FINGERPRINT_SIZE)
+#define EEPROM_MQTT_TOPIC_SEP_START  EEPROM_EMON_FINGERPRINT_END
+#define EEPROM_MQTT_TOPIC_SEP_END    (EEPROM_MQTT_TOPIC_SEP_START + EEPROM_MQTT_TOPIC_SEP_SIZE)
 
 void ResetEEPROM(){
   //DEBUG.println("Erasing EEPROM");
@@ -284,50 +293,43 @@ void ResetEEPROM(){
   EEPROM.commit();
 }
 
+void EEPROM_read_srting(int start, int count, String& val) {
+  for (int i = 0; i < count; ++i){
+    byte c = EEPROM.read(start+i);
+    if (c!=0 && c!=255) val += (char) c;
+  }
+}
+
+void EEPROM_write_string(int start, int count, String val) {
+  for (int i = 0; i < count; ++i){
+    if (i<val.length()) {
+      EEPROM.write(start+i, val[i]);
+    } else {
+      EEPROM.write(start+i, 0);
+    }
+  }
+}
+
 void load_EEPROM_settings(){
 
   EEPROM.begin(EEPROM_SIZE);
-  for (int i = EEPROM_ESID_START; i < EEPROM_ESID_END; ++i){
-    byte c = EEPROM.read(i);
-    if (c!=0 && c!=255) esid += (char) c;
-  }
 
-  for (int i = EEPROM_EPASS_START; i < EEPROM_EPASS_END; ++i){
-    byte c = EEPROM.read(i);
-    if (c!=0 && c!=255) epass += (char) c;
-  }
-  for (int i = EEPROM_EMON_API_KEY_START; i < EEPROM_EMON_API_KEY_END; ++i){
-    byte c = EEPROM.read(i);
-    if (c!=0 && c!=255) emoncms_apikey += (char) c;
-  }
-  for (int i = EEPROM_EMON_SERVER_START; i < EEPROM_EMON_SERVER_END; ++i){
-    byte c = EEPROM.read(i);
-    if (c!=0 && c!=255) emoncms_server += (char) c;
-  }
-  for (int i = EEPROM_EMON_NODE_START; i < EEPROM_EMON_NODE_END; ++i){
-    byte c = EEPROM.read(i);
-    if (c!=0 && c!=255) emoncms_node += (char) c;
-  }
-  for (int i = EEPROM_MQTT_SERVER_START; i < EEPROM_MQTT_SERVER_END; ++i){
-    byte c = EEPROM.read(i);
-    if (c!=0 && c!=255) mqtt_server += (char) c;
-  }
-  for (int i = EEPROM_MQTT_TOPIC_START; i < EEPROM_MQTT_TOPIC_END; ++i){
-    byte c = EEPROM.read(i);
-    if (c!=0 && c!=255) mqtt_topic += (char) c;
-  }
-  for (int i = EEPROM_MQTT_USER_START; i < EEPROM_MQTT_USER_END; ++i){
-    byte c = EEPROM.read(i);
-    if (c!=0 && c!=255) mqtt_user += (char) c;
-  }
-  for (int i = EEPROM_MQTT_PASS_START; i < EEPROM_MQTT_PASS_END; ++i){
-    byte c = EEPROM.read(i);
-    if (c!=0 && c!=255) mqtt_pass += (char) c;
-  }
-  for (int i = EEPROM_EMON_FINGERPRINT_START; i < EEPROM_EMON_FINGERPRINT_END; ++i){
-    byte c = EEPROM.read(i);
-    if (c!=0 && c!=255) emoncms_fingerprint += (char) c;
-  }
+  // Load WiFi values
+  EEPROM_read_srting(EEPROM_ESID_START, EEPROM_ESID_SIZE, esid);
+  EEPROM_read_srting(EEPROM_EPASS_START, EEPROM_EPASS_SIZE, epass);
+
+  // EmonCMS settings
+  EEPROM_read_srting(EEPROM_EMON_API_KEY_START, EEPROM_EMON_API_KEY_SIZE, emoncms_apikey);
+  EEPROM_read_srting(EEPROM_EMON_SERVER_START, EEPROM_EMON_SERVER_SIZE, emoncms_server);
+  EEPROM_read_srting(EEPROM_EMON_NODE_START, EEPROM_EMON_NODE_SIZE, emoncms_node);
+  EEPROM_read_srting(EEPROM_EMON_FINGERPRINT_START, EEPROM_EMON_FINGERPRINT_SIZE, emoncms_fingerprint);
+
+  // MQTT settings
+  EEPROM_read_srting(EEPROM_MQTT_SERVER_START, EEPROM_MQTT_SERVER_SIZE, mqtt_server);
+  EEPROM_read_srting(EEPROM_MQTT_TOPIC_START, EEPROM_MQTT_TOPIC_SIZE, mqtt_topic);
+  EEPROM_read_srting(EEPROM_MQTT_TOPIC_SEP_START, EEPROM_MQTT_TOPIC_SEP_START, mqtt_topic_sep);
+  EEPROM_read_srting(EEPROM_MQTT_USER_START, EEPROM_MQTT_USER_SIZE, mqtt_user);
+  EEPROM_read_srting(EEPROM_MQTT_PASS_START, EEPROM_MQTT_PASS_SIZE, mqtt_pass);
 }
 
 // -------------------------------------------------------------------
@@ -438,21 +440,8 @@ void handleSaveNetwork() {
   qsid.replace('+', ' ');
 
   if (qsid != 0){
-    for (int i = 0; i < EEPROM_ESID_SIZE; i++){
-      if (i<qsid.length()) {
-        EEPROM.write(i+EEPROM_ESID_START, qsid[i]);
-      } else {
-        EEPROM.write(i+EEPROM_ESID_START, 0);
-      }
-    }
-
-    for (int i = 0; i < EEPROM_EPASS_SIZE; i++){
-      if (i<qpass.length()) {
-        EEPROM.write(i+EEPROM_EPASS_START, qpass[i]);
-      } else {
-        EEPROM.write(i+EEPROM_EPASS_START, 0);
-      }
-    }
+    EEPROM_write_string(EEPROM_ESID_START, EEPROM_ESID_SIZE, qsid);
+    EEPROM_write_string(EEPROM_EPASS_START, EEPROM_EPASS_SIZE, qpass);
 
     EEPROM.commit();
     server.send(200, "text/html", "saved");
@@ -469,7 +458,7 @@ void handleSaveNetwork() {
     // Setup the DNS server redirecting all the domains to the apIP
     dnsServer.setErrorReplyCode(DNSReplyCode::NoError);
     dnsServer.start(DNS_PORT, "*", apIP);
-    wifi_mode = 3;
+    wifi_mode = WIFI_MODE_AP_AND_STA;
     startClient();
   }
 }
@@ -483,47 +472,27 @@ void handleSaveEmoncms() {
   emoncms_node = server.arg("node");
   emoncms_apikey = server.arg("apikey");
   emoncms_fingerprint = server.arg("fingerprint");
-  if (emoncms_apikey!=0 && emoncms_server!=0 && emoncms_node!=0) {
-    // save apikey to EEPROM
-    for (int i = 0; i < EEPROM_EMON_API_KEY_SIZE; i++){
-      if (i<emoncms_apikey.length()) {
-        EEPROM.write(i+EEPROM_EMON_API_KEY_START, emoncms_apikey[i]);
-      } else {
-        EEPROM.write(i+EEPROM_EMON_API_KEY_START, 0);
-      }
-    }
-    // save emoncms server to EEPROM max 45 characters
-    for (int i = 0; i < EEPROM_EMON_SERVER_SIZE; i++){
-      if (i<emoncms_server.length()) {
-        EEPROM.write(i+EEPROM_EMON_SERVER_START, emoncms_server[i]);
-      } else {
-        EEPROM.write(i+EEPROM_EMON_SERVER_START, 0);
-      }
-    }
-    // save emoncms node to EEPROM max 32 characters
-    for (int i = 0; i < EEPROM_EMON_NODE_SIZE; i++){
-      if (i<emoncms_node.length()) {
-        EEPROM.write(i+EEPROM_EMON_NODE_START, emoncms_node[i]);
-      } else {
-        EEPROM.write(i+EEPROM_EMON_NODE_START, 0);
-      }
-    }
-    // save emoncms HTTPS fingerprint to EEPROM max 60 characters
-    if (emoncms_fingerprint!=0){
-      for (int i = 0; i < EEPROM_EMON_FINGERPRINT_SIZE; i++){
-        if (i<emoncms_fingerprint.length()) {
-          EEPROM.write(i+EEPROM_EMON_FINGERPRINT_START, emoncms_fingerprint[i]);
-        } else {
-          EEPROM.write(i+EEPROM_EMON_FINGERPRINT_START, 0);
-        }
-      }
-    }
-    EEPROM.commit();
-    char tmpStr[200];
-    sprintf(tmpStr,"Saved: %s %s %s %s",emoncms_server.c_str(),emoncms_node.c_str(),emoncms_apikey.c_str(),emoncms_fingerprint.c_str());
-    DEBUG.println(tmpStr);
-    server.send(200, "text/html", tmpStr);
-  }
+
+  // save apikey to EEPROM
+  EEPROM_write_string(EEPROM_EMON_API_KEY_START, EEPROM_EMON_API_KEY_SIZE, emoncms_apikey);
+
+  // save emoncms server to EEPROM max 45 characters
+  EEPROM_write_string(EEPROM_EMON_SERVER_START, EEPROM_EMON_SERVER_SIZE, emoncms_server);
+
+  // save emoncms node to EEPROM max 32 characters
+  EEPROM_write_string(EEPROM_EMON_NODE_START, EEPROM_EMON_NODE_SIZE, emoncms_node);
+
+  // save emoncms HTTPS fingerprint to EEPROM max 60 characters
+  EEPROM_write_string(EEPROM_EMON_FINGERPRINT_START, EEPROM_EMON_FINGERPRINT_SIZE, emoncms_fingerprint);
+
+  EEPROM.commit();
+
+  // BUG: Potential buffer overflow issue the values emoncms_xxx come from user
+  //      input so could overflow the buffer no matter the length
+  char tmpStr[200];
+  sprintf(tmpStr,"Saved: %s %s %s %s",emoncms_server.c_str(),emoncms_node.c_str(),emoncms_apikey.c_str(),emoncms_fingerprint.c_str());
+  DEBUG.println(tmpStr);
+  server.send(200, "text/html", tmpStr);
 }
 
 // -------------------------------------------------------------------
@@ -533,53 +502,37 @@ void handleSaveEmoncms() {
 void handleSaveMqtt() {
   mqtt_server = server.arg("server");
   mqtt_topic = server.arg("topic");
+  mqtt_topic_sep = server.arg("sep");
   mqtt_user = server.arg("user");
   mqtt_pass = server.arg("pass");
-  if (mqtt_server!=0 && mqtt_topic!=0) {
-    // Save MQTT server max 45 characters
-    for (int i = 0; i < EEPROM_MQTT_SERVER_SIZE; i++){
-      if (i<mqtt_server.length()) {
-        EEPROM.write(i+EEPROM_MQTT_SERVER_START, mqtt_server[i]);
-      } else {
-        EEPROM.write(i+EEPROM_MQTT_SERVER_START, 0);
-      }
-    }
-    // Save MQTT topic max 32 characters
-    for (int i = 0; i < EEPROM_MQTT_TOPIC_SIZE; i++){
-      if (i<mqtt_topic.length()) {
-        EEPROM.write(i+EEPROM_MQTT_TOPIC_START, mqtt_topic[i]);
-      } else {
-        EEPROM.write(i+EEPROM_MQTT_TOPIC_START, 0);
-      }
-    }
-    // Save MQTT username max 32 characters
 
-    if (mqtt_user!=0 && mqtt_pass!=0){
-    for (int i = 0; i < EEPROM_MQTT_USER_SIZE; i++){
-      if (i<mqtt_user.length()) {
-        EEPROM.write(i+EEPROM_MQTT_USER_START, mqtt_user[i]);
-      } else {
-        EEPROM.write(i+EEPROM_MQTT_USER_START, 0);
-      }
-    }
-    // Save MQTT pass max 64 characters
-    for (int i = 0; i < EEPROM_MQTT_PASS_SIZE; i++){
-      if (i<mqtt_pass.length()) {
-        EEPROM.write(i+EEPROM_MQTT_PASS_START, mqtt_pass[i]);
-      } else {
-        EEPROM.write(i+EEPROM_MQTT_PASS_START, 0);
-      }
-    }
-    }
-    EEPROM.commit();
-    char tmpStr[200];
-    sprintf(tmpStr,"Saved: %s %s %s %s",mqtt_server.c_str(),mqtt_topic.c_str(),mqtt_user.c_str(),mqtt_pass.c_str());
-    DEBUG.println(tmpStr);
-    server.send(200, "text/html", tmpStr);
-    // If connected disconnect MQTT to trigger re-connect with new details
-    if (mqttclient.connected()) {
-      mqttclient.disconnect();
-    }
+  // Save MQTT server max 45 characters
+  EEPROM_write_string(EEPROM_MQTT_SERVER_START, EEPROM_MQTT_SERVER_SIZE, mqtt_server);
+
+  // Save MQTT topic max 32 characters
+  EEPROM_write_string(EEPROM_MQTT_TOPIC_START, EEPROM_MQTT_TOPIC_SIZE, mqtt_topic);
+
+  // Save MQTT topic separator max 1 characters
+  EEPROM_write_string(EEPROM_MQTT_TOPIC_SEP_START, EEPROM_MQTT_TOPIC_SEP_SIZE, mqtt_topic_sep);
+
+  // Save MQTT username max 32 characters
+  EEPROM_write_string(EEPROM_MQTT_USER_START, EEPROM_MQTT_USER_SIZE, mqtt_user);
+
+  // Save MQTT pass max 64 characters
+  EEPROM_write_string(EEPROM_MQTT_PASS_START, EEPROM_MQTT_PASS_SIZE, mqtt_pass);
+
+  EEPROM.commit();
+
+  char tmpStr[200];
+  // BUG: Potential buffer overflow issue the values mqtt_xxx come from user
+  //      input so could overflow the buffer no matter the length
+  sprintf(tmpStr,"Saved: %s %s %s %s %s",mqtt_server.c_str(),mqtt_topic.c_str(),mqtt_topic_sep.c_str(),mqtt_user.c_str(),mqtt_pass.c_str());
+  DEBUG.println(tmpStr);
+  server.send(200, "text/html", tmpStr);
+
+  // If connected disconnect MQTT to trigger re-connect with new details
+  if (mqttclient.connected()) {
+    mqttclient.disconnect();
   }
 }
 
@@ -620,11 +573,11 @@ void handleLastValues() {
 void handleStatus() {
 
   String s = "{";
-  if (wifi_mode==0) {
+  if (wifi_mode==WIFI_MODE_STA) {
     s += "\"mode\":\"STA\",";
-  } else if (wifi_mode==1 || wifi_mode==2) {
+  } else if (wifi_mode==WIFI_MODE_AP_STA_RETRY || wifi_mode==WIFI_MODE_AP_ONLY) {
     s += "\"mode\":\"AP\",";
-  } else if (wifi_mode==3) {
+  } else if (wifi_mode==WIFI_MODE_AP_AND_STA) {
     s += "\"mode\":\"STA+AP\",";
   }
   s += "\"networks\":["+st+"],";
@@ -644,6 +597,7 @@ void handleStatus() {
 
   s += "\"mqtt_server\":\""+mqtt_server+"\",";
   s += "\"mqtt_topic\":\""+mqtt_topic+"\",";
+  s += "\"mqtt_topic_sep\":\""+mqtt_topic_sep+"\",";
   s += "\"mqtt_user\":\""+mqtt_user+"\",";
   s += "\"mqtt_pass\":\""+mqtt_pass+"\",";
   s += "\"mqtt_connected\":\""+String(mqttclient.connected())+"\",";
@@ -710,7 +664,7 @@ void handleUpdate() {
   String str="error";
   switch(ret) {
     case HTTP_UPDATE_FAILED:
-      str = printf("Update failed error (%d): %s", ESPhttpUpdate.getLastError(), ESPhttpUpdate.getLastErrorString().c_str());
+      str = DEBUG.printf("Update failed error (%d): %s", ESPhttpUpdate.getLastError(), ESPhttpUpdate.getLastErrorString().c_str());
       break;
     case HTTP_UPDATE_NO_UPDATES:
       str="No update, running latest firmware";
@@ -733,7 +687,7 @@ String get_https(const char* fingerprint, const char* host, String url, int http
   // Use WiFiClient class to create TCP connections
   if (!client.connect(host, httpsPort)) {
     DEBUG.print(host + httpsPort); //debug
-    return("Connection erromqtt_publishr");
+    return("Connection error");
   }
   if (client.verify(fingerprint, host)) {
     client.print(String("GET ") + url + " HTTP/1.1\r\n" + "Host: " + host + "\r\n" + "Connection: close\r\n\r\n");
@@ -757,7 +711,7 @@ String get_https(const char* fingerprint, const char* host, String url, int http
   else {
     return("HTTPS fingerprint no match");
   }
-  return("error" + String(host));
+  return("error " + String(host));
 } // end https_get
 
 // -------------------------------------------------------------------
@@ -813,9 +767,9 @@ void handleTest(){
 // base topic = emon/emonesp
 // MQTT Publish: emon/emonesp/CT1 > 3935 etc..
 // -------------------------------------------------------------------
-void mqtt_publish(String base_topic, String data){
+void mqtt_publish(String base_topic, String sep, String data){
   String mqtt_data = "";
-  String topic = base_topic + "/";
+  String topic = base_topic + sep;
   int i=0;
   while (int(data[i])!=0){
     // Construct MQTT topic e.g. <base_topic>/CT1 e.g. emonesp/CT1
@@ -836,15 +790,82 @@ void mqtt_publish(String base_topic, String data){
       }
     }
     // send data via mqtt
-    delay(100);
+    //delay(100);
+    DEBUG.printf("%s = %s\r\n", topic.c_str(), mqtt_data.c_str());
     mqttclient.publish(topic.c_str(), mqtt_data.c_str());
-    topic= base_topic + "/";
+    topic = base_topic + sep;
     mqtt_data="";
     i++;
     if (int(data[i])==0) break;
   }
 }
 
+// -------------------------------------------------------------------
+// MQTT state management
+//
+// Call every time around loop() if connected to the WiFi
+// -------------------------------------------------------------------
+void mqtt_loop()
+{
+  if (!mqttclient.connected()) {
+    long now = millis();
+    // try and reconnect continuously for first 5s then try again once every 10s
+    if ( (now < 50000) || ((now - lastMqttReconnectAttempt)  > 100000) ) {
+      lastMqttReconnectAttempt = now;
+      if (mqtt_connect()) { // Attempt to reconnect
+        lastMqttReconnectAttempt = 0;
+      }
+    }
+  } else {
+    // if MQTT connected
+    mqttclient.loop();
+  }
+}
+
+void emoncms_publish(String data)
+{
+  // We now create a URL for server data upload
+  String url = e_url;
+  url += "{";
+  // Copy across, data length -1 to remove new line
+  for (int i = 0; i < data.length(); ++i){
+    url += data[i];
+  }
+  url += ",psent:";
+  url += packets_sent;
+  url += ",psuccess:";
+  url += packets_success;
+  url += ",freeram:";
+  url += String(ESP.getFreeHeap());
+  url += "}&node=";
+  url += emoncms_node;
+  url += "&apikey=";
+  url += emoncms_apikey;
+
+  DEBUG.println(url); delay(10);
+  packets_sent++;
+
+  // Send data to Emoncms server
+  String result="";
+  if (emoncms_fingerprint!=0){
+    // HTTPS on port 443 if HTTPS fingerprint is present
+    DEBUG.println("HTTPS Enabled"); delay(10);
+    result = get_https(emoncms_fingerprint.c_str(), emoncms_server.c_str(), url, 443);
+  } else {
+    // Plain HTTP if other emoncms server e.g EmonPi
+    DEBUG.println("Plain old HTTP"); delay(10);
+    result = get_http(emoncms_server.c_str(), url);
+  }
+  if (result == "ok"){
+    packets_success++;
+    emoncms_connected = true;
+  }
+  else{
+    emoncms_connected=false;
+    DEBUG.print("Emoncms error: ");
+    DEBUG.println(result);
+  }
+}
 
 // -------------------------------------------------------------------
 // SETUP
@@ -868,13 +889,13 @@ void setup() {
   if (esid == 0 || esid == "")
   {
     startAP();
-    wifi_mode = 2; // AP mode with no SSID in EEPROM
+    wifi_mode = WIFI_MODE_AP_ONLY; // AP mode with no SSID in EEPROM
   }
   // 2) else try and connect to the configured network
   else
   {
     WiFi.mode(WIFI_STA);
-    wifi_mode = 0;
+    wifi_mode = WIFI_MODE_STA;
     startClient();
   }
 
@@ -882,7 +903,7 @@ void setup() {
   ArduinoOTA.begin();
 
   // Start hostname broadcast in STA mode
-  if ((wifi_mode==0 || wifi_mode==3)){
+  if ((wifi_mode==WIFI_MODE_STA || wifi_mode==WIFI_MODE_AP_AND_STA)){
     if (MDNS.begin(esp_hostname)) {
       MDNS.addService("http", "tcp", 80);
     }
@@ -893,7 +914,7 @@ void setup() {
 
   // Start server & server root html /
   server.on("/", [](){
-    if(www_username!="" && !server.authenticate(www_username, www_password) && wifi_mode == 0)
+    if(www_username!="" && !server.authenticate(www_username, www_password) && wifi_mode == WIFI_MODE_STA)
       return server.requestAuthentication();
     handleHome();
   });
@@ -910,28 +931,28 @@ void setup() {
   server.on("/fwlink", handleHome);  //Microsoft captive portal. Maybe not needed. Might be handled by notFound
 
   server.on("/status", [](){
-  if(www_username!="" && !server.authenticate(www_username, www_password) && wifi_mode == 0)
+  if(www_username!="" && !server.authenticate(www_username, www_password) && wifi_mode == WIFI_MODE_STA)
     return server.requestAuthentication();
   handleStatus();
   });
   server.on("/lastvalues", [](){
-  if(www_username!="" && !server.authenticate(www_username, www_password) && wifi_mode == 0)
+  if(www_username!="" && !server.authenticate(www_username, www_password) && wifi_mode == WIFI_MODE_STA)
     return server.requestAuthentication();
   handleLastValues();
   });
   server.on("/reset", [](){
-  if(www_username!="" && !server.authenticate(www_username, www_password) && wifi_mode == 0)
+  if(www_username!="" && !server.authenticate(www_username, www_password) && wifi_mode == WIFI_MODE_STA)
     return server.requestAuthentication();
   handleRst();
   });
   server.on("/restart", [](){
-  if(www_username!="" && !server.authenticate(www_username, www_password) && wifi_mode == 0)
+  if(www_username!="" && !server.authenticate(www_username, www_password) && wifi_mode == WIFI_MODE_STA)
     return server.requestAuthentication();
   handleRestart();
   });
 
   server.on("/test", [](){
-  if(www_username!="" && !server.authenticate(www_username, www_password) && wifi_mode == 0)
+  if(www_username!="" && !server.authenticate(www_username, www_password) && wifi_mode == WIFI_MODE_STA)
     return server.requestAuthentication();
   handleTest();
   });
@@ -957,24 +978,12 @@ void loop() {
   dnsServer.processNextRequest(); // Captive portal DNS re-dierct
 
   // If Wifi is connected & MQTT server has been set then connect to mqtt server
-  if ((wifi_mode==0 || wifi_mode==3) && mqtt_server != 0){
-    if (!mqttclient.connected()) {
-      long now = millis();
-      // try and reconnect continuously for first 5s then try again once every 10s
-      if ( (now < 50000) || ((now - lastMqttReconnectAttempt)  > 100000) ) {
-        lastMqttReconnectAttempt = now;
-        if (mqtt_connect()) { // Attempt to reconnect
-          lastMqttReconnectAttempt = 0;
-        }
-      }
-    } else {
-      // if MQTT connected
-      mqttclient.loop();
-    }
+  if ((wifi_mode==WIFI_MODE_STA || wifi_mode==WIFI_MODE_AP_AND_STA) && mqtt_server != 0){
+    mqtt_loop();
   }
 
   // Remain in AP mode for 5 Minutes before resetting
-  if (wifi_mode == 1){
+  if (wifi_mode == WIFI_MODE_AP_STA_RETRY){
      if ((millis() - Timer) >= 300000){
        ESP.reset();
        DEBUG.println("WIFI Mode = 1, resetting");
@@ -998,53 +1007,18 @@ void loop() {
 
     last_datastr = data;
     // If Wifi connected & emoncms server details are present
-    if ((wifi_mode==0 || wifi_mode==3) && emoncms_apikey != 0){
-      // We now create a URL for server data upload
-      String url = e_url;
-      url += "{";
-      // Copy across, data length -1 to remove new line
-      for (int i = 0; i < data.length(); ++i){
-        url += data[i];
-      }
-      url += ",psent:";
-      url += packets_sent;
-      url += ",psuccess:";
-      url += packets_success;
-      url += ",freeram:";
-      url += String(ESP.getFreeHeap());
-      url += "}&node=";
-      url += emoncms_node;
-      url += "&apikey=";
-      url += emoncms_apikey;
-
-      DEBUG.println(url);
-      packets_sent++;
-
-      // Send data to Emoncms server
-      String result="";
-      if (emoncms_fingerprint!=0){
-        // HTTPS on port 443 if HTTPS fingerprint is present
-        DEBUG.println("HTTPS Enabled");
-        result = get_https(emoncms_fingerprint.c_str(), emoncms_server.c_str(), url, 443);
-      } else {
-        // Plain HTTP if other emoncms server e.g EmonPi
-        result = get_http(emoncms_server.c_str(), url);
-      }
-      if (result == "ok"){
-        packets_success++;
-        emoncms_connected = true;
-      }
-      else{
-        emoncms_connected=false;
-        DEBUG.print("Emoncms error: ");
-        DEBUG.println(result);
+    if (wifi_mode==WIFI_MODE_STA || wifi_mode==WIFI_MODE_AP_AND_STA)
+    {
+      // Send data to EmonCMS
+      if(emoncms_apikey != 0){
+        emoncms_publish(data);
       }
 
       // Send data to MQTT
       if (mqtt_server != 0){
         DEBUG.print("MQTT publish base-topic: "); DEBUG.println(mqtt_topic);
-        mqtt_publish(mqtt_topic, data);
-        String ram_topic = mqtt_topic + "/freeram";
+        mqtt_publish(mqtt_topic, mqtt_topic_sep, data);
+        String ram_topic = mqtt_topic + mqtt_topic_sep + "freeram";
         String free_ram = String(ESP.getFreeHeap());
         mqttclient.publish(ram_topic.c_str(), free_ram.c_str());
         ram_topic = "";
