@@ -37,7 +37,8 @@
 #include <DNSServer.h>                // Required for captive portal
 #include <PubSubClient.h>             // MQTT https://github.com/knolleary/pubsubclient PlatformIO lib: 89
 
-#define DEBUG_SERIAL1
+// Uncomment to use hardware UART 1 for debug else use UART 0
+//#define DEBUG_SERIAL1
 #ifdef DEBUG_SERIAL1
 #define DEBUG Serial1
 #else
