@@ -332,7 +332,7 @@ void load_EEPROM_settings(){
 }
 
 // -------------------------------------------------------------------
-// Load SPIFFS Home page
+// Load Home page
 // url: /
 // -------------------------------------------------------------------
 void handleHome() {
@@ -343,6 +343,26 @@ void handleHome() {
     server.send(200, "text/html", s);
     f.close();
   }
+}
+
+// -------------------------------------------------------------------
+// Wifi scan /scan not currently used
+// url: /scan
+// -------------------------------------------------------------------
+void handleScan() {
+  DEBUG.println("WIFI Scan");
+  int n = WiFi.scanNetworks();
+  DEBUG.print(n);
+  DEBUG.println(" networks found");
+  st = "";
+  rssi = "";
+  for (int i = 0; i < n; ++i){
+    st += "\""+WiFi.SSID(i)+"\"";
+    rssi += "\""+String(WiFi.RSSI(i))+"\"";
+    if (i<n-1) st += ",";
+    if (i<n-1) rssi += ",";
+  }
+  server.send(200, "text/plain","[" +st+ "],[" +rssi+"]");
 }
 
 // -------------------------------------------------------------------
@@ -585,38 +605,17 @@ void handleSaveMqtt() {
 }
 
 
-
 // -------------------------------------------------------------------
-// Wifi scan /scan not currently used
-// url: /scan
-// -------------------------------------------------------------------
-void handleScan() {
-  DEBUG.println("WIFI Scan");
-  int n = WiFi.scanNetworks();
-  DEBUG.print(n);
-  DEBUG.println(" networks found");
-  st = "";
-  rssi = "";
-  for (int i = 0; i < n; ++i){
-    st += "\""+WiFi.SSID(i)+"\"";
-    rssi += "\""+String(WiFi.RSSI(i))+"\"";
-    if (i<n-1) st += ",";
-    if (i<n-1) rssi += ",";
-  }
-  server.send(200, "text/plain","[" +st+ "],[" +rssi+"]");
-}
-
-// -------------------------------------------------------------------
-// url: /lastvalues
 // Last values on atmega serial
+// url: /lastvalues
 // -------------------------------------------------------------------
 void handleLastValues() {
   server.send(200, "text/html", last_datastr);
 }
 
 // -------------------------------------------------------------------
+// Returns status json
 // url: /status
-// returns wifi status
 // -------------------------------------------------------------------
 void handleStatus() {
 
@@ -678,6 +677,16 @@ void handleRestart() {
   ESP.restart();
 }
 
+// -------------------------------------------------------------------
+// Handle test input API
+// url /test
+// e.g http://192.168.0.75/test?serial=CT1:3935,CT2:325,T1:12.5,T2:16.9,T3:11.2,T4:34.7
+// -------------------------------------------------------------------
+void handleTest(){
+  test_serial = server.arg("serial");
+  server.send(200, "text/html", test_serial);
+  DEBUG.println(test_serial);
+}
 
 // -------------------------------------------------------------------
 // Check for updates and display current version
@@ -796,15 +805,6 @@ boolean mqtt_connect() {
     return(0);
   }
   return (1);
-}
-
-// -------------------------------------------------------------------
-// Simulate Serial Input from emonTx
-// -------------------------------------------------------------------
-void handleTest(){
-  test_serial = server.arg("serial");
-  server.send(200, "text/html", test_serial);
-  DEBUG.println(test_serial);
 }
 
 // -------------------------------------------------------------------
