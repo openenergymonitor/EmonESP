@@ -832,7 +832,7 @@ void emoncms_publish(String data)
   // We now create a URL for server data upload
   String url = e_url;
   url += "{";
-  // Copy across, data length -1 to remove new line
+  // Copy across, data length
   for (int i = 0; i < data.length(); ++i){
     url += data[i];
   }
@@ -1001,7 +1001,9 @@ void loop() {
   // Could check for string integrity here
     if (Serial.available()){
       data = Serial.readStringUntil('\n');
-      data.remove(data.length(), 1); //remove new line character
+
+      // Get rid of any whitespace, newlines etc
+      data.trim();
     }
     // If serial from test API e.g `http://<IP-ADDRESS>/test?serial=CT1:3935,CT2:325,T1:12.5,T2:16.9,T3:11.2,T4:34.7`
     if (test_serial !=""){
