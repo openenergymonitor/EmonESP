@@ -190,7 +190,7 @@
           <p><b>MQTT Base-topic*:</b><br>
           <input id="mqtt_topic" type="text">
         </p><span>e.g 'emon/emonesp', 'emon/heatpump'</span><br><br>
-          <div id="small-text">Data will be published to sub topic e.g. 'emon/emonesp/CT1 > XXX'</div>
+          <div id="small-text">Data will be published to sub topic e.g. 'emon/emonesp/CT1'</div>
           <p><b>MQTT feed prefix:</b><br>
           <input id="mqtt_feed_prefix" type="text">
           <div id="small-text">value to prefix the feed names with, eg emonesp- would cause P0 to be named emonesp-P0</div>
@@ -241,7 +241,8 @@
 
           <div class="itembody-wrapper">
 
-          <p><b>Free RAM:</b><br><span id="free_heap"></span>B</p>
+          <p><b>Free RAM: </b><span id="free_heap"></span>B</p>
+          <p><b>Version: </b><a href="https://github.com/openenergymonitor/EmonESP/releases">v<span id="version" test></span></a></p>
           <button id="restart">Restart</button>
           <button id="reset">Factory Reset</button>
 
