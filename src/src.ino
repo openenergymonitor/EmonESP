@@ -69,10 +69,9 @@ String st, rssi;
 /* hostname for mDNS. Should work at least on windows. Try http://emonesp.local */
 const char *esp_hostname = "emonesp";
 
-//
+// Wifi Network Strings
 String esid = "";
 String epass = "";
-
 String connected_network = "";
 String last_datastr = "";
 String status_string = "";
@@ -80,7 +79,6 @@ String ipaddress = "";
 
 //EMONCMS SERVER strings
 const char* e_url = "/input/post.json?json=";
-
 String emoncms_server = "";
 String emoncms_node = "";
 String emoncms_apikey = "";
@@ -606,7 +604,8 @@ void handleStatus() {
   s += "\"mqtt_pass\":\""+mqtt_pass+"\",";
   s += "\"mqtt_connected\":\""+String(mqttclient.connected())+"\",";
 
-  s += "\"free_heap\":\""+String(ESP.getFreeHeap())+"\"";
+  s += "\"free_heap\":\""+String(ESP.getFreeHeap())+"\",";
+  s += "\"version\":\""+currentfirmware+"\"";
 
   s += "}";
   server.send(200, "text/html", s);

@@ -168,7 +168,7 @@
           <p><b>MQTT topic separator:</b><br>
           <input id="mqtt_topic_sep" type="text">
         </p><span>e.g 'emon/emonesp', 'emon/heatpump'</span><br><br>
-          <div id="small-text">Data will be published to sub topic e.g. 'emon/emonesp/CT1 > XXX'</div>
+          <div id="small-text">Data will be published to sub topic e.g. 'emon/emonesp/CT1'</div>
           <p><b>Username:</b><br>
           <input id="mqtt_user" type="text">
           </p><span>Leave blank for no authentication</span><br>
@@ -216,7 +216,8 @@
 
           <div class="itembody-wrapper">
 
-          <p><b>Free RAM:</b><br><span id="free_heap"></span>B</p>
+          <p><b>Free RAM: </b><span id="free_heap"></span>B</p>
+          <p><b>Version: </b><a href="https://github.com/openenergymonitor/EmonESP/releases">v<span id="version" test></span></a></p>
           <button id="restart">Restart</button>
           <button id="reset">Factory Reset</button>
 
