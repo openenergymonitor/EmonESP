@@ -37,6 +37,14 @@
 #include <DNSServer.h>                // Required for captive portal
 #include <PubSubClient.h>             // MQTT https://github.com/knolleary/pubsubclient PlatformIO lib: 89
 
+// Uncomment to use hardware UART 1 for debug else use UART 0
+//#define DEBUG_SERIAL1
+#ifdef DEBUG_SERIAL1
+#define DEBUG Serial1
+#else
+#define DEBUG Serial
+#endif
+
 ESP8266WebServer server(80);          //Create class for Web server
 WiFiClientSecure client;              // Create class for HTTPS TCP connections get_https()
 HTTPClient http;                      // Create class for HTTP TCP connections get_http
@@ -61,18 +69,17 @@ String st, rssi;
 /* hostname for mDNS. Should work at least on windows. Try http://emonesp.local */
 const char *esp_hostname = "emonesp";
 
+//
 String esid = "";
 String epass = "";
-
 
 String connected_network = "";
 String last_datastr = "";
 String status_string = "";
 String ipaddress = "";
 
-//EMONCMS SERVER strings and interfers for emoncms.org
+//EMONCMS SERVER strings
 const char* e_url = "/input/post.json?json=";
-const char* emoncmsorg_fingerprint = "7D:82:15:BE:D7:BC:72:58:87:7D:8E:40:D4:80:BA:1A:9F:8B:8D:DA";
 
 String emoncms_server = "";
 String emoncms_node = "";
@@ -95,7 +102,6 @@ long lastMqttReconnectAttempt = 0;
 // Array of strings Used to check firmware version
 const char* u_host = "217.9.195.227";
 const char* u_url = "/esp/firmware.php";
-
 const char* firmware_update_path = "/upload";
 
 // Get running firmware version from build tag environment variable
@@ -154,14 +160,14 @@ bool handleFileRead(String path){
 // Access point is used for wifi network selection
 // -------------------------------------------------------------------
 void startAP() {
-  Serial.print("Starting AP");
+  DEBUG.print("Starting AP");
   WiFi.mode(WIFI_STA);
   WiFi.disconnect();
   delay(100);
-  Serial.print("Scan: ");
+  DEBUG.print("Scan: ");
   int n = WiFi.scanNetworks();
-  Serial.print(n);
-  Serial.println(" networks found");
+  DEBUG.print(n);
+  DEBUG.println(" networks found");
   st = "";
   rssi = "";
   for (int i = 0; i < n; ++i){
@@ -176,15 +182,16 @@ void startAP() {
   // Create Unique SSID e.g "emonESP_XXXXXX"
   String softAP_ssid_ID = String(softAP_ssid)+"_"+String(ESP.getChipId());;
   WiFi.softAP(softAP_ssid_ID.c_str(), softAP_password);
-    /* Setup the DNS server redirecting all the domains to the apIP */
+
+  // Setup the DNS server redirecting all the domains to the apIP
   dnsServer.setErrorReplyCode(DNSReplyCode::NoError);
   dnsServer.start(DNS_PORT, "*", apIP);
 
   IPAddress myIP = WiFi.softAPIP();
   char tmpStr[40];
   sprintf(tmpStr,"%d.%d.%d.%d",myIP[0],myIP[1],myIP[2],myIP[3]);
-  Serial.print("AP IP Address: ");
-  Serial.println(tmpStr);
+  DEBUG.print("AP IP Address: ");
+  DEBUG.println(tmpStr);
   ipaddress = tmpStr;
 }
 
@@ -192,10 +199,10 @@ void startAP() {
 // Start Client, attempt to connect to Wifi network
 // -------------------------------------------------------------------
 void startClient() {
-  Serial.print("Connecting as client to ");
-  Serial.print(esid.c_str());
-  Serial.print(" epass:");
-  Serial.println(epass.c_str());
+  DEBUG.print("Connecting as client to ");
+  DEBUG.print(esid.c_str());
+  DEBUG.print(" epass:");
+  DEBUG.println(epass.c_str());
   WiFi.begin(esid.c_str(), epass.c_str());
 
   delay(50);
@@ -206,8 +213,8 @@ void startClient() {
     delay(500);
     t++;
     if (t >= 20){
-      Serial.println(" ");
-      Serial.println("Try Again...");
+      DEBUG.println(" ");
+      DEBUG.println("Try Again...");
       delay(2000);
       WiFi.disconnect();
       WiFi.begin(esid.c_str(), epass.c_str());
@@ -226,27 +233,27 @@ void startClient() {
     IPAddress myAddress = WiFi.localIP();
     char tmpStr[40];
     sprintf(tmpStr,"%d.%d.%d.%d",myAddress[0],myAddress[1],myAddress[2],myAddress[3]);
-    Serial.print("Connected, IP: ");
-    Serial.println(tmpStr);
+    DEBUG.print("Connected, IP: ");
+    DEBUG.println(tmpStr);
     // Copy the connected network and ipaddress to global strings for use in status request
     connected_network = esid;
     ipaddress = tmpStr;
   }
 }
 
-#define EEPROM_ESID_SIZE                 32
-#define EEPROM_EPASS_SIZE                64
-#define EEPROM_EMON_API_KEY_SIZE         32
-#define EEPROM_EMON_SERVER_SIZE          45
-#define EEPROM_EMON_NODE_SIZE            32
-#define EEPROM_MQTT_SERVER_SIZE          45
-#define EEPROM_MQTT_TOPIC_SIZE           32
-#define EEPROM_MQTT_USER_SIZE            32
-#define EEPROM_MQTT_PASS_SIZE            64
+#define EEPROM_ESID_SIZE          32
+#define EEPROM_EPASS_SIZE         64
+#define EEPROM_EMON_API_KEY_SIZE  32
+#define EEPROM_EMON_SERVER_SIZE   45
+#define EEPROM_EMON_NODE_SIZE     32
+#define EEPROM_MQTT_SERVER_SIZE   45
+#define EEPROM_MQTT_TOPIC_SIZE    32
+#define EEPROM_MQTT_USER_SIZE     32
+#define EEPROM_MQTT_PASS_SIZE     64
 #define EEPROM_EMON_FINGERPRINT_SIZE     60
-#define EEPROM_SIZE                      512
+#define EEPROM_SIZE 512
 
-#define EEPROM_ESID_START                0
+#define EEPROM_ESID_START         0
 #define EEPROM_ESID_END           (EEPROM_ESID_START + EEPROM_ESID_SIZE)
 #define EEPROM_EPASS_START        EEPROM_ESID_END
 #define EEPROM_EPASS_END          (EEPROM_EPASS_START + EEPROM_EPASS_SIZE)
@@ -267,15 +274,21 @@ void startClient() {
 #define EEPROM_EMON_FINGERPRINT_START  EEPROM_MQTT_PASS_END
 #define EEPROM_EMON_FINGERPRINT_END    (EEPROM_EMON_FINGERPRINT_START + EEPROM_EMON_FINGERPRINT_SIZE)
 
+// -------------------------------------------------------------------
+// Reset EEPROM, wipes all settings
+// -------------------------------------------------------------------
 void ResetEEPROM(){
-  //Serial.println("Erasing EEPROM");
+  //DEBUG.println("Erasing EEPROM");
   for (int i = 0; i < EEPROM_SIZE; ++i) {
     EEPROM.write(i, 0);
-    //Serial.print("#");
+    //DEBUG.print("#");
   }
   EEPROM.commit();
 }
 
+// -------------------------------------------------------------------
+// Load saved settings from EEPROM
+// -------------------------------------------------------------------
 void load_EEPROM_settings(){
 
   EEPROM.begin(EEPROM_SIZE);
@@ -323,7 +336,7 @@ void load_EEPROM_settings(){
 }
 
 // -------------------------------------------------------------------
-// Load SPIFFS Home page
+// Load Home page
 // url: /
 // -------------------------------------------------------------------
 void handleHome() {
@@ -337,12 +350,32 @@ void handleHome() {
 }
 
 // -------------------------------------------------------------------
+// Wifi scan /scan not currently used
+// url: /scan
+// -------------------------------------------------------------------
+void handleScan() {
+  DEBUG.println("WIFI Scan");
+  int n = WiFi.scanNetworks();
+  DEBUG.print(n);
+  DEBUG.println(" networks found");
+  st = "";
+  rssi = "";
+  for (int i = 0; i < n; ++i){
+    st += "\""+WiFi.SSID(i)+"\"";
+    rssi += "\""+String(WiFi.RSSI(i))+"\"";
+    if (i<n-1) st += ",";
+    if (i<n-1) rssi += ",";
+  }
+  server.send(200, "text/plain","[" +st+ "],[" +rssi+"]");
+}
+
+// -------------------------------------------------------------------
 // Handle turning Access point off
 // url: /apoff
 // -------------------------------------------------------------------
 void handleAPOff() {
   server.send(200, "text/html", "Turning AP Off");
-  Serial.println("Turning AP Off");
+  DEBUG.println("Turning AP Off");
   WiFi.disconnect();
   delay(1000);
   ESP.reset();
@@ -454,11 +487,11 @@ void handleSaveNetwork() {
     WiFi.mode(WIFI_AP_STA);
     WiFi.softAPConfig(apIP, apIP, netMsk);
 
-  // Create Unique SSID e.g "emonESP_XXXXXX"
+    // Create Unique SSID e.g "emonESP_XXXXXX"
     String softAP_ssid_ID = String(softAP_ssid)+"_"+String(ESP.getChipId());;
     WiFi.softAP(softAP_ssid_ID.c_str(), softAP_password);
 
-    /* Setup the DNS server redirecting all the domains to the apIP */
+    // Setup the DNS server redirecting all the domains to the apIP
     dnsServer.setErrorReplyCode(DNSReplyCode::NoError);
     dnsServer.start(DNS_PORT, "*", apIP);
     wifi_mode = 3;
@@ -511,9 +544,9 @@ void handleSaveEmoncms() {
       }
     }
     EEPROM.commit();
-    char tmpStr[169];
+    char tmpStr[200];
     sprintf(tmpStr,"Saved: %s %s %s %s",emoncms_server.c_str(),emoncms_node.c_str(),emoncms_apikey.c_str(),emoncms_fingerprint.c_str());
-    Serial.println(tmpStr);
+    DEBUG.println(tmpStr);
     server.send(200, "text/html", tmpStr);
   }
 }
@@ -547,26 +580,26 @@ void handleSaveMqtt() {
     // Save MQTT username max 32 characters
 
     if (mqtt_user!=0 && mqtt_pass!=0){
-      for (int i = 0; i < EEPROM_MQTT_USER_SIZE; i++){
-        if (i<mqtt_user.length()) {
-          EEPROM.write(i+EEPROM_MQTT_USER_START, mqtt_user[i]);
-        } else {
-          EEPROM.write(i+EEPROM_MQTT_USER_START, 0);
-        }
-      }
-      // Save MQTT pass max 64 characters
-      for (int i = 0; i < EEPROM_MQTT_PASS_SIZE; i++){
-        if (i<mqtt_pass.length()) {
-          EEPROM.write(i+EEPROM_MQTT_PASS_START, mqtt_pass[i]);
-        } else {
-          EEPROM.write(i+EEPROM_MQTT_PASS_START, 0);
-        }
+    for (int i = 0; i < EEPROM_MQTT_USER_SIZE; i++){
+      if (i<mqtt_user.length()) {
+        EEPROM.write(i+EEPROM_MQTT_USER_START, mqtt_user[i]);
+      } else {
+        EEPROM.write(i+EEPROM_MQTT_USER_START, 0);
       }
     }
+    // Save MQTT pass max 64 characters
+    for (int i = 0; i < EEPROM_MQTT_PASS_SIZE; i++){
+      if (i<mqtt_pass.length()) {
+        EEPROM.write(i+EEPROM_MQTT_PASS_START, mqtt_pass[i]);
+      } else {
+        EEPROM.write(i+EEPROM_MQTT_PASS_START, 0);
+      }
+    }
+    }
     EEPROM.commit();
-    char tmpStr[80];
+    char tmpStr[200];
     sprintf(tmpStr,"Saved: %s %s %s %s",mqtt_server.c_str(),mqtt_topic.c_str(),mqtt_user.c_str(),mqtt_pass.c_str());
-    Serial.println(tmpStr);
+    DEBUG.println(tmpStr);
     server.send(200, "text/html", tmpStr);
     // If connected disconnect MQTT to trigger re-connect with new details
     if (mqttclient.connected()) {
@@ -576,38 +609,17 @@ void handleSaveMqtt() {
 }
 
 
-
 // -------------------------------------------------------------------
-// Wifi scan /scan not currently used
-// url: /scan
-// -------------------------------------------------------------------
-void handleScan() {
-  Serial.println("WIFI Scan");
-  int n = WiFi.scanNetworks();
-  Serial.print(n);
-  Serial.println(" networks found");
-  st = "";
-  rssi = "";
-  for (int i = 0; i < n; ++i){
-    st += "\""+WiFi.SSID(i)+"\"";
-    rssi += "\""+String(WiFi.RSSI(i))+"\"";
-    if (i<n-1) st += ",";
-    if (i<n-1) rssi += ",";
-  }
-  server.send(200, "text/plain","[" +st+ "],[" +rssi+"]");
-}
-
-// -------------------------------------------------------------------
-// url: /lastvalues
 // Last values on atmega serial
+// url: /lastvalues
 // -------------------------------------------------------------------
 void handleLastValues() {
   server.send(200, "text/html", last_datastr);
 }
 
 // -------------------------------------------------------------------
+// Returns status json
 // url: /status
-// returns wifi status
 // -------------------------------------------------------------------
 void handleStatus() {
 
@@ -670,17 +682,27 @@ void handleRestart() {
   ESP.restart();
 }
 
+// -------------------------------------------------------------------
+// Handle test input API
+// url /test
+// e.g http://192.168.0.75/test?serial=CT1:3935,CT2:325,T1:12.5,T2:16.9,T3:11.2,T4:34.7
+// -------------------------------------------------------------------
+void handleTest(){
+  test_serial = server.arg("serial");
+  server.send(200, "text/html", test_serial);
+  DEBUG.println(test_serial);
+}
 
 // -------------------------------------------------------------------
 // Check for updates and display current version
 // url: /firmware
 // -------------------------------------------------------------------
 String handleUpdateCheck() {
-  Serial.println("Running: " + currentfirmware);
+  DEBUG.println("Running: " + currentfirmware);
   // Get latest firmware version number
   String url = u_url;
   String latestfirmware = get_http(u_host, url);
-  Serial.println("Latest: " + latestfirmware);
+  DEBUG.println("Latest: " + latestfirmware);
   // Update web interface with firmware version(s)
   String s = "{";
   s += "\"current\":\""+currentfirmware+"\",";
@@ -697,23 +719,23 @@ String handleUpdateCheck() {
 // -------------------------------------------------------------------
 void handleUpdate() {
   SPIFFS.end(); // unmount filesystem
-  Serial.println("UPDATING...");
+  DEBUG.println("UPDATING...");
   delay(500);
   t_httpUpdate_return ret = ESPhttpUpdate.update("http://" + String(u_host) + String(u_url) + "?tag=" + currentfirmware);
   String str="error";
   switch(ret) {
-      case HTTP_UPDATE_FAILED:
-          str = printf("Update failed error (%d): %s", ESPhttpUpdate.getLastError(), ESPhttpUpdate.getLastErrorString().c_str());
-          break;
-      case HTTP_UPDATE_NO_UPDATES:
-          str="No update, running latest firmware";
-          break;
-      case HTTP_UPDATE_OK:
-          str="Update done!";
-          break;
+    case HTTP_UPDATE_FAILED:
+      str = printf("Update failed error (%d): %s", ESPhttpUpdate.getLastError(), ESPhttpUpdate.getLastErrorString().c_str());
+      break;
+    case HTTP_UPDATE_NO_UPDATES:
+      str="No update, running latest firmware";
+      break;
+    case HTTP_UPDATE_OK:
+      str="Update done!";
+      break;
   }
   server.send(400,"text/html",str);
-  Serial.println(str);
+  DEBUG.println(str);
   SPIFFS.begin(); //mount-file system
 }
 
@@ -725,7 +747,7 @@ void handleUpdate() {
 String get_https(const char* fingerprint, const char* host, String url, int httpsPort){
   // Use WiFiClient class to create TCP connections
   if (!client.connect(host, httpsPort)) {
-    Serial.print(host + httpsPort); //debug
+    DEBUG.print(host + httpsPort); //debug
     return("Connection erromqtt_publishr");
   }
   if (client.verify(fingerprint, host)) {
@@ -741,7 +763,7 @@ String get_https(const char* fingerprint, const char* host, String url, int http
     // Handle message receive
     while(client.available()){
       String line = client.readStringUntil('\r');
-      Serial.println(line); //debug
+      DEBUG.println(line); //debug
       if (line.startsWith("HTTP/1.1 200 OK")) {
         return("ok");
       }
@@ -751,7 +773,7 @@ String get_https(const char* fingerprint, const char* host, String url, int http
     return("HTTPS fingerprint no match");
   }
   return("error" + String(host));
-} // end https_get
+}
 
 // -------------------------------------------------------------------
 // HTTP GET Request
@@ -762,7 +784,7 @@ String get_http(const char* host, String url){
   int httpCode = http.GET();
   if((httpCode > 0) && (httpCode == HTTP_CODE_OK)){
     String payload = http.getString();
-    Serial.println(payload);
+    DEBUG.println(payload);
     http.end();
     return(payload);
   }
@@ -777,26 +799,17 @@ String get_http(const char* host, String url){
 // -------------------------------------------------------------------
 boolean mqtt_connect() {
   mqttclient.setServer(mqtt_server.c_str(), 1883);
-  Serial.println("MQTT Connecting...");
+  DEBUG.println("MQTT Connecting...");
   String strID = String(ESP.getChipId());
   if (mqttclient.connect(strID.c_str(), mqtt_user.c_str(), mqtt_pass.c_str())) {  // Attempt to connect
-    Serial.println("MQTT connected");
+    DEBUG.println("MQTT connected");
     mqttclient.publish(mqtt_topic.c_str(), "connected"); // Once connected, publish an announcement..
   } else {
-    Serial.print("MQTT failed: ");
-    Serial.println(mqttclient.state());
+    DEBUG.print("MQTT failed: ");
+    DEBUG.println(mqttclient.state());
     return(0);
   }
   return (1);
-}
-
-// -------------------------------------------------------------------
-// Simulate Serial Input from emonTx
-// -------------------------------------------------------------------
-void handleTest(){
-  test_serial = server.arg("serial");
-  server.send(200, "text/html", test_serial);
-  Serial.println(test_serial);
 }
 
 // -------------------------------------------------------------------
@@ -811,30 +824,30 @@ void mqtt_publish(String base_topic, String data){
   String topic = base_topic + "/";
   int i=0;
   while (int(data[i])!=0){
-      // Construct MQTT topic e.g. <base_topic>/CT1 e.g. emonesp/CT1
-      while (data[i]!=':'){
-        topic+= data[i];
-        i++;
-        if (int(data[i])==0){
-          break;
-        }
-      }
+    // Construct MQTT topic e.g. <base_topic>/CT1 e.g. emonesp/CT1
+    while (data[i]!=':'){
+      topic+= data[i];
       i++;
-      // Construct data string to publish to above topic
-      while (data[i]!=','){
-        mqtt_data+= data[i];
-        i++;
-        if (int(data[i])==0){
-          break;
-        }
+      if (int(data[i])==0){
+        break;
       }
-      // send data via mqtt
-      delay(100);
-      mqttclient.publish(topic.c_str(), mqtt_data.c_str());
-      topic= base_topic + "/";
-      mqtt_data="";
+    }
+    i++;
+    // Construct data string to publish to above topic
+    while (data[i]!=','){
+      mqtt_data+= data[i];
       i++;
-      if (int(data[i])==0) break;
+      if (int(data[i])==0){
+        break;
+      }
+    }
+    // send data via mqtt
+    delay(100);
+    mqttclient.publish(topic.c_str(), mqtt_data.c_str());
+    topic= base_topic + "/";
+    mqtt_data="";
+    i++;
+    if (int(data[i])==0) break;
   }
 }
 
@@ -843,12 +856,15 @@ void mqtt_publish(String base_topic, String data){
 // SETUP
 // -------------------------------------------------------------------
 void setup() {
-	delay(2000);
-	Serial.begin(115200);
-  Serial.println();
-  Serial.print("EmonESP ");
-  Serial.println(ESP.getChipId());
-  Serial.println("Firmware: "+ currentfirmware);
+  delay(2000);
+  Serial.begin(115200);
+  #ifdef DEBUG_SERIAL1
+  Serial1.begin(115200);
+  #endif
+  DEBUG.println();
+  DEBUG.print("EmonESP ");
+  DEBUG.println(ESP.getChipId());
+  DEBUG.println("Firmware: "+ currentfirmware);
 
   // Read saved settings from EEPROM
   load_EEPROM_settings();
@@ -874,8 +890,8 @@ void setup() {
   // Start hostname broadcast in STA mode
   if ((wifi_mode==0 || wifi_mode==3)){
     if (MDNS.begin(esp_hostname)) {
-            MDNS.addService("http", "tcp", 80);
-          }
+      MDNS.addService("http", "tcp", 80);
+    }
   }
 
   // Setup firmware upload
@@ -931,8 +947,8 @@ void setup() {
     server.send(404, "text/plain", "NotFound");
   });
 
-	server.begin();
-	Serial.println("Server started");
+  server.begin();
+  DEBUG.println("Server started");
   delay(100);
   Timer = millis();
   lastMqttReconnectAttempt = 0;
@@ -960,14 +976,14 @@ void loop() {
     } else {
       // if MQTT connected
       mqttclient.loop();
-      }
+    }
   }
 
   // Remain in AP mode for 5 Minutes before resetting
   if (wifi_mode == 1){
      if ((millis() - Timer) >= 300000){
        ESP.reset();
-       Serial.println("WIFI Mode = 1, resetting");
+       DEBUG.println("WIFI Mode = 1, resetting");
      }
   }
 
@@ -978,12 +994,14 @@ void loop() {
     if (Serial.available()){
       data = Serial.readStringUntil('\n');
       data.remove(data.length(), 1); //remove new line character
-      }
+    }
     // If serial from test API e.g `http://<IP-ADDRESS>/test?serial=CT1:3935,CT2:325,T1:12.5,T2:16.9,T3:11.2,T4:34.7`
     if (test_serial !=""){
       data = test_serial;
       test_serial = "";
     }
+    DEBUG.println(data);
+
     last_datastr = data;
     // If Wifi connected & emoncms server details are present
     if ((wifi_mode==0 || wifi_mode==3) && emoncms_apikey != 0){
@@ -992,7 +1010,7 @@ void loop() {
       url += "{";
       // Copy across, data length -1 to remove new line
       for (int i = 0; i < data.length(); ++i){
-          url += data[i];
+        url += data[i];
       }
       url += ",psent:";
       url += packets_sent;
@@ -1005,14 +1023,14 @@ void loop() {
       url += "&apikey=";
       url += emoncms_apikey;
 
-      Serial.println(url);
+      DEBUG.println(url);
       packets_sent++;
 
       // Send data to Emoncms server
       String result="";
       if (emoncms_fingerprint!=0){
         // HTTPS on port 443 if HTTPS fingerprint is present
-        Serial.println("HTTPS Enabled");
+        DEBUG.println("HTTPS Enabled");
         result = get_https(emoncms_fingerprint.c_str(), emoncms_server.c_str(), url, 443);
       } else {
         // Plain HTTP if other emoncms server e.g EmonPi
@@ -1024,13 +1042,13 @@ void loop() {
       }
       else{
         emoncms_connected=false;
-        Serial.print("Emoncms error: ");
-        Serial.println(result);
+        DEBUG.print("Emoncms error: ");
+        DEBUG.println(result);
       }
 
       // Send data to MQTT
       if (mqtt_server != 0){
-        Serial.print("MQTT publish base-topic: "); Serial.println(mqtt_topic);
+        DEBUG.print("MQTT publish base-topic: "); DEBUG.println(mqtt_topic);
         mqtt_publish(mqtt_topic, data);
         String ram_topic = mqtt_topic + "/freeram";
         String free_ram = String(ESP.getFreeHeap());
@@ -1038,9 +1056,6 @@ void loop() {
         ram_topic = "";
         free_ram ="";
       }
-
-
     } // end wifi connected
   } // end serial available
-
 } // end loop
