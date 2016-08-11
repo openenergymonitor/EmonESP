@@ -45,6 +45,7 @@ r1.onreadystatechange = function () {
   }
 
   document.getElementById("free_heap").innerHTML = status.free_heap;
+  document.getElementById("version").innerHTML = status.version;
 
 
   if (status.mode=="AP") {

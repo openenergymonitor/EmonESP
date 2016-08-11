@@ -640,7 +640,8 @@ void handleStatus() {
   s += "\"mqtt_pass\":\""+mqtt_pass+"\",";
   s += "\"mqtt_connected\":\""+String(mqttclient.connected())+"\",";
 
-  s += "\"free_heap\":\""+String(ESP.getFreeHeap())+"\"";
+  s += "\"free_heap\":\""+String(ESP.getFreeHeap())+"\",";
+  s += "\"version\":\""+currentfirmware+"\"";
 
   s += "}";
   server.send(200, "text/html", s);
