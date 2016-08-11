@@ -61,8 +61,8 @@ IPAddress apIP(192, 168, 4, 1);
 IPAddress netMsk(255, 255, 255, 0);
 
 // Web server authentication (leave blank for none)
-const char* www_username = "emonesp";
-const char* www_password = "emon";
+String www_username = "";
+String www_password = "";
 String st, rssi;
 
 
@@ -93,7 +93,7 @@ String mqtt_server = "";
 String mqtt_topic = "";
 String mqtt_user = "";
 String mqtt_pass = "";
-String mqtt_topic_sep = "";
+String mqtt_feed_prefix = "";
 long lastMqttReconnectAttempt = 0;
 
 // -------------------------------------------------------------------
@@ -256,8 +256,10 @@ void startClient() {
 #define EEPROM_MQTT_TOPIC_SIZE    32
 #define EEPROM_MQTT_USER_SIZE     32
 #define EEPROM_MQTT_PASS_SIZE     64
-#define EEPROM_EMON_FINGERPRINT_SIZE     60
-#define EEPROM_MQTT_TOPIC_SEP_SIZE  1
+#define EEPROM_EMON_FINGERPRINT_SIZE  60
+#define EEPROM_MQTT_FEED_PREFIX_SIZE  10
+#define EEPROM_WWW_USER_SIZE      16
+#define EEPROM_WWW_PASS_SIZE      16
 #define EEPROM_SIZE 512
 
 #define EEPROM_ESID_START         0
@@ -280,8 +282,12 @@ void startClient() {
 #define EEPROM_MQTT_PASS_END      (EEPROM_MQTT_PASS_START + EEPROM_MQTT_PASS_SIZE)
 #define EEPROM_EMON_FINGERPRINT_START  EEPROM_MQTT_PASS_END
 #define EEPROM_EMON_FINGERPRINT_END    (EEPROM_EMON_FINGERPRINT_START + EEPROM_EMON_FINGERPRINT_SIZE)
-#define EEPROM_MQTT_TOPIC_SEP_START  EEPROM_EMON_FINGERPRINT_END
-#define EEPROM_MQTT_TOPIC_SEP_END    (EEPROM_MQTT_TOPIC_SEP_START + EEPROM_MQTT_TOPIC_SEP_SIZE)
+#define EEPROM_MQTT_FEED_PREFIX_START  EEPROM_EMON_FINGERPRINT_END
+#define EEPROM_MQTT_FEED_PREFIX_END    (EEPROM_MQTT_FEED_PREFIX_START + EEPROM_MQTT_FEED_PREFIX_SIZE)
+#define EEPROM_WWW_USER_START     EEPROM_MQTT_FEED_PREFIX_END
+#define EEPROM_WWW_USER_END       (EEPROM_WWW_USER_START + EEPROM_WWW_USER_SIZE)
+#define EEPROM_WWW_PASS_START     EEPROM_WWW_USER_END
+#define EEPROM_WWW_PASS_END       (EEPROM_WWW_PASS_START + EEPROM_WWW_PASS_SIZE)
 
 // -------------------------------------------------------------------
 // Reset EEPROM, wipes all settings
@@ -332,9 +338,57 @@ void load_EEPROM_settings(){
   // MQTT settings
   EEPROM_read_srting(EEPROM_MQTT_SERVER_START, EEPROM_MQTT_SERVER_SIZE, mqtt_server);
   EEPROM_read_srting(EEPROM_MQTT_TOPIC_START, EEPROM_MQTT_TOPIC_SIZE, mqtt_topic);
-  EEPROM_read_srting(EEPROM_MQTT_TOPIC_SEP_START, EEPROM_MQTT_TOPIC_SEP_START, mqtt_topic_sep);
+  EEPROM_read_srting(EEPROM_MQTT_FEED_PREFIX_START, EEPROM_MQTT_FEED_PREFIX_SIZE, mqtt_feed_prefix);
   EEPROM_read_srting(EEPROM_MQTT_USER_START, EEPROM_MQTT_USER_SIZE, mqtt_user);
   EEPROM_read_srting(EEPROM_MQTT_PASS_START, EEPROM_MQTT_PASS_SIZE, mqtt_pass);
+
+  // Web server credentials
+  EEPROM_read_srting(EEPROM_WWW_USER_START, EEPROM_WWW_USER_SIZE, www_username);
+  EEPROM_read_srting(EEPROM_WWW_PASS_START, EEPROM_WWW_PASS_SIZE, www_password);
+}
+
+
+// -------------------------------------------------------------------
+// Helper function to decode the URL values
+// -------------------------------------------------------------------
+void decodeURI(String& val)
+{
+    val.replace("%21", "!");
+//    val.replace("%22", '"');
+    val.replace("%23", "#");
+    val.replace("%24", "$");
+    val.replace("%26", "&");
+    val.replace("%27", "'");
+    val.replace("%28", "(");
+    val.replace("%29", ")");
+    val.replace("%2A", "*");
+    val.replace("%2B", "+");
+    val.replace("%2C", ",");
+    val.replace("%2D", "-");
+    val.replace("%2E", ".");
+    val.replace("%2F", "/");
+    val.replace("%3A", ":");
+    val.replace("%3B", ";");
+    val.replace("%3C", "<");
+    val.replace("%3D", "=");
+    val.replace("%3E", ">");
+    val.replace("%3F", "?");
+    val.replace("%40", "@");
+    val.replace("%5B", "[");
+    val.replace("%5C", "'\'");
+    val.replace("%5D", "]");
+    val.replace("%5E", "^");
+    val.replace("%5F", "_");
+    val.replace("%60", "`");
+    val.replace("%7B", "{");
+    val.replace("%7C", "|");
+    val.replace("%7D", "}");
+    val.replace("%7E", "~");
+    val.replace('+', ' ');
+
+    // Decode the % char last as there is always the posibility that the decoded
+    // % char coould be followed by one of the other replaces
+    val.replace("%25", "%");
 }
 
 // -------------------------------------------------------------------
@@ -393,76 +447,12 @@ void handleSaveNetwork() {
   String s;
   String qsid = server.arg("ssid");
   String qpass = server.arg("pass");
+
+  decodeURI(qsid);
+  decodeURI(qpass);
+
   esid = qsid;
   epass = qpass;
-
-  qpass.replace("%21", "!");
-//  qpass.replace("%22", '"');
-  qpass.replace("%23", "#");
-  qpass.replace("%24", "$");
-  qpass.replace("%25", "%");
-  qpass.replace("%26", "&");
-  qpass.replace("%27", "'");
-  qpass.replace("%28", "(");
-  qpass.replace("%29", ")");
-  qpass.replace("%2A", "*");
-  qpass.replace("%2B", "+");
-  qpass.replace("%2C", ",");
-  qpass.replace("%2D", "-");
-  qpass.replace("%2E", ".");
-  qpass.replace("%2F", "/");
-  qpass.replace("%3A", ":");
-  qpass.replace("%3B", ";");
-  qpass.replace("%3C", "<");
-  qpass.replace("%3D", "=");
-  qpass.replace("%3E", ">");
-  qpass.replace("%3F", "?");
-  qpass.replace("%40", "@");
-  qpass.replace("%5B", "[");
-  qpass.replace("%5C", "'\'");
-  qpass.replace("%5D", "]");
-  qpass.replace("%5E", "^");
-  qpass.replace("%5F", "_");
-  qpass.replace("%60", "`");
-  qpass.replace("%7B", "{");
-  qpass.replace("%7C", "|");
-  qpass.replace("%7D", "}");
-  qpass.replace("%7E", "~");
-  qpass.replace('+', ' ');
-
-  qsid.replace("%21", "!");
-//  qsid.replace("%22", '"');
-  qsid.replace("%23", "#");
-  qsid.replace("%24", "$");
-  qsid.replace("%25", "%");
-  qsid.replace("%26", "&");
-  qsid.replace("%27", "'");
-  qsid.replace("%28", "(");
-  qsid.replace("%29", ")");
-  qsid.replace("%2A", "*");
-  qsid.replace("%2B", "+");
-  qsid.replace("%2C", ",");
-  qsid.replace("%2D", "-");
-  qsid.replace("%2E", ".");
-  qsid.replace("%2F", "/");
-  qsid.replace("%3A", ":");
-  qsid.replace("%3B", ";");
-  qsid.replace("%3C", "<");
-  qsid.replace("%3D", "=");
-  qsid.replace("%3E", ">");
-  qsid.replace("%3F", "?");
-  qsid.replace("%40", "@");
-  qsid.replace("%5B", "[");
-  qsid.replace("%5C", "'\'");
-  qsid.replace("%5D", "]");
-  qsid.replace("%5E", "^");
-  qsid.replace("%5F", "_");
-  qsid.replace("%60", "`");
-  qsid.replace("%7B", "{");
-  qsid.replace("%7C", "|");
-  qsid.replace("%7D", "}");
-  qsid.replace("%7E", "~");
-  qsid.replace('+', ' ');
 
   if (qsid != 0){
     EEPROM_write_string(EEPROM_ESID_START, EEPROM_ESID_SIZE, qsid);
@@ -527,7 +517,7 @@ void handleSaveEmoncms() {
 void handleSaveMqtt() {
   mqtt_server = server.arg("server");
   mqtt_topic = server.arg("topic");
-  mqtt_topic_sep = server.arg("sep");
+  mqtt_feed_prefix = server.arg("prefix");
   mqtt_user = server.arg("user");
   mqtt_pass = server.arg("pass");
 
@@ -537,8 +527,8 @@ void handleSaveMqtt() {
   // Save MQTT topic max 32 characters
   EEPROM_write_string(EEPROM_MQTT_TOPIC_START, EEPROM_MQTT_TOPIC_SIZE, mqtt_topic);
 
-  // Save MQTT topic separator max 1 characters
-  EEPROM_write_string(EEPROM_MQTT_TOPIC_SEP_START, EEPROM_MQTT_TOPIC_SEP_SIZE, mqtt_topic_sep);
+  // Save MQTT topic separator max 10 characters
+  EEPROM_write_string(EEPROM_MQTT_FEED_PREFIX_START, EEPROM_MQTT_FEED_PREFIX_SIZE, mqtt_feed_prefix);
 
   // Save MQTT username max 32 characters
   EEPROM_write_string(EEPROM_MQTT_USER_START, EEPROM_MQTT_USER_SIZE, mqtt_user);
@@ -551,7 +541,7 @@ void handleSaveMqtt() {
   char tmpStr[200];
   // BUG: Potential buffer overflow issue the values mqtt_xxx come from user
   //      input so could overflow the buffer no matter the length
-  sprintf(tmpStr,"Saved: %s %s %s %s %s",mqtt_server.c_str(),mqtt_topic.c_str(),mqtt_topic_sep.c_str(),mqtt_user.c_str(),mqtt_pass.c_str());
+  sprintf(tmpStr,"Saved: %s %s %s %s %s",mqtt_server.c_str(),mqtt_topic.c_str(),mqtt_feed_prefix.c_str(),mqtt_user.c_str(),mqtt_pass.c_str());
   DEBUG.println(tmpStr);
   server.send(200, "text/html", tmpStr);
 
@@ -559,6 +549,27 @@ void handleSaveMqtt() {
   if (mqttclient.connected()) {
     mqttclient.disconnect();
   }
+}
+
+// -------------------------------------------------------------------
+// Save the web site user/pass
+// url: /saveadmin
+// -------------------------------------------------------------------
+void handleSaveAdmin() {
+  String quser = server.arg("user");
+  String qpass = server.arg("pass");
+
+  decodeURI(quser);
+  decodeURI(qpass);
+
+  www_username = quser;
+  www_password = qpass;
+
+  EEPROM_write_string(EEPROM_WWW_USER_START, EEPROM_WWW_USER_SIZE, quser);
+  EEPROM_write_string(EEPROM_WWW_PASS_START, EEPROM_WWW_PASS_SIZE, qpass);
+
+  EEPROM.commit();
+  server.send(200, "text/html", "saved");
 }
 
 
@@ -601,10 +612,13 @@ void handleStatus() {
 
   s += "\"mqtt_server\":\""+mqtt_server+"\",";
   s += "\"mqtt_topic\":\""+mqtt_topic+"\",";
-  s += "\"mqtt_topic_sep\":\""+mqtt_topic_sep+"\",";
+  s += "\"mqtt_feed_prefix\":\""+mqtt_feed_prefix+"\",";
   s += "\"mqtt_user\":\""+mqtt_user+"\",";
   s += "\"mqtt_pass\":\""+mqtt_pass+"\",";
   s += "\"mqtt_connected\":\""+String(mqttclient.connected())+"\",";
+
+  s += "\"www_username\":\""+www_username+"\",";
+  s += "\"www_password\":\""+www_password+"\",";
 
   s += "\"free_heap\":\""+String(ESP.getFreeHeap())+"\"";
 
@@ -772,9 +786,9 @@ boolean mqtt_connect() {
 // base topic = emon/emonesp
 // MQTT Publish: emon/emonesp/CT1 > 3935 etc..
 // -------------------------------------------------------------------
-void mqtt_publish(String base_topic, String sep, String data){
+void mqtt_publish(String base_topic, String prefix, String data){
   String mqtt_data = "";
-  String topic = base_topic + sep;
+  String topic = base_topic  +"/" + prefix;
   int i=0;
   while (int(data[i])!=0){
     // Construct MQTT topic e.g. <base_topic>/CT1 e.g. emonesp/CT1
@@ -798,7 +812,7 @@ void mqtt_publish(String base_topic, String sep, String data){
     //delay(100);
     DEBUG.printf("%s = %s\r\n", topic.c_str(), mqtt_data.c_str());
     mqttclient.publish(topic.c_str(), mqtt_data.c_str());
-    topic = base_topic + sep;
+    topic = base_topic + "/" + prefix;
     mqtt_data="";
     i++;
     if (int(data[i])==0) break;
@@ -919,7 +933,7 @@ void setup() {
 
   // Start server & server root html /
   server.on("/", [](){
-    if(www_username!="" && !server.authenticate(www_username, www_password) && wifi_mode == WIFI_MODE_STA)
+    if(www_username!="" && !server.authenticate(www_username.c_str(), www_password.c_str()) && wifi_mode == WIFI_MODE_STA)
       return server.requestAuthentication();
     handleHome();
   });
@@ -928,6 +942,7 @@ void setup() {
   server.on("/savenetwork", handleSaveNetwork);
   server.on("/saveemoncms", handleSaveEmoncms);
   server.on("/savemqtt", handleSaveMqtt);
+  server.on("/saveadmin", handleSaveAdmin);
   server.on("/scan", handleScan);
   server.on("/apoff",handleAPOff);
   server.on("/firmware",handleUpdateCheck);
@@ -936,28 +951,28 @@ void setup() {
   server.on("/fwlink", handleHome);  //Microsoft captive portal. Maybe not needed. Might be handled by notFound
 
   server.on("/status", [](){
-  if(www_username!="" && !server.authenticate(www_username, www_password) && wifi_mode == WIFI_MODE_STA)
+  if(www_username!="" && !server.authenticate(www_username.c_str(), www_password.c_str()) && wifi_mode == WIFI_MODE_STA)
     return server.requestAuthentication();
   handleStatus();
   });
   server.on("/lastvalues", [](){
-  if(www_username!="" && !server.authenticate(www_username, www_password) && wifi_mode == WIFI_MODE_STA)
+  if(www_username!="" && !server.authenticate(www_username.c_str(), www_password.c_str()) && wifi_mode == WIFI_MODE_STA)
     return server.requestAuthentication();
   handleLastValues();
   });
   server.on("/reset", [](){
-  if(www_username!="" && !server.authenticate(www_username, www_password) && wifi_mode == WIFI_MODE_STA)
+  if(www_username!="" && !server.authenticate(www_username.c_str(), www_password.c_str()) && wifi_mode == WIFI_MODE_STA)
     return server.requestAuthentication();
   handleRst();
   });
   server.on("/restart", [](){
-  if(www_username!="" && !server.authenticate(www_username, www_password) && wifi_mode == WIFI_MODE_STA)
+  if(www_username!="" && !server.authenticate(www_username.c_str(), www_password.c_str()) && wifi_mode == WIFI_MODE_STA)
     return server.requestAuthentication();
   handleRestart();
   });
 
   server.on("/test", [](){
-  if(www_username!="" && !server.authenticate(www_username, www_password) && wifi_mode == WIFI_MODE_STA)
+  if(www_username!="" && !server.authenticate(www_username.c_str(), www_password.c_str()) && wifi_mode == WIFI_MODE_STA)
     return server.requestAuthentication();
   handleTest();
   });
@@ -1024,8 +1039,8 @@ void loop() {
       // Send data to MQTT
       if (mqtt_server != 0){
         DEBUG.print("MQTT publish base-topic: "); DEBUG.println(mqtt_topic);
-        mqtt_publish(mqtt_topic, mqtt_topic_sep, data);
-        String ram_topic = mqtt_topic + mqtt_topic_sep + "freeram";
+        mqtt_publish(mqtt_topic, mqtt_feed_prefix, data);
+        String ram_topic = mqtt_topic + "/" + mqtt_feed_prefix + "freeram";
         String free_ram = String(ESP.getFreeHeap());
         mqttclient.publish(ram_topic.c_str(), free_ram.c_str());
         ram_topic = "";

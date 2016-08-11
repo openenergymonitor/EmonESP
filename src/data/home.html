@@ -84,12 +84,36 @@
         </div>
 
       </div>
+  <!--//////////////////////////////////////////////////////////////////////////////////<div id="client-view" style="display:none">-->
+
+        <div class="flex-item">
+
+          <div id="two">
+
+            <h2>Admin</h2>
+
+            <div class="itembody-wrapper">
+
+              <p><b>Username:</b><br>
+                <input id="www_user" type="text" value="emoncms">
+              </p>
+
+              <p><b>Password:</b><br>
+                <input id="www_pass" type="password"  value="emon"><br/>
+                <button id="save-admin">Save</button>
+              </p>
+
+            </div>
+
+          </div>
+
+        </div>
 
 <!--//////////////////////////////////////////////////////////////////////////////////-->
 
       <div class="flex-item">
 
-        <div id="two">
+        <div id="three">
 
           <h2>Emoncms</h2>
 
@@ -122,7 +146,7 @@
 
       <div class="flex-item">
 
-        <div id="three">
+        <div id="four">
 
           <h2>Firmware</h2>
 
@@ -154,7 +178,7 @@
 
       <div class="flex-item">
 
-        <div id="four">
+        <div id="five">
 
           <h2>MQTT</h2>
 
@@ -165,10 +189,11 @@
           </p><span>e.g 'emonpi', 'test.mosquitto.org', or '192.168.1.4'</span><br>
           <p><b>MQTT Base-topic*:</b><br>
           <input id="mqtt_topic" type="text">
-          <p><b>MQTT topic separator:</b><br>
-          <input id="mqtt_topic_sep" type="text">
         </p><span>e.g 'emon/emonesp', 'emon/heatpump'</span><br><br>
           <div id="small-text">Data will be published to sub topic e.g. 'emon/emonesp/CT1 > XXX'</div>
+          <p><b>MQTT feed prefix:</b><br>
+          <input id="mqtt_feed_prefix" type="text">
+          <div id="small-text">value to prefix the feed names with, eg emonesp- would cause P0 to be named emonesp-P0</div>
           <p><b>Username:</b><br>
           <input id="mqtt_user" type="text">
           </p><span>Leave blank for no authentication</span><br>
@@ -189,7 +214,7 @@
 
       <div class="flex-item">
 
-        <div id="five">
+        <div id="six">
 
           <h2>Latest Data</h2>
 
@@ -210,7 +235,7 @@
 
       <div class="flex-item">
 
-        <div id="six">
+        <div id="seven">
 
           <h2>System</h2>
 
