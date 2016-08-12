@@ -616,7 +616,7 @@ void handleStatus() {
   s += "\"mqtt_connected\":\""+String(mqttclient.connected())+"\",";
 
   s += "\"www_username\":\""+www_username+"\",";
-  s += "\"www_password\":\""+www_password+"\",";
+  //s += "\"www_password\":\""+www_password+"\",";
 
   s += "\"free_heap\":\""+String(ESP.getFreeHeap())+"\",";
   s += "\"version\":\""+currentfirmware+"\"";
