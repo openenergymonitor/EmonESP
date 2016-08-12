@@ -77,8 +77,38 @@ OTA uses port 8266. See [PlatformIO ESP OTA docs](http://docs.platformio.org/en/
 
 
 
+#### 4. Debugging ESP subsystems
 
+The ESP subsystems have a lot of logging that can be enabled via setting various build options.
 
+Using Platform IO the easiest way to configure these is via the [PLATFORMIO_BUILD_FLAGS](http://docs.platformio.org/en/stable/envvars.html#envvar-PLATFORMIO_BUILD_FLAGS) environment variable.
+
+First select the serial port to output debug;
+```
+-DDEBUG_ESP_PORT=Serial
+-DDEBUG_ESP_PORT=Serial1
+```
+
+Then add one or more of the debug options;
+```
+-DDEBUG_ESP_CORE
+-DDEBUG_ESP_WIFI
+-DDEBUG_ESP_HTTP_CLIENT
+-DDEBUG_ESP_HTTP_SERVER
+-DDEBUG_ESP_HTTP_UPDATE
+-DDEBUG_ESP_UPDATER
+-DDEBUG_ESP_OTA
+-DDEBUG_ESP_SSL
+-DDEBUG_TLS_MEM
+```
+
+For example from the Windows Power shell you may do something like;
+```
+$env:PLATFORMIO_BUILD_FLAGS="-DDEBUG_ESP_PORT=Serial1 -DDEBUG_ESP_CORE -DDEBUG_ESP_WIFI"
+pio run -t clean
+pio run
+pio run -t upload --upload-port 172.16.0.80
+```
 
 ***
 
@@ -129,11 +159,11 @@ On first boot, ESP should broadcast a WiFI AP `ESP_XXX`. Connect to this AP and 
 
 ### WiFi Connection
 
+
 - Select your WiFi network from list of available networks
 - Enter WiFi PSK key then hit save and connect
 - emonESP should now connect to local wifi network and return local IP address.
 - Browse to local IP address by clicking the hyperlink (assuming your computer is on the same WiFi network)
-
 On future boots EmonESP will automatically connect to this network.
 
 **If re-connection fails (e.g. network cannot be found) the EmonESP will automatically revert back to WiFi AP mode after a short while to allow a new network to be re-configued if required. Re-connection to existing network will be attempted every 5min.**

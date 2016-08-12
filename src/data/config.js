@@ -13,6 +13,11 @@ r1.onreadystatechange = function () {
 
   document.getElementById("passkey").value = status.pass;
 
+  if ((status.www_user!=0) & (status.www_pass!=0)){
+    document.getElementById("www_user").value = status.www_username;
+    document.getElementById("www_pass").value = status.www_password;
+  }
+
   if ((status.emoncms_server!=0) & (status.emoncms_apikey!=0)){
     document.getElementById("emoncms_apikey").value = status.emoncms_apikey;
     document.getElementById("emoncms_server").value = status.emoncms_server;
@@ -32,6 +37,7 @@ r1.onreadystatechange = function () {
   if (status.mqtt_server!=0){
     document.getElementById("mqtt_server").value = status.mqtt_server;
     document.getElementById("mqtt_topic").value = status.mqtt_topic;
+    document.getElementById("mqtt_feed_prefix").value = status.mqtt_feed_prefix;
     if (status.mqtt_user!=0){
       document.getElementById("mqtt_user").value = status.mqtt_user;
       document.getElementById("mqtt_pass").value = status.mqtt_pass;
@@ -237,6 +243,7 @@ document.getElementById("save-mqtt").addEventListener("click", function(e) {
     var mqtt = {
       server: document.getElementById("mqtt_server").value,
       topic: document.getElementById("mqtt_topic").value,
+      prefix: document.getElementById("mqtt_feed_prefix").value,
       user: document.getElementById("mqtt_user").value,
       pass: document.getElementById("mqtt_pass").value
     }
@@ -247,7 +254,7 @@ document.getElementById("save-mqtt").addEventListener("click", function(e) {
       var r = new XMLHttpRequest();
       r.open("POST", "savemqtt", true);
       r.setRequestHeader("Content-type","application/x-www-form-urlencoded");
-      r.send("&server="+mqtt.server+"&topic="+mqtt.topic+"&user="+mqtt.user+"&pass="+mqtt.pass);
+      r.send("&server="+mqtt.server+"&topic="+mqtt.topic+"&prefix="+mqtt.prefix+"&user="+mqtt.user+"&pass="+mqtt.pass);
       r.onreadystatechange = function () {
         console.log(mqtt);
         if (r.readyState != 4 || r.status != 200) return;
@@ -256,6 +263,28 @@ document.getElementById("save-mqtt").addEventListener("click", function(e) {
   	    if (str!=0) document.getElementById("save-mqtt").innerHTML = "Saved";
       };
     }
+});
+
+// -----------------------------------------------------------------------
+// Event: Admin save
+// -----------------------------------------------------------------------
+document.getElementById("save-admin").addEventListener("click", function(e) {
+    var admin = {
+      user: document.getElementById("www_user").value,
+      pass: document.getElementById("www_pass").value
+    }
+    document.getElementById("save-admin").innerHTML = "Saving...";
+    var r = new XMLHttpRequest();
+    r.open("POST", "saveadmin", true);
+    r.setRequestHeader("Content-type","application/x-www-form-urlencoded");
+    r.send("&user="+admin.user+"&pass="+admin.pass);
+    r.onreadystatechange = function () {
+      console.log(admin);
+      if (r.readyState != 4 || r.status != 200) return;
+      var str = r.responseText;
+	    console.log(str);
+	    if (str!=0) document.getElementById("save-admin").innerHTML = "Saved";
+    };
 });
 
 // -----------------------------------------------------------------------

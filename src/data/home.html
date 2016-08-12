@@ -84,12 +84,37 @@
         </div>
 
       </div>
+  <!--//////////////////////////////////////////////////////////////////////////////////<div id="client-view" style="display:none">-->
+
+        <div class="flex-item">
+
+          <div id="two">
+
+            <h2>Admin</h2>
+
+            <div class="itembody-wrapper">
+
+              <p><b>Username:</b><br>
+                <input id="www_user" type="text">
+              </p>
+
+              <p><b>Password:</b><br>
+                <input id="www_pass" type="password"><br/><br>
+              Web-interface authentication <br><br>
+                <button id="save-admin">Save</button>
+            
+
+            </div>
+
+          </div>
+
+        </div>
 
 <!--//////////////////////////////////////////////////////////////////////////////////-->
 
       <div class="flex-item">
 
-        <div id="two">
+        <div id="three">
 
           <h2>Emoncms</h2>
 
@@ -122,7 +147,7 @@
 
       <div class="flex-item">
 
-        <div id="three">
+        <div id="four">
 
           <h2>Firmware</h2>
 
@@ -154,7 +179,7 @@
 
       <div class="flex-item">
 
-        <div id="four">
+        <div id="five">
 
           <h2>MQTT</h2>
 
@@ -167,6 +192,9 @@
           <input id="mqtt_topic" type="text">
         </p><span>e.g 'emon/emonesp', 'emon/heatpump'</span><br><br>
           <div id="small-text">Data will be published to sub topic e.g. 'emon/emonesp/CT1'</div>
+          <p><b>MQTT Feed-name prefix:</b><br>
+          <input id="mqtt_feed_prefix" type="text">
+          <div id="small-text">Value to prefix the feed names with: &#60;base-topic&#62;/&#60;prefix&#62;&#60;feed-name&#62;. Required for posting to AdafruitIO</div>
           <p><b>Username:</b><br>
           <input id="mqtt_user" type="text">
           </p><span>Leave blank for no authentication</span><br>
@@ -187,7 +215,7 @@
 
       <div class="flex-item">
 
-        <div id="five">
+        <div id="six">
 
           <h2>Latest Data</h2>
 
@@ -208,7 +236,7 @@
 
       <div class="flex-item">
 
-        <div id="six">
+        <div id="seven">
 
           <h2>System</h2>
 
