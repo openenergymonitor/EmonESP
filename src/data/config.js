@@ -6,7 +6,7 @@ var ipaddress = "";
 
 // get statup status and populate input fields
 var r1 = new XMLHttpRequest();
-r1.open("GET", "status", false);
+r1.open("GET", "status", true);
 r1.onreadystatechange = function () {
   if (r1.readyState != 4 || r1.status != 200) return;
   var status = JSON.parse(r1.responseText);
@@ -118,7 +118,7 @@ function updateLastValues() {
 
 function updateStatus() {
     var r2 = new XMLHttpRequest();
-    r2.open("GET", "status", false);
+    r2.open("GET", "status", true);
     r2.onreadystatechange = function () {
       if (r2.readyState != 4) {
         return;
