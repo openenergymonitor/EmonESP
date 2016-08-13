@@ -84,7 +84,7 @@ String emoncms_node = "";
 String emoncms_apikey = "";
 String emoncms_fingerprint = "";
 boolean emoncms_connected = false;
-String test_serial="";
+String input_string="";
 
 //MQTT Settings
 String mqtt_server = "";
@@ -650,13 +650,13 @@ void handleRestart() {
 
 // -------------------------------------------------------------------
 // Handle test input API
-// url /test
-// e.g http://192.168.0.75/test?serial=CT1:3935,CT2:325,T1:12.5,T2:16.9,T3:11.2,T4:34.7
+// url /input
+// e.g http://192.168.0.75/input?serial=CT1:3935,CT2:325,T1:12.5,T2:16.9,T3:11.2,T4:34.7
 // -------------------------------------------------------------------
-void handleTest(){
-  test_serial = server.arg("serial");
-  server.send(200, "text/html", test_serial);
-  DEBUG.println(test_serial);
+void handleInput(){
+  input_string = server.arg("string");
+  server.send(200, "text/html", input_string);
+  DEBUG.println(input_string);
 }
 
 // -------------------------------------------------------------------
@@ -1010,10 +1010,10 @@ void setup() {
   handleRestart();
   });
 
-  server.on("/test", [](){
+  server.on("/input", [](){
   if(www_username!="" && !server.authenticate(www_username.c_str(), www_password.c_str()))
     return server.requestAuthentication();
-  handleTest();
+  handleInput();
   });
 
   server.onNotFound([](){
@@ -1050,7 +1050,7 @@ void loop() {
   }
 
   // If data received on serial
-  while(Serial.available() || test_serial !="") {
+  while(Serial.available() || input_string !="") {
     String data = "";
   // Could check for string integrity here
     if (Serial.available()){
@@ -1059,10 +1059,10 @@ void loop() {
       // Get rid of any whitespace, newlines etc
       data.trim();
     }
-    // If serial from test API e.g `http://<IP-ADDRESS>/test?serial=CT1:3935,CT2:325,T1:12.5,T2:16.9,T3:11.2,T4:34.7`
-    if (test_serial !=""){
-      data = test_serial;
-      test_serial = "";
+    // If serial from test API e.g `http://<IP-ADDRESS>/input?string=CT1:3935,CT2:325,T1:12.5,T2:16.9,T3:11.2,T4:34.7`
+    if (input_string !=""){
+      data = input_string;
+      input_string = "";
     }
     DEBUG.println(data);
 

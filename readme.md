@@ -178,7 +178,7 @@ Topics to cover:
 - API format
 - Node name / numerical
 - Status
-- Test API
+- Input API
 
 ## MQTT
 
@@ -207,9 +207,11 @@ Example return in JSON:
 {"mode":"STA","networks":[],"rssi":[],"ssid":"OpenEnergyMonitor","srssi":"-58","ipaddress":"10.0.1.93","emoncms_server":"emoncms.org","emoncms_node":"emonesp","emoncms_apikey":"xxxxxxxx","emoncms_connected":"0","packets_sent":"0","packets_success":"0","mqtt_server":"emonpi","mqtt_topic":"emonesp","mqtt_user":"emonpi","mqtt_pass":"xxxxxx","mqtt_connected":"0","free_heap":"25040"}
 ```
 
-### Send test serial string
+### Input data via HTTP
 
-`http://<IP-ADDRESS>/test?serial=CT1:3935,CT2:325,T1:12.5,T2:16.9,T3:11.2,T4:34.7`
+*Previously called `test`, renamed to `input` since this is a useful method to input a data string to be posted to Emoncms & MQTT*
+
+`http://<IP-ADDRESS>/input?string=CT1:3935,CT2:325,T1:12.5,T2:16.9,T3:11.2,T4:34.7`
 
 ### Save Emoncms server details
 
