@@ -6,7 +6,7 @@ var ipaddress = "";
 
 // get statup status and populate input fields
 var r1 = new XMLHttpRequest();
-r1.open("GET", "status", false);
+r1.open("GET", "status", true);
 r1.onreadystatechange = function () {
   if (r1.readyState != 4 || r1.status != 200) return;
   var status = JSON.parse(r1.responseText);
@@ -79,84 +79,106 @@ r1.onreadystatechange = function () {
       document.getElementById("ap-view").style.display = 'none';
       document.getElementById("client-view").style.display = '';
       ipaddress = status.ipaddress;
-
-
   }
+
+  updateLastValues();
 };
 r1.send();
 
-
-update();
-setInterval(update,10000);
+setInterval(updateStatus,10000);
 
 // -----------------------------------------------------------------------
 // Periodic 10s update of last data values and packets sent
 // -----------------------------------------------------------------------
-function update() {
-
+function updateLastValues() {
     var r = new XMLHttpRequest();
     r.open("GET", "lastvalues", true);
     r.onreadystatechange = function () {
-	    if (r.readyState != 4 || r.status != 200) return;
-	    var str = r.responseText;
-	    var namevaluepairs = str.split(",");
-	    var out = "";
-	    for (var z in namevaluepairs) {
-	        var namevalue = namevaluepairs[z].split(":");
-	        var units = "";
-	        if (namevalue[0].indexOf("CT")==0) units = "W";
-	        if (namevalue[0].indexOf("T")==0) units = "&deg;C";
-	        out += "<tr><td>"+namevalue[0]+"</td><td>"+namevalue[1]+units+"</td></tr>";
-	    }
-	    document.getElementById("datavalues").innerHTML = out;
+	    if (r.readyState != 4) {
+        return;
+      }
+
+      if(r.status == 200)
+      {
+  	    var str = r.responseText;
+  	    var namevaluepairs = str.split(",");
+  	    var out = "";
+  	    for (var z in namevaluepairs) {
+  	        var namevalue = namevaluepairs[z].split(":");
+  	        var units = "";
+  	        if (namevalue[0].indexOf("CT")==0) units = "W";
+  	        if (namevalue[0].indexOf("T")==0) units = "&deg;C";
+  	        out += "<tr><td>"+namevalue[0]+"</td><td>"+namevalue[1]+units+"</td></tr>";
+  	    }
+  	    document.getElementById("datavalues").innerHTML = out;
+      }
     };
     r.send();
+}
 
+function updateStatus() {
     var r2 = new XMLHttpRequest();
-    r2.open("GET", "status", false);
+    r2.open("GET", "status", true);
     r2.onreadystatechange = function () {
-    if (r2.readyState != 4 || r2.status != 200) return;
-      var status = JSON.parse(r2.responseText);
-
-      document.getElementById("free_heap").innerHTML = status.free_heap;
-
-      if (status.emoncms_connected == "1"){
-       document.getElementById("emoncms_connected").innerHTML = "Yes";
-       if  ((status.packets_success!="undefined") & (status.packets_sent!="undefined")){
-         document.getElementById("psuccess").innerHTML = "Successful posts: " + status.packets_success + " / " + status.packets_sent;
-       }
-      } else {
-        document.getElementById("emoncms_connected").innerHTML = "No";
+      if (r2.readyState != 4) {
+        return;
       }
 
-      if (status.mqtt_connected == "1"){
-       document.getElementById("mqtt_connected").innerHTML = "Yes";
-      } else {
-       document.getElementById("mqtt_connected").innerHTML = "No";
+      if(r2.status == 200) {
+        var status = JSON.parse(r2.responseText);
+
+        document.getElementById("free_heap").innerHTML = status.free_heap;
+
+        if (status.emoncms_connected == "1"){
+         document.getElementById("emoncms_connected").innerHTML = "Yes";
+         if  ((status.packets_success!="undefined") & (status.packets_sent!="undefined")){
+           document.getElementById("psuccess").innerHTML = "Successful posts: " + status.packets_success + " / " + status.packets_sent;
+         }
+        } else {
+          document.getElementById("emoncms_connected").innerHTML = "No";
+        }
+
+        if (status.mqtt_connected == "1"){
+         document.getElementById("mqtt_connected").innerHTML = "Yes";
+        } else {
+         document.getElementById("mqtt_connected").innerHTML = "No";
+        }
+
+        if ((status.mode=="STA") || (status.mode=="STA+AP")){
+          // Update connected network RSSI
+          var out="";
+          out += "<tr><td>"+status.ssid+"</td><td>"+status.srssi+"</td></tr>"
+          document.getElementById("sta-ssid").innerHTML = out;
+        }
+
+        document.getElementById("psent").innerHTML = status.packets_sent;
+        document.getElementById("psuccess").innerHTML = status.packets_success;
+        if(status.packets_sent > 0) {
+          document.getElementById("ppercent").innerHTML = ((status.packets_success / status.packets_sent) * 100) + "%";
+        }
       }
 
-      if ((status.mode=="STA") || (status.mode=="STA+AP")){
-        // Update connected network RSSI
-        var out="";
-        out += "<tr><td>"+status.ssid+"</td><td>"+status.srssi+"</td></tr>"
-        document.getElementById("sta-ssid").innerHTML = out;
-      }
+      updateLastValues();
     };
     r2.send();
 }
 // -----------------------------------------------------------------------
 
 
-function updateStatus() {
+function updateWiFiStatus() {
   // Update status on Wifi connection
   var r1 = new XMLHttpRequest();
   r1.open("GET", "status", true);
   r1.timeout = 2000;
   r1.onreadystatechange = function () {
-    if (r1.readyState != 4 || r1.status != 200) return;
-    var status = JSON.parse(r1.responseText);
+    if (r1.readyState != 4) {
+      return;
+    }
 
-    if (status.mode=="STA+AP" || status.mode=="STA") {
+    if(r1.status == 200) {
+      var status = JSON.parse(r1.responseText);
+
+      if (status.mode=="STA+AP" || status.mode=="STA") {
         // Hide waiting message
         document.getElementById("wait-view").style.display = 'none';
         // Display mode
@@ -167,12 +189,11 @@ function updateStatus() {
         if (status.mode=="STA") document.getElementById("mode").innerHTML = "Client (STA)";
         document.getElementById("sta-ssid").innerHTML = status.ssid;
         document.getElementById("sta-ip").innerHTML = "<a href='http://"+status.ipaddress+"'>"+status.ipaddress+"</a>";
-        document.getElementById("sta-psent").innerHTML = status.packets_sent;
-        document.getElementById("sta-psuccess").innerHTML = status.packets_success;
 
         // View display
         document.getElementById("ap-view").style.display = 'none';
         document.getElementById("client-view").style.display = '';
+      }
     }
     lastmode = status.mode;
   };
@@ -199,7 +220,7 @@ document.getElementById("connect").addEventListener("click", function(e) {
 	        console.log(str);
 	        document.getElementById("connect").innerHTML = "Connecting...please wait 10s";
 
-	        statusupdate = setInterval(updateStatus,5000);
+	        statusupdate = setInterval(updateWiFiStatus, 5000);
         };
         r.send("ssid="+selected_network_ssid+"&pass="+passkey);
     }
