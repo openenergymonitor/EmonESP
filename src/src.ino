@@ -938,40 +938,80 @@ void setup() {
   });
 
   // Handle HTTP web interface button presses
-  server.on("/savenetwork", handleSaveNetwork);
-  server.on("/saveemoncms", handleSaveEmoncms);
-  server.on("/savemqtt", handleSaveMqtt);
-  server.on("/saveadmin", handleSaveAdmin);
-  server.on("/scan", handleScan);
-  server.on("/apoff",handleAPOff);
-  server.on("/firmware",handleUpdateCheck);
-  server.on("/update",handleUpdate);
   server.on("/generate_204", handleHome);  //Android captive portal. Maybe not needed. Might be handled by notFound
   server.on("/fwlink", handleHome);  //Microsoft captive portal. Maybe not needed. Might be handled by notFound
 
   server.on("/status", [](){
-  if(www_username!="" && !server.authenticate(www_username.c_str(), www_password.c_str()) && wifi_mode == WIFI_MODE_STA)
+  if(www_username!="" && !server.authenticate(www_username.c_str(), www_password.c_str()))
+    return server.requestAuthentication();
+  handleStatus();
+  });
+  server.on("/savenetwork", [](){
+  if(www_username!="" && !server.authenticate(www_username.c_str(), www_password.c_str()))
+    return server.requestAuthentication();
+  handleSaveNetwork();
+  });
+  server.on("/saveemoncms", [](){
+  if(www_username!="" && !server.authenticate(www_username.c_str(), www_password.c_str()))
+    return server.requestAuthentication();
+  handleSaveEmoncms();
+  });
+  server.on("/savemqtt", [](){
+  if(www_username!="" && !server.authenticate(www_username.c_str(), www_password.c_str()))
+    return server.requestAuthentication();
+  handleSaveMqtt();
+  });
+  server.on("/saveadmin", [](){
+  if(www_username!="" && !server.authenticate(www_username.c_str(), www_password.c_str()))
+    return server.requestAuthentication();
+  handleSaveAdmin();
+  });
+  server.on("/scan", [](){
+  if(www_username!="" && !server.authenticate(www_username.c_str(), www_password.c_str()))
+    return server.requestAuthentication();
+  handleScan();
+  });
+  
+  server.on("/apoff", [](){
+  if(www_username!="" && !server.authenticate(www_username.c_str(), www_password.c_str()))
+    return server.requestAuthentication();
+  handleAPOff();
+  });
+  server.on("/firmware", [](){
+  if(www_username!="" && !server.authenticate(www_username.c_str(), www_password.c_str()))
+    return server.requestAuthentication();
+  handleUpdateCheck();
+  });
+  
+  server.on("/update", [](){
+  if(www_username!="" && !server.authenticate(www_username.c_str(), www_password.c_str()))
+    return server.requestAuthentication();
+  handleUpdate();
+  });
+
+  server.on("/status", [](){
+  if(www_username!="" && !server.authenticate(www_username.c_str(), www_password.c_str()))
     return server.requestAuthentication();
   handleStatus();
   });
   server.on("/lastvalues", [](){
-  if(www_username!="" && !server.authenticate(www_username.c_str(), www_password.c_str()) && wifi_mode == WIFI_MODE_STA)
+  if(www_username!="" && !server.authenticate(www_username.c_str(), www_password.c_str()))
     return server.requestAuthentication();
   handleLastValues();
   });
   server.on("/reset", [](){
-  if(www_username!="" && !server.authenticate(www_username.c_str(), www_password.c_str()) && wifi_mode == WIFI_MODE_STA)
+  if(www_username!="" && !server.authenticate(www_username.c_str(), www_password.c_str()))
     return server.requestAuthentication();
   handleRst();
   });
   server.on("/restart", [](){
-  if(www_username!="" && !server.authenticate(www_username.c_str(), www_password.c_str()) && wifi_mode == WIFI_MODE_STA)
+  if(www_username!="" && !server.authenticate(www_username.c_str(), www_password.c_str()))
     return server.requestAuthentication();
   handleRestart();
   });
 
   server.on("/test", [](){
-  if(www_username!="" && !server.authenticate(www_username.c_str(), www_password.c_str()) && wifi_mode == WIFI_MODE_STA)
+  if(www_username!="" && !server.authenticate(www_username.c_str(), www_password.c_str()))
     return server.requestAuthentication();
   handleTest();
   });
