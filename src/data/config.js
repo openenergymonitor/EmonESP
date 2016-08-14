@@ -10,8 +10,10 @@ r1.open("GET", "status", true);
 r1.onreadystatechange = function () {
   if (r1.readyState != 4 || r1.status != 200) return;
   var status = JSON.parse(r1.responseText);
-
-  document.getElementById("passkey").value = status.pass;
+ 
+  if  (status.pass!="undefined"){
+   document.getElementById("passkey").value = status.pass;
+  }
 
   if ((status.www_user!=0) & (status.www_pass!=0)){
     document.getElementById("www_user").value = status.www_username;
