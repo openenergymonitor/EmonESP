@@ -8,9 +8,32 @@ body {
     margin: 0;
 }
 
+/*----------------*/
+
 #page {
     height: 100%;
     width: 100%;
+    max-width: 1024px;
+    margin: 0 auto;
+    overflow-x: hidden;
+}
+
+@media screen and (min-width: 1024px) {
+
+#left-hand-container {
+    width: 50%;
+    float: left;
+    margin-bottom: 40px;
+}
+}
+
+@media screen and (min-width: 1024px) {
+  
+#right-hand-container {
+    width: 50%;
+    float: right;
+    margin-bottom: 40px;
+}
 }
 
 #one,#two,#three,#four,#five,#six,#seven {
@@ -19,19 +42,60 @@ body {
     margin: 5px 5px 5px 5px;
 }
 
+@media screen and (min-width: 1024px) {
+     #one,#two,#three {
+         vertical-align: top;
+         display: inline-block;
+         width: 500px;
+     }
+}
+
+@media screen and (min-width: 1024px) {
+     #four,#five,#six,#seven {
+        vertical-align: top;
+         display: inline-block;
+         width: 500px;
+         right: 0;
+     }
+}
+
 .itembody-wrapper {
     padding: 5px 25px 5px 25px;
 }
+
+input[type="text"],
+input[type="password"] {
+    box-sizing: border-box;
+    border-radius: 4px;
+    padding: 10px;
+    margin-top: 10px;
+    width: 280px;
+}
+
+@media screen and (max-width: 420px) {
+    input[type="text"],
+    input[type="password"]  {
+        width: 240px;
+    }
+}
+
+#update {
+    background-color: red;
+}
+
+#small-text{
+font-size: 10px;
+word-wrap: break-word;
+}
+
+/*----------------*/
 
 table {
     border-collapse: collapse;
     margin: 10px auto 0 auto;
     max-width: 380px;
     max-height: 100px;
-}
-
-table {
-   border-style: none;
+    border-style: none;
 }
 
 th {
@@ -48,49 +112,44 @@ td {
    padding: 8px;
 }
 
-.flex-container {
-    display: -webkit-flex;
-    display: flex;
-    flex-direction: column;
-    flex-wrap: nowrap;
-    justify-content: flex-start;
-    align-items: center;
-    width: 100%;
-    max-height: 2400px;
-}
+/*----------------*/
 
-@media screen and (min-width: 800px) {
-    .flex-container {
-        width: 800px;
-        max-height: 1400px;
-        flex-wrap: wrap;
-        margin: 0 auto;
-    }
-}
-
-
-.flex-item {
-    margin: 0 auto;
-    width: 100%;
-}
-
-@media screen and (min-width: 800px) {
-    .flex-item {
-        width: 400px;
-    }
-}
-
-.flex-item p {
+p {
     padding-top: 10px;
 }
 
-.flex-item h2 {
+
+a {
+  text-decoration: none;
+  color: #0699fa;
+  cursor: pointer;
+}
+
+h2 {
     font-size: 20px;
     background-color: #777777;
     color: #ffffff;
     padding: 5px 25px 5px 25px;
     margin: 0;
 }
+
+button {
+    background-color: #0699fa;
+    border-radius: 10px;
+    border: none;
+    color: #ffffff;
+    padding: 13px 28px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 15px;
+    font-weight: bold;
+    margin: 4px 2px;
+    cursor: pointer;
+    outline: none;
+}
+
+/*----------------*/
 
 .box {
     padding-top: 5px;
@@ -117,53 +176,54 @@ td {
     font-size: 19px;
     text-align: center;
     color: #b6b6b6;
-    margin: -8px 0 0 0;
+    margin: -12px 0 0 0;
 }
 
-button {
-    background-color: #0699fa;
-    border-radius: 10px;
-    border: none;
-    color: #ffffff;
-    padding: 13px 28px;
-    text-align: center;
-    text-decoration: none;
-    display: inline-block;
-    font-size: 15px;
-    font-weight: bold;
-    margin: 4px 2px;
-    cursor: pointer;
-    outline: none;
-}
+/*----------------*/
 
-input[type="text"],
-input[type="password"] {
-    box-sizing: border-box;
-    border-radius: 4px;
-    padding: 10px;
-    margin-top: 10px;
-    width: 280px;
-}
-
-@media screen and (max-width: 420px) {
-    input[type="text"],
-    input[type="password"]  {
-        width: 240px;
-    }
-}
-
-#update {
-    background-color: red;
-}
-
-#footer {
+#footer-small-scrn {
+    width: 100%;
     font-weight: bold;
     font-family: Arial,"sans-serif";
     font-size: 15px;
     text-align: center;
-    margin-bottom: 5px;
+    padding: 5px;
+    color: #bcbcbc;
 }
 
-#small-text{
-font-size: 10px;
+#footer-large-scrn {
+    display: none;
 }
+
+@media screen and (min-width: 1024px) {
+  
+#footer-small-scrn {
+    display: none;
+}
+}
+
+@media screen and (min-width: 1024px) {
+  
+#footer-large-scrn {
+    position: fixed;
+    display: block;
+    width: 100%;
+    font-weight: bold;
+    font-family: Arial,"sans-serif";
+    font-size: 15px;
+    text-align: center;
+    padding: 5px;
+    color: #bcbcbc;
+    bottom: 0;
+    background-color: #ffffff;
+}
+}
+
+#footer-large-scrn a, #footer-small-scrn a {
+    color: #0699fa;
+}
+
+#footer-large-scrn span, #footer-small-scrn span {
+    color: #777777;
+}
+
