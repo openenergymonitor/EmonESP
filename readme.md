@@ -161,7 +161,6 @@ On first boot, ESP should broadcast a WiFI AP `ESP_XXX`. Connect to this AP and 
 
 ### 1. WiFi Connection
 
-![Wifi setup](docs/wifi.png)
 
 - Select your WiFi network from list of available networks
 - Enter WiFi PSK key then hit save and connect
@@ -170,6 +169,8 @@ On first boot, ESP should broadcast a WiFI AP `ESP_XXX`. Connect to this AP and 
 On future boots EmonESP will automatically connect to this network.
 
 **If re-connection fails (e.g. network cannot be found) the EmonESP will automatically revert back to WiFi AP mode after a short while to allow a new network to be re-configued if required. Re-connection to existing network will be attempted every 5min.**
+
+![Wifi setup](docs/wifi.png)
 
 ## 2. Emoncms
 
