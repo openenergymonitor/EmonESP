@@ -61,7 +61,7 @@ IPAddress apIP(192, 168, 4, 1);
 IPAddress netMsk(255, 255, 255, 0);
 
 // Web server authentication (leave blank for none)
-String www_username = "";
+String www_username = "admin";
 String www_password = "";
 String st, rssi;
 
@@ -971,7 +971,7 @@ void setup() {
     return server.requestAuthentication();
   handleScan();
   });
-  
+
   server.on("/apoff", [](){
   if(www_username!="" && !server.authenticate(www_username.c_str(), www_password.c_str()))
     return server.requestAuthentication();
@@ -982,7 +982,7 @@ void setup() {
     return server.requestAuthentication();
   handleUpdateCheck();
   });
-  
+
   server.on("/update", [](){
   if(www_username!="" && !server.authenticate(www_username.c_str(), www_password.c_str()))
     return server.requestAuthentication();
