@@ -151,14 +151,17 @@ Required to include `data` folder with HTML etc in the upload
 
 ***
 
+# EmonESP User Guide
+
 ## First Setup
 
 On first boot, ESP should broadcast a WiFI AP `ESP_XXX`. Connect to this AP and the [captive portal](https://en.wikipedia.org/wiki/Captive_portal) should forward you to the log-in page. If this does not happen navigate to `http://192.168.4.1`
 
 *Note: You may need to disable mobile data if connecting via a Android 6 device*
 
-### WiFi Connection
+### 1. WiFi Connection
 
+![Wifi setup](docs/wifi.png)
 
 - Select your WiFi network from list of available networks
 - Enter WiFi PSK key then hit save and connect
@@ -168,19 +171,23 @@ On future boots EmonESP will automatically connect to this network.
 
 **If re-connection fails (e.g. network cannot be found) the EmonESP will automatically revert back to WiFi AP mode after a short while to allow a new network to be re-configued if required. Re-connection to existing network will be attempted every 5min.**
 
-## Emoncms
+## 2. Emoncms
 
-TBC
+![emoncms setup](docs/emoncms.png)
 
-Topics to cover:
-- HTTP / HTTPS SHA-1 fingerprint
-- Connection status
-- API format
-- Node name / numerical
-- Status
-- Input API
+EmonESP can post data to [emoncms.org](https://emoncms.org) or any other  Emoncms server (e.g. emonPi) using [Emoncms API](https://emoncms.org/site/api#input).
 
-## MQTT
+Data ca be posted using HTTP or HTTPS. For HTTPS the Emoncms server must support HTTPS (emoncms.org does, emonPi does not).Due to the limited resources on the ESP the SSL SSH-1 fingerprint for the Emoncms server must be manually entered and regularly updated.
+
+*Note: the emoncms.org fingerprint will change every 90 days when the SSL certificate is renewed.*
+
+Currently emoncms.org only supports numerical node names, other emoncms servers e.g. emonPi do support alphanumeric node naming.
+
+
+## 3. MQTT
+
+
+![mqtt setup](docs/mqtt.png)
 
 EmonESP can post data to an MQTT server. Each data key:pair value will be published to a sub-topic of base topic.E.g data `CT1:346` will results in `346` being published to `<base-topic>/CT1`
 
@@ -190,6 +197,21 @@ EmonESP can post data to an MQTT server. Each data key:pair value will be publis
 - After a few seconds `Connected: No` should change to `Connected: Yes` if connection is successful. Re-connection will be attempted every 10s.
 
 *Note: `emon/xxxx` should be used as the base-topic if posting to emonPi MQTT server if you want the data to appear in emonPi Emoncms. See [emonPi MQTT docs](https://guide.openenergymonitor.org/technical/mqtt/).*
+
+
+## 5. Admin (Authentication)
+
+HTTP Authentication can be set in the admin config by default username is `admin` and password in blank
+
+**HTTP authentication is required for all HTTP requests including input API**
+
+![admin setup](docs/admin.png)
+
+## 7. System
+
+Displays free system memory and firmware version
+
+![system](docs/system.png)
 
 ## OTA Firmware Update
 
@@ -207,7 +229,11 @@ Example return in JSON:
 {"mode":"STA","networks":[],"rssi":[],"ssid":"OpenEnergyMonitor","srssi":"-58","ipaddress":"10.0.1.93","emoncms_server":"emoncms.org","emoncms_node":"emonesp","emoncms_apikey":"xxxxxxxx","emoncms_connected":"0","packets_sent":"0","packets_success":"0","mqtt_server":"emonpi","mqtt_topic":"emonesp","mqtt_user":"emonpi","mqtt_pass":"xxxxxx","mqtt_connected":"0","free_heap":"25040"}
 ```
 
-### Input data via HTTP
+### 4. Data Input
+
+Data can be inputed to EmonESP via serial UART (9600 baud) or HTTP API:
+
+![input setup](docs/input.png)
 
 *Previously called `test`, renamed to `input` since this is a useful method to input a data string to be posted to Emoncms & MQTT*
 
@@ -224,8 +250,10 @@ Example return in JSON:
 `http://<IP-ADDRESS>/savemqtt?&server=emonpi&topic=emonesp&user=emonpi&pass=emonpimqtt2016`
 
 *MQTT user and pass are optional, leave blank for connection to un-authenticated MQTT servers*
+
+###
 ***
 
 ### License
 
-GNU General Public License
+GNU V3 General Public License

@@ -18,7 +18,7 @@
         </div><!--<div id="client-view" style="display:none">-->
         <div id="left-hand-container">
             <div id="one">
-                <h2>Wifi</h2>
+                <h2>1. WiFi Network</h2>
                 <div class="itembody-wrapper">
                     <p><b>Mode:</b> <span id="mode"></span></p>
                     <div id="client-view">
@@ -56,7 +56,7 @@
             </div>
             <!--//////////////////////////////////////////////////////////////////////////////////-->
             <div id="two">
-                <h2>Emoncms</h2>
+                <h2>2. Emoncms</h2>
                 <div class="itembody-wrapper">
                     <p><b>Emoncms Server*:</b><br>
                     <input id="emoncms_server" type="text" value=
@@ -90,7 +90,7 @@
             </div>
             <!--//////////////////////////////////////////////////////////////////////////////////-->
             <div id="three">
-                <h2>MQTT</h2>
+                <h2>3. MQTT</h2>
                 <div class="itembody-wrapper">
                     <p><b>MQTT Server*:</b><br>
                     <input id="mqtt_server" type="text"></p><span>e.g 'emonpi',
@@ -125,7 +125,7 @@
         <!--//////////////////////////////////////////////////////////////////////////////////-->
         <div id="right-hand-container">
             <div id="four">
-                <h2>Latest Data</h2>
+                <h2>4. Latest Data</h2>
                 <div class="itembody-wrapper">
                     <table>
                         <tr>
@@ -133,12 +133,16 @@
                             <th>Value</th>
                         </tr>
                         <tbody id="datavalues"></tbody>
-                    </table>
+                    </table><br>
+                    <div id="small-text">
+                      Input key value pairs via serial uart (e.g "CT1:3935,CT2:325") or HTTP input API e.g.: <br>
+                      <span id="input-api">
+                      </div>
                 </div>
             </div>
             <!--//////////////////////////////////////////////////////////////////////////////////-->
             <div id="five">
-                <h2>Admin</h2>
+                <h2>5. Admin</h2>
                 <div class="itembody-wrapper">
                     <p><b>Username:</b><br>
                     <input id="www_user" type="text" value="admin"></p>
@@ -152,7 +156,7 @@
             </div>
             <!--//////////////////////////////////////////////////////////////////////////////////-->
             <div id="six">
-                <h2>Firmware</h2>
+                <h2>6. Firmware</h2>
                 <div class="itembody-wrapper">
                     <div id="firmware" style="display:none">
                         <table>
@@ -175,7 +179,7 @@
             </div>
             <!--//////////////////////////////////////////////////////////////////////////////////-->
             <div id="seven">
-                <h2>System</h2>
+                <h2>7. System</h2>
                 <div class="itembody-wrapper">
                     <p><b>Free RAM:</b> <span id="free_heap"></span>B</p>
                     <p><b>Version:</b> <a href=

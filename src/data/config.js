@@ -10,7 +10,7 @@ r1.open("GET", "status", true);
 r1.onreadystatechange = function () {
   if (r1.readyState != 4 || r1.status != 200) return;
   var status = JSON.parse(r1.responseText);
- 
+
   if  (status.pass!="undefined"){
    document.getElementById("passkey").value = status.pass;
   }
@@ -78,6 +78,7 @@ r1.onreadystatechange = function () {
       out += "<tr><td>"+status.ssid+"</td><td>"+status.srssi+"</td></tr>"
       document.getElementById("sta-ssid").innerHTML = out;
       document.getElementById("sta-ip").innerHTML = "<a href='http://"+status.ipaddress+"'>"+status.ipaddress+"</a>";
+      document.getElementById("input-api").innerHTML = "<a href='http://"+status.ipaddress+"/input?string=CT1:3935,CT2:325'>"+"http://"+status.ipaddress+"/input?string=CT1:3935,CT2:325</a>";
       document.getElementById("ap-view").style.display = 'none';
       document.getElementById("client-view").style.display = '';
       ipaddress = status.ipaddress;
