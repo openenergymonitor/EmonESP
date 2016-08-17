@@ -400,6 +400,8 @@ void handleHome() {
     String s = f.readString();
     server.send(200, "text/html", s);
     f.close();
+  } else {
+    server.send(200, "text/plain","/home.html not found, have you flashed the SPIFFS?");
   }
 }
 
