@@ -61,7 +61,7 @@ IPAddress apIP(192, 168, 4, 1);
 IPAddress netMsk(255, 255, 255, 0);
 
 // Web server authentication (leave blank for none)
-String www_username = "admin";
+String www_username = "";
 String www_password = "";
 String st, rssi;
 

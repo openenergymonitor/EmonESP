@@ -15,12 +15,11 @@ r1.onreadystatechange = function () {
    document.getElementById("passkey").value = status.pass;
   }
 
-  if ((status.www_user!=0) & (status.www_pass!=0)){
+  if ((status.www_user!=0) && (status.www_user!="undefined")  ){
     document.getElementById("www_user").value = status.www_username;
-    document.getElementById("www_pass").value = status.www_password;
   }
 
-  if ((status.emoncms_server!=0) & (status.emoncms_apikey!=0)){
+  if ((status.emoncms_server!=0) && (status.emoncms_apikey!=0)){
     document.getElementById("emoncms_apikey").value = status.emoncms_apikey;
     document.getElementById("emoncms_server").value = status.emoncms_server;
     document.getElementById("emoncms_node").value = status.emoncms_node;
