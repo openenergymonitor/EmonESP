@@ -66,6 +66,10 @@ r1.onreadystatechange = function () {
         out += "<tr><td><input class='networkcheckbox' name='"+status.networks[z]+"' type='checkbox'></td><td>"+status.networks[z]+"</td><td>"+status.rssi[z]+"</td></tr>"
       }
       document.getElementById("networks").innerHTML = out;
+      var networkcheckboxes = document.getElementsByClassName("networkcheckbox");
+      for (var i = 0; i < networkcheckboxes.length; i++) {
+          networkcheckboxes[i].addEventListener('click', networkSelect, false);
+      }
   } else {
       if (status.mode=="STA+AP") {
           document.getElementById("mode").innerHTML = "Client + Access Point (STA+AP)";
@@ -366,8 +370,6 @@ document.getElementById("restart").addEventListener("click", function(e) {
 // -----------------------------------------------------------------------
 // UI: Network select
 // -----------------------------------------------------------------------
-var networkcheckboxes = document.getElementsByClassName("networkcheckbox");
-
 var networkSelect = function() {
     selected_network_ssid = this.getAttribute("name");
 
@@ -376,10 +378,6 @@ var networkSelect = function() {
             networkcheckboxes[i].checked = 0;
     }
 };
-
-for (var i = 0; i < networkcheckboxes.length; i++) {
-    networkcheckboxes[i].addEventListener('click', networkSelect, false);
-}
 
 // -----------------------------------------------------------------------
 // Event:Check for updates & display current / latest
