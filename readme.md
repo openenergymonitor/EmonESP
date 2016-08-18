@@ -1,4 +1,4 @@
-# EmonESP
+*# EmonESP
 
 [![Build Status](https://travis-ci.org/openenergymonitor/EmonESP.svg?branch=master)](https://travis-ci.org/openenergymonitor/EmonESP)
 
@@ -24,12 +24,19 @@ On first boot, ESP should broadcast a WiFI AP `ESP_XXX`. Connect to this AP and 
 
 
 - Select your WiFi network from list of available networks
-- Enter WiFi PSK key then hit save and connect
+- Enter WiFi PSK key then click `Connect`
+
+![Wifi setup](docs/wifi-scan.png)
+
 - emonESP should now connect to local wifi network and return local IP address.
 - Browse to local IP address by clicking the hyperlink (assuming your computer is on the same WiFi network)
 On future boots EmonESP will automatically connect to this network.
 
+*Note on some networks it's possible to browse to the EmonESP using hostname [http://emonesp.local](http://emonesp.local), this seems to work on windows but not on Linux*
+
 **If re-connection fails (e.g. network cannot be found) the EmonESP will automatically revert back to WiFi AP mode after a short while to allow a new network to be re-configued if required. Re-connection to existing network will be attempted every 5min.**
+
+E.g Connected to WiFi network with SSID `OpenEnergyMonitor` with local IP `10.0.1.93`:
 
 ![Wifi setup](docs/wifi.png)
 
@@ -43,7 +50,7 @@ Data ca be posted using HTTP or HTTPS. For HTTPS the Emoncms server must support
 
 *Note: the emoncms.org fingerprint will change every 90 days when the SSL certificate is renewed.*
 
-Currently emoncms.org only supports numerical node names, other emoncms servers e.g. emonPi do support alphanumeric node naming.
+**Currently emoncms.org only supports numerical node names, other emoncms servers e.g. emonPi do support alphanumeric node naming.**
 
 
 ## 3. MQTT
