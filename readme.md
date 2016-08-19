@@ -16,7 +16,7 @@ ESP8266 WIFI serial to emoncms link
 
 ## First Setup
 
-On first boot, ESP should broadcast a WiFI AP `ESP_XXX`. Connect to this AP and the [captive portal](https://en.wikipedia.org/wiki/Captive_portal) should forward you to the log-in page. If this does not happen navigate to `http://192.168.4.1`
+On first boot, ESP should broadcast a WiFI AP `emonESP_XXX`. Connect to this AP and the [captive portal](https://en.wikipedia.org/wiki/Captive_portal) should forward you to the log-in page. If this does not happen navigate to `http://192.168.4.1`
 
 *Note: You may need to disable mobile data if connecting via a Android 6 device*
 
