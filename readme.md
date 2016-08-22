@@ -1,4 +1,4 @@
-*# EmonESP
+# EmonESP
 
 [![Build Status](https://travis-ci.org/openenergymonitor/EmonESP.svg?branch=master)](https://travis-ci.org/openenergymonitor/EmonESP)
 
