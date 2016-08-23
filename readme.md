@@ -264,6 +264,11 @@ Required to include `data` folder with HTML etc in the upload
 
 ***
 
+### Development Forum Threads
+
+- https://community.openenergymonitor.org/t/emonesp-firmware-development/1191/43
+- https://community.openenergymonitor.org/tags/emonesp
+
 ### License
 
 GNU V3 General Public License
