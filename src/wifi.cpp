@@ -189,3 +189,8 @@ void wifi_scan()
     if (i<n-1) rssi += ",";
   }
 }
+
+void wifi_disconnect()
+{
+  WiFi.disconnect();
+}

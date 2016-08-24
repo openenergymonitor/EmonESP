@@ -1,7 +1,6 @@
 #include <Arduino.h>
 #include <ESP8266WebServer.h>         // Config portal
 #include <FS.h>                       // SPIFFS file-system: store web server html, CSS etc.
-#include <WiFi.h>
 
 #include "emonesp.h"
 #include "web_server.h"
@@ -279,7 +278,7 @@ void handleStatus() {
 void handleRst() {
   config_reset();
   server.send(200, "text/html", "1");
-  WiFi.disconnect();
+  wifi_disconnect();
   delay(1000);
   ESP.reset();
 }
@@ -291,7 +290,7 @@ void handleRst() {
 void handleRestart() {
   server.send(200, "text/html", "1");
   delay(1000);
-  WiFi.disconnect();
+  wifi_disconnect();
   ESP.restart();
 }
 
