@@ -297,7 +297,7 @@ void handleRestart() {
 // -------------------------------------------------------------------
 // Handle test input API
 // url /input
-// e.g http://192.168.0.75/input?serial=CT1:3935,CT2:325,T1:12.5,T2:16.9,T3:11.2,T4:34.7
+// e.g http://192.168.0.75/input?string=CT1:3935,CT2:325,T1:12.5,T2:16.9,T3:11.2,T4:34.7
 // -------------------------------------------------------------------
 void handleInput(){
   input_string = server.arg("string");
