@@ -28,6 +28,12 @@
 
 #include <Arduino.h>
 
+// -------------------------------------------------------------------
+// Load and save the EmonESP config.
+//
+// This initial implementation saves the config to the EEPROM area of flash
+// -------------------------------------------------------------------
+
 // Global config varables
 
 // Wifi Network Strings
@@ -57,13 +63,29 @@ extern String mqtt_feed_prefix;
 extern void config_load_settings();
 
 // -------------------------------------------------------------------
-// Load saved settings from config
+// Save the EmonCMS server details
 // -------------------------------------------------------------------
 extern void config_save_emoncms(String server, String node, String apikey, String fingerprint);
+
+// -------------------------------------------------------------------
+// Save the MQTT broker details
+// -------------------------------------------------------------------
 extern void config_save_mqtt(String server, String topic, String prefix, String user, String pass);
+
+// -------------------------------------------------------------------
+// Save the admin/web interface details
+// -------------------------------------------------------------------
 extern void config_save_admin(String user, String pass);
+
+// -------------------------------------------------------------------
+// Save the Wifi details
+// -------------------------------------------------------------------
 extern void config_save_wifi(String qsid, String qpass);
 
+
+// -------------------------------------------------------------------
+// Reset the config back to defaults
+// -------------------------------------------------------------------
 extern void config_reset();
 
 #endif // _EMONESP_CONFIG_H

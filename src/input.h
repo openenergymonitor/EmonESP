@@ -28,9 +28,19 @@
 
 #include <Arduino.h>
 
+// -------------------------------------------------------------------
+// Support for reading input
+// -------------------------------------------------------------------
+
 extern String last_datastr;
 extern String input_string;
 
+// -------------------------------------------------------------------
+// Read input sent via the web_server or serial.
+//
+// data: if true is returned data will be updated with the new line of
+//       input
+// -------------------------------------------------------------------
 extern boolean input_get(String& data);
 
 #endif // _EMONESP_INPUT_H
