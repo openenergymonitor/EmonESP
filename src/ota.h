@@ -23,70 +23,20 @@
  * Boston, MA 02111-1307, USA.
  */
 
-#include "emonesp.h"
-#include "config.h"
-#include "wifi.h"
-#include "web_server.h"
-#include "ota.h"
-#include "input.h"
-#include "emoncms.h"
-#include "mqtt.h"
+#ifndef _EMONESP_OTA_H
+#define _EMONESP_OTA_H
 
 // -------------------------------------------------------------------
-// SETUP
+// Support for updating the fitmware os the ESP8266
 // -------------------------------------------------------------------
-void setup() {
-  delay(2000);
 
-  Serial.begin(115200);
-#ifdef DEBUG_SERIAL1
-  Serial1.begin(115200);
-#endif
+#include <Arduino.h>
+#include <ESP8266httpUpdate.h>
 
-  DEBUG.println();
-  DEBUG.print("EmonESP ");
-  DEBUG.println(ESP.getChipId());
-  DEBUG.println("Firmware: "+ currentfirmware);
 
-  // Read saved settings from the config
-  config_load_settings();
+void ota_setup();
+void ota_loop();
+String ota_get_latest_version();
+t_httpUpdate_return ota_http_update();
 
-  // Initialise the WiFi
-  wifi_setup();
-
-  // Bring up the web server
-  web_server_setup();
-
-  // Start the OTA update systems
-  ota_setup();
-
-  DEBUG.println("Server started");
-
-  delay(100);
-} // end setup
-
-// -------------------------------------------------------------------
-// LOOP
-// -------------------------------------------------------------------
-void loop()
-{
-  ota_loop();
-  web_server_loop();
-  wifi_loop();
-
-  String input = "";
-  boolean gotInput = input_get(input);
-  if (wifi_mode==WIFI_MODE_STA || wifi_mode==WIFI_MODE_AP_AND_STA)
-  {
-    if(emoncms_apikey != 0 && gotInput) {
-      emoncms_publish(input);
-    }
-    if(mqtt_server != 0)
-    {
-      mqtt_loop();
-      if(gotInput) {
-        mqtt_publish(input);
-      }
-    }
-  }
-} // end loop
+#endif // _EMONESP_OTA_H
