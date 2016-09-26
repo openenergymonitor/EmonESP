@@ -46,9 +46,12 @@ const char* u_host = "217.9.195.227";
 const char* u_url = "/esp/firmware.php";
 const char* firmware_update_path = "/upload";
 
+extern const char *esp_hostname;
+
 void ota_setup()
 {
   // Start local OTA update server
+  ArduinoOTA.setHostname(esp_hostname);
   ArduinoOTA.begin();
 
   // Setup firmware upload
