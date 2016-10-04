@@ -20,6 +20,7 @@
             <div id="one">
                 <h2>1. WiFi Network</h2>
                 <div class="itembody-wrapper">
+                  <p>Connect to local WiFi network:</p>
                     <p><b>Mode:</b> <span id="mode"></span></p>
                     <div id="client-view">
                         <!--<p><b>Network SSID:</b><br><span id="sta-ssid"></span></p>
@@ -58,11 +59,12 @@
             <div id="two">
                 <h2>2. Emoncms</h2>
                 <div class="itembody-wrapper">
+                    <p> Emoncms server to post data to:</p>
                     <p><b>Emoncms Server*:</b><br>
                     <input id="emoncms_server" type="text" value=
-                    "emoncms.org"></p><span>e.g 'emoncms.org',
+                    "emoncms.org"></p><span>e.g '<a href="https://emoncms.org">emoncms.org</a>',
                     'emonpi/emoncms', or '192.168.1.4/emoncms'</span><br>
-                    <p><b>Node Name*:</b><br>
+                    <p><b>Emoncms Node Name*:</b><br>
                     <input id="emoncms_node" type="text" value=
                     "emonesp"></p><span>E.g 'emonesp', 'heatpump'</span><br>
                     <br>
@@ -92,6 +94,7 @@
             <div id="three">
                 <h2>3. MQTT</h2>
                 <div class="itembody-wrapper">
+                    <p>MQTT server to publish data to:</p>
                     <p><b>MQTT Server*:</b><br>
                     <input id="mqtt_server" type="text"></p><span>e.g 'emonpi',
                     'test.mosquitto.org', or '192.168.1.4'</span><br>
@@ -135,7 +138,7 @@
                         <tbody id="datavalues"></tbody>
                     </table><br>
                     <div id="small-text">
-                      Input key value pairs via serial uart (e.g "CT1:3935,CT2:325") or HTTP input API e.g.: <br>
+                      Input key value pairs received via serial UART (e.g "CT1:3935,CT2:325") or HTTP input API e.g.: <br>
                       <span id="input-api">
                       </div>
                 </div>
@@ -144,12 +147,12 @@
             <div id="five">
                 <h2>5. Admin</h2>
                 <div class="itembody-wrapper">
+                    <p>Web access authentication:</p>
                     <p><b>Username:</b><br>
                     <input id="www_user" type="text" value="admin"></p>
                     <p><b>Password:</b><br>
                     <input id="www_pass" type="password"><br>
                     <br>
-                    Web access authentication<br>
                     <br>
                     <button id="save-admin">Save</button></p>
                 </div>
