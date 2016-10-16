@@ -31,6 +31,7 @@
 #include "input.h"
 #include "emoncms.h"
 #include "mqtt.h"
+#include "pixel.h"
 
 // -------------------------------------------------------------------
 // SETUP
