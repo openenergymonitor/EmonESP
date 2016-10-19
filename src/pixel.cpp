@@ -22,21 +22,40 @@
 #include <pixel.h>
 #include <NeoPixelBus.h>
 
-const uint16_t PixelCount= 16;
-const uint16_t PixelPin=   4;
+// ESP Bitbang method using GPIO4
 
-
-
-
+// void pixel_setup(uint16_t PixelCount, uint16_t PixelPin)
+// {
+  // NeoPixelBus<NeoGrbFeature, NeoEsp8266BitBang800KbpsMethod> strip(PixelCount, PixelPin);
+// }
 
 NeoPixelBus<NeoGrbFeature, NeoEsp8266BitBang800KbpsMethod> strip(PixelCount, PixelPin);
 
-// https://github.com/Protoneer/WifiPixels/blob/ac241f15a5746d05060a68348c4d4319568e365a/examples/WifiPixels_Fade_RGB/WifiPixels_Fade_RGB.ino
+RgbColor red(colorSaturation, 0, 0);
+RgbColor green(0, colorSaturation, 0);
+RgbColor blue(0, 0, colorSaturation);
+RgbColor white(colorSaturation);
+RgbColor black(0);
 
-
-void pixel_setup()
+void pixel_begin()
 {
+  // this resets all the neopixels to an off state
   strip.Begin();
   strip.Show();
 }
 
+void pixel_rgb_demo(){
+  strip.SetPixelColor(0, red);
+  strip.SetPixelColor(1, green);
+  strip.SetPixelColor(2, blue);
+  strip.SetPixelColor(3, white);
+  strip.Show();
+}
+
+void pixel_off(){
+  strip.SetPixelColor(0, black);
+  strip.SetPixelColor(1, black);
+  strip.SetPixelColor(2, black);
+  strip.SetPixelColor(3, black);
+  strip.Show();
+}

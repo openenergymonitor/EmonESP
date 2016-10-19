@@ -29,8 +29,16 @@
 #include <Arduino.h>
 #include <NeoPixelBus.h>
 
+#define PIXEL //enable pixel
 
-void pixel_setup();
+#define PixelCount      16
+#define PixelPin        4
+#define colorSaturation 128
+
+
+extern void pixel_begin();
+extern void pixel_rgb_demo();
+extern void pixel_off();
 
 
 

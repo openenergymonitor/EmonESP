@@ -62,6 +62,16 @@ void setup() {
   ota_setup();
 
   DEBUG.println("Server started");
+  
+  // Start Pixel
+#ifdef PIXEL
+  pixel_begin();
+  DEBUG.println("Pixel started..RGB demo");
+  pixel_rgb_demo();
+  delay(5000);
+  DEBUG.println("Pixel off");
+  pixel_off();
+#endif
 
   delay(100);
 } // end setup
