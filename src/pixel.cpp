@@ -22,5 +22,21 @@
 #include <pixel.h>
 #include <NeoPixelBus.h>
 
-const uint16_t PixelCount = 16;
+const uint16_t PixelCount= 16;
+const uint16_t PixelPin=   4;
+
+
+
+
+
+NeoPixelBus<NeoGrbFeature, NeoEsp8266BitBang800KbpsMethod> strip(PixelCount, PixelPin);
+
+// https://github.com/Protoneer/WifiPixels/blob/ac241f15a5746d05060a68348c4d4319568e365a/examples/WifiPixels_Fade_RGB/WifiPixels_Fade_RGB.ino
+
+
+void pixel_setup()
+{
+  strip.Begin();
+  strip.Show();
+}
 

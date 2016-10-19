@@ -27,12 +27,10 @@
 #define _EMONESP_PIXEL_H
 
 #include <Arduino.h>
+#include <NeoPixelBus.h>
 
 
-
-
-
-
+void pixel_setup();
 
 
 
