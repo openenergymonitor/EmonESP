@@ -33,9 +33,11 @@ On first boot, ESP should broadcast a WiFI AP `emonESP_XXX`. Connect to this AP 
 - Browse to local IP address by clicking the hyperlink (assuming your computer is on the same WiFi network)
 On future boots EmonESP will automatically connect to this network.
 
-*Note on some networks it's possible to browse to the EmonESP using hostname [http://emonesp.local](http://emonesp.local), this seems to work on windows but not on Linux*
+*Note on some networks it's possible to browse to the EmonESP using hostname [http://emonesp](http://emonesp) or [http://emonesp.local](http://emonesp.local)*
 
 **If re-connection fails (e.g. network cannot be found) the EmonESP will automatically revert back to WiFi AP mode after a short while to allow a new network to be re-configued if required. Re-connection to existing network will be attempted every 5min.**
+
+- Holding the `boot` button at startup (for about 10's) will force AP mode. This is useful when trying to connect the unit to a new WiFi network. 
 
 E.g Connected to WiFi network with SSID `OpenEnergyMonitor` with local IP `10.0.1.93`:
 
