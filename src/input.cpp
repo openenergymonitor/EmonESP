@@ -69,7 +69,12 @@ boolean input_get(String& data)
     int end = input.indexOf(",");
     if (start != -1 && end != -1 && end > (start+4))
     {
-      return input.substring(start+4,end).toFloat();
+      float val = input.substring(start+4,end).toFloat();
+      if(val<0) // someing times the read
+      {
+        val = val * -1;
+      }
+      return val;
     }
     return -1;
   }
