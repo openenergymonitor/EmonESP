@@ -39,6 +39,8 @@
 extern void pixel_begin();
 extern void pixel_rgb_demo();
 extern void pixel_off();
+extern void light_to_pixel(float val);
+void set_pixel(uint8_t pixel, uint8_t red, uint8_t green, uint8_t blue);
 
 
 

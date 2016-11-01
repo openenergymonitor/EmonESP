@@ -26,6 +26,7 @@
 #include "emonesp.h"
 #include "wifi.h"
 #include "config.h"
+#include "pixel.h"
 
 #include <ESP8266WiFi.h>              // Connect to Wifi
 #include <ESP8266mDNS.h>              // Resolve URL for update server etc.
@@ -62,6 +63,10 @@ int wifi_mode = WIFI_MODE_STA;
 // -------------------------------------------------------------------
 void startAP() {
   DEBUG.print("Starting AP");
+  set_pixel(13,128,128,128);
+  set_pixel(12,128,128,128);
+  set_pixel(11,128,128,128);
+
   WiFi.mode(WIFI_STA);
   WiFi.disconnect();
   delay(100);
@@ -111,9 +116,17 @@ void startClient() {
   int t = 0;
   int attempt = 0;
   while (WiFi.status() != WL_CONNECTED){
+    if (t%2 == 1){
+      set_pixel(attempt,0,0,128);
+    }
+    else{
+      set_pixel(attempt,128,0,0);
+
+    }
     delay(500);
     t++;
-    if (t >= 20){
+    if (t >= 20 || digitalRead(0) == LOW){
+
       DEBUG.println(" ");
       DEBUG.println("Try Again...");
       delay(2000);
@@ -121,7 +134,8 @@ void startClient() {
       WiFi.begin(esid.c_str(), epass.c_str());
       t = 0;
       attempt++;
-      if (attempt >= 5){
+      set_pixel(attempt,0,0,128);
+      if (attempt >= 5 || digitalRead(0) == LOW){
         startAP();
         // AP mode with SSID in EEPROM, connection will retry in 5 minutes
         wifi_mode = WIFI_MODE_AP_STA_RETRY;

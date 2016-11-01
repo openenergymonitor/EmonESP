@@ -42,5 +42,6 @@ extern String input_string;
 //       input
 // -------------------------------------------------------------------
 extern boolean input_get(String& data);
+extern float get_CT1_val(String input);
 
 #endif // _EMONESP_INPUT_H
