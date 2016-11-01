@@ -113,7 +113,7 @@ void startClient() {
   while (WiFi.status() != WL_CONNECTED){
     delay(500);
     t++;
-    if (t >= 20){
+    if (t >= 20 || digitalRead(0) == LOW){
       DEBUG.println(" ");
       DEBUG.println("Try Again...");
       delay(2000);
@@ -121,7 +121,7 @@ void startClient() {
       WiFi.begin(esid.c_str(), epass.c_str());
       t = 0;
       attempt++;
-      if (attempt >= 5){
+      if (attempt >= 5 || digitalRead(0) == LOW){
         startAP();
         // AP mode with SSID in EEPROM, connection will retry in 5 minutes
         wifi_mode = WIFI_MODE_AP_STA_RETRY;
