@@ -11,9 +11,11 @@ r1.onreadystatechange = function () {
   if (r1.readyState != 4 || r1.status != 200) return;
   var status = JSON.parse(r1.responseText);
 
-  if  (status.pass!="undefined"){
+  if  (status.pass==true){
    document.getElementById("passkey").value = status.pass;
-  }
+ } else {
+   document.getElementById("passkey").innerHTML = '';
+ }
 
   if ((status.www_user!=0) && (status.www_user!="undefined")  ){
     document.getElementById("www_user").value = status.www_username;
@@ -59,6 +61,7 @@ r1.onreadystatechange = function () {
       document.getElementById("mode").innerHTML = "Access Point (AP)";
       document.getElementById("client-view").style.display = 'none';
       document.getElementById("ap-view").style.display = '';
+      document.getElementById("input-api").innerHTML = "<a href='http://"+status.ipaddress+"/input?string=ct1:3935,ct2:325'>"+"http://"+status.ipaddress+"/input?string=ct1:3935,ct2:325</a>";
 
       var out = "";
       for (var z in status.networks) {
@@ -81,7 +84,7 @@ r1.onreadystatechange = function () {
       out += "<tr><td>"+status.ssid+"</td><td>"+status.srssi+"</td></tr>"
       document.getElementById("sta-ssid").innerHTML = out;
       document.getElementById("sta-ip").innerHTML = "<a href='http://"+status.ipaddress+"'>"+status.ipaddress+"</a>";
-      document.getElementById("input-api").innerHTML = "<a href='http://"+status.ipaddress+"/input?string=CT1:3935,CT2:325'>"+"http://"+status.ipaddress+"/input?string=CT1:3935,CT2:325</a>";
+      document.getElementById("input-api").innerHTML = "<a href='http://"+status.ipaddress+"/input?string=ct1:3935,ct2:325'>"+"http://"+status.ipaddress+"/input?string=ct1:3935,ct2:325</a>";
       document.getElementById("ap-view").style.display = 'none';
       document.getElementById("client-view").style.display = '';
       ipaddress = status.ipaddress;
@@ -109,14 +112,18 @@ function updateLastValues() {
   	    var str = r.responseText;
   	    var namevaluepairs = str.split(",");
   	    var out = "";
-  	    for (var z in namevaluepairs) {
-  	        var namevalue = namevaluepairs[z].split(":");
-  	        var units = "";
-  	        if (namevalue[0].indexOf("CT")==0) units = "W";
-  	        if (namevalue[0].indexOf("T")==0) units = "&deg;C";
-  	        out += "<tr><td>"+namevalue[0]+"</td><td>"+namevalue[1]+units+"</td></tr>";
-  	    }
-  	    document.getElementById("datavalues").innerHTML = out;
+        if (namevaluepairs == ""){
+          out = "<tr><td>no data</td><td>received</td></tr>" ;
+        }else{
+    	    for (var z in namevaluepairs) {
+    	        var namevalue = namevaluepairs[z].split(":");
+    	        var units = "";
+    	        if (namevalue[0].toLowerCase().indexOf("ct")==0) units = "W";
+    	        if (namevalue[0].toLowerCase().indexOf("t")==0) units = "&deg;C";
+    	        out += "<tr><td>"+namevalue[0]+"</td><td>"+namevalue[1]+units+"</td></tr>";
+    	    }
+        }
+        document.getElementById("datavalues").innerHTML = out;
       }
     };
     r.send();
@@ -401,20 +408,20 @@ document.getElementById("updatecheck").addEventListener("click", function(e) {
 
 
 // -----------------------------------------------------------------------
-// Event:Update Firmware
+// Event:Update Firmware DISABLED IN FIRMWARE
 // -----------------------------------------------------------------------
-document.getElementById("update").addEventListener("click", function(e) {
-    document.getElementById("update-info").innerHTML = "UPDATING..."
-    var r1 = new XMLHttpRequest();
-    r1.open("POST", "update", true);
-    r1.onreadystatechange = function () {
-        if (r1.readyState != 4 || r1.status != 200) return;
-        var str1 = r1.responseText;
-        document.getElementById("update-info").innerHTML = str1
-        console.log(str1);
-	  };
-    r1.send();
-});
+// document.getElementById("update").addEventListener("click", function(e) {
+//     document.getElementById("update-info").innerHTML = "UPDATING..."
+//     var r1 = new XMLHttpRequest();
+//     r1.open("POST", "update", true);
+//     r1.onreadystatechange = function () {
+//         if (r1.readyState != 4 || r1.status != 200) return;
+//         var str1 = r1.responseText;
+//         document.getElementById("update-info").innerHTML = str1
+//         console.log(str1);
+// 	  };
+//     r1.send();
+// });
 
 // -----------------------------------------------------------------------
 // Event:Upload Firmware
