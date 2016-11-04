@@ -98,14 +98,14 @@ void loop()
                                 mqtt_publish(input);
                         }
                 }
-                #ifdef PIXEL
-                if(gotInput) {
-                        pixel_off();
-                        float val = get_CT1_val(input);
-                        DEBUG.println("val of:" + String(val));
-                        light_to_pixel(val);
-                }
-                #endif
 
         }
+        #ifdef PIXEL
+        if(gotInput) {
+          pixel_off();
+          float val = get_CT1_val(input);
+          DEBUG.println("val of:" + String(val));
+          light_to_pixel(val);
+        }
+        #endif
 } // end loop
