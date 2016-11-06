@@ -9,8 +9,9 @@ install:
 - pip install -U platformio
 - platformio platform install espressif8266 --with-package tool-mkspiffs
 script:
+- platformio --version
 - platformio run -e emonesp_deploy
-- platformio run -t buildfs
+- platformio run -t buildfs -e emonesp_deploy
 deploy:
   provider: releases
   skip_cleanup: true
