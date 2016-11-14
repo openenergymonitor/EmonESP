@@ -103,13 +103,21 @@ Example return in JSON:
 
 ### 4. Data Input
 
-Data can be inputed to EmonESP via serial UART (9600 baud) or HTTP API:
+Data can be inputed to EmonESP via serial UART or HTTP API.
 
 ![input setup](docs/input.png)
 
-*Previously called `test`, renamed to `input` since this is a useful method to input a data string to be posted to Emoncms & MQTT*
+#### UART Input 
 
-`http://<IP-ADDRESS>/input?string=CT1:3935,CT2:325,T1:12.5,T2:16.9,T3:11.2,T4:34.7`
+Data in serial:pairs string format can be inputed to EmonESP via serial UART **(115200 baud)** e.g:
+
+`ct1:3935,ct2:325,t1:12.5,t2:16.9,t3:11.2,t4:34.7`
+
+#### HTTP API
+
+Data in string:pairs can be sent to EmonESP via HTTP API. This is useful to emulate the serial string data function while using the UART for code upload and debug. API example: 
+
+`http://<IP-ADDRESS>/input?string=ct1:3935,ct2:325,t1:12.5,t2:16.9,t3:11.2,t4:34.7`
 
 ### Save Emoncms server details
 
