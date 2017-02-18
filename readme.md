@@ -285,6 +285,7 @@ Required to include `data` folder with HTML etc in the upload
 - Put ESP into bootloader mode
    - On Heatpump monitor use jumper to pull `GPIO0` low then reset then connect power (simulates reset)
    - On other ESP boards (Adafruit HUZZAH) press and hold `GPIO0` button then press Reset, LED should light dimly to indicate bootloader mode
+- Go to 'Tools > Flash Size:' and set to '1M (512k SPIFFS)'.
 - **Upload main sketch:** Compile and Upload as normal using Arduino IDE [CTRL + u]
 - **Upload 'data' folder**: Upload data folder (home.html web page etc) using `tools > ESP8266 Sketch Data Upload tool`.
 
