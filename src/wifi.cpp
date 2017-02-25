@@ -113,6 +113,7 @@ void startClient() {
   while (WiFi.status() != WL_CONNECTED){
     delay(500);
     t++;
+    // push and hold boot button after power on to skip stright to AP mode
     if (t >= 20 || digitalRead(0) == LOW){
       DEBUG.println(" ");
       DEBUG.println("Try Again...");
