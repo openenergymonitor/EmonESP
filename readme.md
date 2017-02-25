@@ -33,13 +33,12 @@ On first boot, ESP should broadcast a WiFI AP `emonESP_XXX`. Connect to this AP 
 - Browse to local IP address by clicking the hyperlink (assuming your computer is on the same WiFi network)
 On future boots EmonESP will automatically connect to this network.
 
-*Note: on some networks it's possible to browse to the EmonESP using hostname [http://emonesp](http://emonesp) or [http://emonesp.local](http://emonesp.local)*
+*Note: on some networks it's possible to browse to the EmonESP using hostname [http://emonesp](http://emonesp) or on windows [http://emonesp.local](http://emonesp.local)*
 
 **If re-connection fails (e.g. network cannot be found) the EmonESP will automatically revert back to WiFi AP mode after a short while to allow a new network to be re-configued if required. Re-connection to existing network will be attempted every 5min.**
 
-*Holding the `boot` button at startup (for about 10's) will force AP mode. This is useful when trying to connect the unit to a new WiFi network.* 
+*Holding the `boot` button at startup (for about 10's) will force AP mode. This is useful when trying to connect the unit to a new WiFi network.*
 
-E.g Connected to WiFi network with SSID `OpenEnergyMonitor` with local IP `10.0.1.93`:
 
 ![Wifi setup](docs/wifi.png)
 
@@ -107,7 +106,7 @@ Data can be inputed to EmonESP via serial UART or HTTP API.
 
 ![input setup](docs/input.png)
 
-#### UART Input 
+#### UART Input
 
 Data in serial:pairs string format can be inputed to EmonESP via serial UART **(115200 baud)** e.g:
 
@@ -115,7 +114,7 @@ Data in serial:pairs string format can be inputed to EmonESP via serial UART **(
 
 #### HTTP API
 
-Data in string:pairs can be sent to EmonESP via HTTP API. This is useful to emulate the serial string data function while using the UART for code upload and debug. API example: 
+Data in string:pairs can be sent to EmonESP via HTTP API. This is useful to emulate the serial string data function while using the UART for code upload and debug. API example:
 
 `http://<IP-ADDRESS>/input?string=ct1:3935,ct2:325,t1:12.5,t2:16.9,t3:11.2,t4:34.7`
 
@@ -202,7 +201,7 @@ OTA uses port 8266. See [PlatformIO ESP OTA docs](http://docs.platformio.org/en/
 
 If you are experiancing ESP hanging in a reboot loop after upload it may be that the ESP flash has remnants of previous code (which may have the used the ESP memory in a different way). The ESP flash can be fully erased using [esptool](https://github.com/themadinventor/esptool). With the unit in bootloder mode run:
 
-`$ esptool.py erase_flash` 
+`$ esptool.py erase_flash`
 
 *`sudo` mayb be required*
 
