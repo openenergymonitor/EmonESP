@@ -258,7 +258,7 @@ Install steps from: https://github.com/esp8266/Arduino
 
 - Install Arduino IDE 1.6.8 from the Arduino website.
 - Start Arduino and open Preferences window.
-- Enter `http://arduino.esp8266.com/stable/package_esp8266com_index.json` into Additional Board Manager URLs field. You can add multiple URLs, separating them with commas.
+- At the bottom of this window find the field “Additional Board Manager URLs” and enter ‘http://arduino.esp8266.com/stable/package_esp8266com_index.json`. You can add multiple URLs, separating them with commas.
 - Open `Tools > Board > Board Manager`, scroll down and click on esp8266 platform, select version then install
 - Select `Tools > Board > Generic ESP8266 Module` (required for EmonESP)
 
@@ -286,7 +286,7 @@ Required to include `data` folder with HTML etc in the upload
    - On other ESP boards (Adafruit HUZZAH) press and hold `GPIO0` button then press Reset, LED should light dimly to indicate bootloader mode
 - **Upload main sketch:** Compile and Upload as normal using Arduino IDE [CTRL + u]
 - **Upload 'data' folder**: Upload data folder (home.html web page etc) using `tools > ESP8266 Sketch Data Upload tool`.
-
+- If compiling fails because PubSubClient.h library cannot be found. Open the Library Manager again (Sketch > Include Library > Library Manager) and search for 'PubSubClient', install.
 ***
 
 ### Development Forum Threads
