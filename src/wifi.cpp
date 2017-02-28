@@ -104,6 +104,7 @@ void startClient() {
   DEBUG.print(esid.c_str());
   DEBUG.print(" epass:");
   DEBUG.println(epass.c_str());
+  WiFi.hostname("emonesp");
   WiFi.begin(esid.c_str(), epass.c_str());
 
   delay(50);
