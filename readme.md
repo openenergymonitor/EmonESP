@@ -193,7 +193,7 @@ This wil upload both the fimware and fs in a single command
 
 Put ESP into bootloader mode
 
-`esptool.py write_flash 0x000000 .pioenvs/emonpixel/firmware.bin 0x300000 .pioenvs/emonpixel/spiffs.bin`
+`esptool.py write_flash 0x000000 .pioenvs/emonesp/firmware.bin 0x300000 .pioenvs/emonesp/spiffs.bin`
 
 
 
@@ -231,7 +231,7 @@ Erase took 8.0 seconds
 
 To fully erase all memory locations on an ESP-12 (4Mb) we neeed to upload a blank file to each memory location
 
-esptool.py write_flash 0x000000 blank_1MB.bin 0x100000 blank_1MB.bin 0x200000 blank_1MB.bin 0x300000 blank_1MB.bin
+`esptool.py write_flash 0x000000 blank_1MB.bin 0x100000 blank_1MB.bin 0x200000 blank_1MB.bin 0x300000 blank_1MB.bin`
 
 
 #### 4. Debugging ESP subsystems
