@@ -187,6 +187,16 @@ The first time platformIO is ran the espressif arduino tool chain and all the re
 
 See [PlatfomrIO docs regarding SPIFFS uploading](http://docs.platformio.org/en/latest/platforms/espressif.html#uploading-files-to-file-system-spiffs)
 
+#### Or upload all in one go
+
+This wil upload both the fimware and fs in a single command
+
+Put ESP into bootloader mode
+
+`esptool.py write_flash 0x000000 .pioenvs/emonpixel/firmware.bin 0x300000 .pioenvs/emonpixel/spiffs.bin`
+
+
+
 ##### c.) OTA upload over local network
 
 `$  pio run  -t upload --upload-port <LOCAL-ESP-IP-ADDRESS>`
@@ -199,11 +209,13 @@ OTA uses port 8266. See [PlatformIO ESP OTA docs](http://docs.platformio.org/en/
 
 #### Troubleshooting Upload
 
+##### Erase Flash
+
 If you are experiancing ESP hanging in a reboot loop after upload it may be that the ESP flash has remnants of previous code (which may have the used the ESP memory in a different way). The ESP flash can be fully erased using [esptool](https://github.com/themadinventor/esptool). With the unit in bootloder mode run:
 
 `$ esptool.py erase_flash`
 
-*`sudo` mayb be required*
+*`sudo` maybe be required*
 
 Output:
 
@@ -214,6 +226,13 @@ Running Cesanta flasher stub...
 Erasing flash (this may take a while)...
 Erase took 8.0 seconds
 ```
+
+##### Fully erase ESP-12E
+
+To fully erase all memory locations on an ESP-12 (4Mb) we neeed to upload a blank file to each memory location
+
+esptool.py write_flash 0x000000 blank_1MB.bin 0x100000 blank_1MB.bin 0x200000 blank_1MB.bin 0x300000 blank_1MB.bin
+
 
 #### 4. Debugging ESP subsystems
 
