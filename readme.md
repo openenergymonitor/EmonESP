@@ -33,13 +33,12 @@ On first boot, ESP should broadcast a WiFI AP `emonESP_XXX`. Connect to this AP 
 - Browse to local IP address by clicking the hyperlink (assuming your computer is on the same WiFi network)
 On future boots EmonESP will automatically connect to this network.
 
-*Note: on some networks it's possible to browse to the EmonESP using hostname [http://emonesp](http://emonesp) or [http://emonesp.local](http://emonesp.local)*
+*Note: on some networks it's possible to browse to the EmonESP using hostname [http://emonesp](http://emonesp) or on windows [http://emonesp.local](http://emonesp.local)*
 
 **If re-connection fails (e.g. network cannot be found) the EmonESP will automatically revert back to WiFi AP mode after a short while to allow a new network to be re-configued if required. Re-connection to existing network will be attempted every 5min.**
 
-*Holding the `boot` button at startup (for about 10's) will force AP mode. This is useful when trying to connect the unit to a new WiFi network.* 
+*Holding the `boot` button at startup (for about 10's) will force AP mode. This is useful when trying to connect the unit to a new WiFi network.*
 
-E.g Connected to WiFi network with SSID `OpenEnergyMonitor` with local IP `10.0.1.93`:
 
 ![Wifi setup](docs/wifi.png)
 
@@ -107,7 +106,7 @@ Data can be inputed to EmonESP via serial UART or HTTP API.
 
 ![input setup](docs/input.png)
 
-#### UART Input 
+#### UART Input
 
 Data in serial:pairs string format can be inputed to EmonESP via serial UART **(115200 baud)** e.g:
 
@@ -115,7 +114,7 @@ Data in serial:pairs string format can be inputed to EmonESP via serial UART **(
 
 #### HTTP API
 
-Data in string:pairs can be sent to EmonESP via HTTP API. This is useful to emulate the serial string data function while using the UART for code upload and debug. API example: 
+Data in string:pairs can be sent to EmonESP via HTTP API. This is useful to emulate the serial string data function while using the UART for code upload and debug. API example:
 
 `http://<IP-ADDRESS>/input?string=ct1:3935,ct2:325,t1:12.5,t2:16.9,t3:11.2,t4:34.7`
 
@@ -188,6 +187,16 @@ The first time platformIO is ran the espressif arduino tool chain and all the re
 
 See [PlatfomrIO docs regarding SPIFFS uploading](http://docs.platformio.org/en/latest/platforms/espressif.html#uploading-files-to-file-system-spiffs)
 
+#### Or upload all in one go
+
+This wil upload both the fimware and fs in a single command
+
+Put ESP into bootloader mode
+
+`esptool.py write_flash 0x000000 .pioenvs/emonesp/firmware.bin 0x300000 .pioenvs/emonesp/spiffs.bin`
+
+
+
 ##### c.) OTA upload over local network
 
 `$  pio run  -t upload --upload-port <LOCAL-ESP-IP-ADDRESS>`
@@ -200,11 +209,13 @@ OTA uses port 8266. See [PlatformIO ESP OTA docs](http://docs.platformio.org/en/
 
 #### Troubleshooting Upload
 
+##### Erase Flash
+
 If you are experiancing ESP hanging in a reboot loop after upload it may be that the ESP flash has remnants of previous code (which may have the used the ESP memory in a different way). The ESP flash can be fully erased using [esptool](https://github.com/themadinventor/esptool). With the unit in bootloder mode run:
 
-`$ esptool.py erase_flash` 
+`$ esptool.py erase_flash`
 
-*`sudo` mayb be required*
+*`sudo` maybe be required*
 
 Output:
 
@@ -215,6 +226,13 @@ Running Cesanta flasher stub...
 Erasing flash (this may take a while)...
 Erase took 8.0 seconds
 ```
+
+##### Fully erase ESP-12E
+
+To fully erase all memory locations on an ESP-12 (4Mb) we neeed to upload a blank file to each memory location
+
+`esptool.py write_flash 0x000000 blank_1MB.bin 0x100000 blank_1MB.bin 0x200000 blank_1MB.bin 0x300000 blank_1MB.bin`
+
 
 #### 4. Debugging ESP subsystems
 
@@ -259,7 +277,7 @@ Install steps from: https://github.com/esp8266/Arduino
 
 - Install Arduino IDE 1.6.8 from the Arduino website.
 - Start Arduino and open Preferences window.
-- Enter `http://arduino.esp8266.com/stable/package_esp8266com_index.json` into Additional Board Manager URLs field. You can add multiple URLs, separating them with commas.
+- At the bottom of this window find the field “Additional Board Manager URLs” and enter ‘http://arduino.esp8266.com/stable/package_esp8266com_index.json`. You can add multiple URLs, separating them with commas.
 - Open `Tools > Board > Board Manager`, scroll down and click on esp8266 platform, select version then install
 - Select `Tools > Board > Generic ESP8266 Module` (required for EmonESP)
 
@@ -287,7 +305,7 @@ Required to include `data` folder with HTML etc in the upload
    - On other ESP boards (Adafruit HUZZAH) press and hold `GPIO0` button then press Reset, LED should light dimly to indicate bootloader mode
 - **Upload main sketch:** Compile and Upload as normal using Arduino IDE [CTRL + u]
 - **Upload 'data' folder**: Upload data folder (home.html web page etc) using `tools > ESP8266 Sketch Data Upload tool`.
-
+- If compiling fails because PubSubClient.h library cannot be found. Open the Library Manager again (Sketch > Include Library > Library Manager) and search for 'PubSubClient', install.
 ***
 
 ### Development Forum Threads

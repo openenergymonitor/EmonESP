@@ -36,7 +36,7 @@ boolean emoncms_connected = false;
 
 unsigned long packets_sent = 0;
 unsigned long packets_success = 0;
-
+unsigned long emoncms_connection_error_count = 0;
 
 void emoncms_publish(String data)
 {
@@ -80,5 +80,9 @@ void emoncms_publish(String data)
     emoncms_connected=false;
     DEBUG.print("Emoncms error: ");
     DEBUG.println(result);
+    emoncms_connection_error_count ++;
+    if (emoncms_connection_error_count>30) {
+      ESP.restart();
+    }
   }
 }
