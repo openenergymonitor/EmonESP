@@ -52,9 +52,6 @@ Data ca be posted using HTTP or HTTPS. For HTTPS the Emoncms server must support
 
 *Note: the emoncms.org fingerprint will change every 90 days when the SSL certificate is renewed.*
 
-**Currently emoncms.org only supports numerical node names, other emoncms servers e.g. emonPi do support alphanumeric node naming.**
-
-
 ## 3. MQTT
 
 
