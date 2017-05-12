@@ -5,6 +5,10 @@
 
 ESP8266 WIFI serial to emoncms link
 
+For applications that only require basic posting of data from one emonTx to a remote server such as Emoncms.org an emonTx with this WiFi module provides a lower cost route than an emonBase or emonPi base-station installation. 
+
+The core of EmonESP is also used for [emonPixel](https://https://github.com/openenergymonitor/emonpixel) and [OpenEVSE ESP WiFi 2.0](https://github.com/OpenEVSE/ESP8266_WiFi_v2.x).
+
 ![EmonEsp WiFi AP Setup Portal](docs/emonesp.png)
 
 ## Requirements
@@ -14,6 +18,11 @@ ESP8266 WIFI serial to emoncms link
 ***
 
 # EmonESP User Guide
+
+## Hardware Setup 
+
+- [Purchase a pre-loaded ESP8266](https://shop.openenergymonitor.com/esp8266-wifi-adapter-for-emontx/)
+- To connect an ESP to emonTx see [This User Guide Section](https://guide.openenergymonitor.org/setup/esp8266-adapter-emontx/)
 
 ## First Setup
 
