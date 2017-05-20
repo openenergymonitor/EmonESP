@@ -379,7 +379,7 @@ document.getElementById("restart").addEventListener("click", function(e) {
 // -----------------------------------------------------------------------
 var networkSelect = function() {
     selected_network_ssid = this.getAttribute("name");
-
+var networkcheckboxes = document.getElementsByClassName("networkcheckbox");
     for (var i = 0; i < networkcheckboxes.length; i++) {
         if (networkcheckboxes[i].getAttribute("name")!=selected_network_ssid)
             networkcheckboxes[i].checked = 0;
