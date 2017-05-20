@@ -66,7 +66,7 @@ r1.onreadystatechange = function () {
       var out = "";
       for (var z in status.networks) {
         if (status.rssi[z]=="undefined") status.rssi[z]="";
-        out += "<tr><td><input class='networkcheckbox' name='"+status.networks[z]+"' type='checkbox'></td><td>"+status.networks[z]+"</td><td>"+status.rssi[z]+"</td></tr>"
+        out += "<tr><td><input class='networkcheckbox' name='"+status.networks[z]+"' type='radio'></td><td>"+status.networks[z]+"</td><td>"+status.rssi[z]+"</td></tr>"
       }
       document.getElementById("networks").innerHTML = out;
       var networkcheckboxes = document.getElementsByClassName("networkcheckbox");
