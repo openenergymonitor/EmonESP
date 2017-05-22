@@ -44,7 +44,8 @@ String get_https(const char* fingerprint, const char* host, String url, int http
     return("Connection error");
   }
   if (client.verify(fingerprint, host)) {
-    client.print(String("GET ") + url + " HTTP/1.1\r\n" + "Host: " + host + "\r\n" + "Connection: close\r\n\r\n");
+    client.print(String("GET ") + url + " HTTP/1.1\r\n" + "Host: " + host +
+                 "\r\n" + "Connection: close\r\n\r\n");
      // Handle wait for reply and timeout
     unsigned long timeout = millis();
     while (client.available() == 0) {
@@ -61,8 +62,7 @@ String get_https(const char* fingerprint, const char* host, String url, int http
         return("ok");
       }
     }
-  }
-  else {
+  } else {
     return("HTTPS fingerprint no match");
   }
   return("error " + String(host));
@@ -72,7 +72,7 @@ String get_https(const char* fingerprint, const char* host, String url, int http
 // HTTP GET Request
 // url: N/A
 // -------------------------------------------------------------------
-String get_http(const char* host, String url){
+String get_http(const char *host, String url){
   http.begin(String("http://") + host + String(url));
   int httpCode = http.GET();
   if((httpCode > 0) && (httpCode == HTTP_CODE_OK)){
@@ -80,8 +80,7 @@ String get_http(const char* host, String url){
     DEBUG.println(payload);
     http.end();
     return(payload);
-  }
-  else{
+  } else {
     http.end();
     return("server error: "+String(httpCode));
   }

@@ -70,7 +70,7 @@ void mqtt_publish(String data)
   String mqtt_data = "";
   String topic = mqtt_topic + "/" + mqtt_feed_prefix;
   int i=0;
-  while (int(data[i])!=0)
+  while (int (data[i]) != 0)
   {
     // Construct MQTT topic e.g. <base_topic>/CT1 e.g. emonesp/CT1
     while (data[i]!=':'){
@@ -96,7 +96,7 @@ void mqtt_publish(String data)
     topic = mqtt_topic + "/" + mqtt_feed_prefix;
     mqtt_data="";
     i++;
-    if (int(data[i])==0) break;
+    if (int(data[i]) == 0) break;
   }
 
   String ram_topic = mqtt_topic + "/" + mqtt_feed_prefix + "freeram";
