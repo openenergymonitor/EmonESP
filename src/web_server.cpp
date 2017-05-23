@@ -263,12 +263,12 @@ handleSaveAdmin(AsyncWebServerRequest *request) {
 // -------------------------------------------------------------------
 void handleLastValues(AsyncWebServerRequest *request) {
   AsyncResponseStream *response;
-  if(false == requestPreProcess(request, response, "text/plain")) {
+  if(false == requestPreProcess(request, response)) {
     return;
   }
 
   response->setCode(200);
-  response->print(last_datastr);
+  response->printf("{%s}", last_datastr.c_str());
   request->send(response);
 }
 
