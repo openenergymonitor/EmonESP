@@ -351,6 +351,7 @@ handleConfig(AsyncWebServerRequest *request) {
   s += "\"emoncms_fingerprint\":\"" + emoncms_fingerprint + "\",";
   s += "\"mqtt_server\":\"" + mqtt_server + "\",";
   s += "\"mqtt_topic\":\"" + mqtt_topic + "\",";
+  s += "\"mqtt_feed_prefix\":\"" + mqtt_feed_prefix + "\",";
   s += "\"mqtt_user\":\"" + mqtt_user + "\",";
   //s += "\"mqtt_pass\":\""+mqtt_pass+"\","; security risk: DONT RETURN PASSWORDS
   s += "\"www_username\":\"" + www_username + "\"";

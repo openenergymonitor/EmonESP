@@ -1,390 +1,338 @@
+// Work out the endpoint to use, for dev you can change to point at a remote ESP
+// and run the HTML/JS from file, no need to upload to the ESP to test
+
+//var baseHost = window.location.hostname;
+//var baseHost = 'emonesp.local';
+//var baseHost = '192.168.4.1';
+var baseHost = '172.16.0.52';
+var baseEndpoint = 'http://' + baseHost;
+
 var statusupdate = false;
 var selected_network_ssid = "";
 var lastmode = "";
 var ipaddress = "";
 
+// Convert string to number, divide by scale, return result
+// as a string with specified precision
+function scaleString(string, scale, precision) {
+  var tmpval = parseInt(string) / scale;
+  return tmpval.toFixed(precision);
+}
 
-// get statup status and populate input fields
-var r1 = new XMLHttpRequest();
-r1.open("GET", "status", true);
-r1.onreadystatechange = function () {
-  if (r1.readyState != 4 || r1.status != 200) return;
-  var status = JSON.parse(r1.responseText);
+function BaseViewModel(defaults, remoteUrl, mappings = {}) {
+  var self = this;
+  self.remoteUrl = remoteUrl;
 
-  if  (status.pass==true){
-   document.getElementById("passkey").value = status.pass;
- } else {
-   document.getElementById("passkey").innerHTML = '';
- }
+  // Observable properties
+  ko.mapping.fromJS(defaults, mappings, self);
+  self.fetching = ko.observable(false);
+}
 
-  if ((status.www_user!=0) && (status.www_user!="undefined")  ){
-    document.getElementById("www_user").value = status.www_username;
-  }
-
-  if ((status.emoncms_server!=0) && (status.emoncms_apikey!=0)){
-    document.getElementById("emoncms_apikey").value = status.emoncms_apikey;
-    document.getElementById("emoncms_server").value = status.emoncms_server;
-    document.getElementById("emoncms_node").value = status.emoncms_node;
-    document.getElementById("emoncms_fingerprint").value = status.emoncms_fingerprint;
-  }
-
-  if (status.emoncms_connected == "1"){
-   document.getElementById("emoncms_connected").innerHTML = "Yes";
-   if  ((status.packets_success!="undefined") & (status.packets_sent!="undefined")){
-     document.getElementById("psuccess").innerHTML = "Successful posts: " + status.packets_success + " / " + status.packets_sent;
-   }
-  } else {
-    document.getElementById("emoncms_connected").innerHTML = "No";
-  }
-
-  if (status.mqtt_server!=0){
-    document.getElementById("mqtt_server").value = status.mqtt_server;
-    document.getElementById("mqtt_topic").value = status.mqtt_topic;
-    document.getElementById("mqtt_feed_prefix").value = status.mqtt_feed_prefix;
-    if (status.mqtt_user!=0){
-      document.getElementById("mqtt_user").value = status.mqtt_user;
-      document.getElementById("mqtt_pass").value = status.mqtt_pass;
-    }
-  }
-
-  if (status.mqtt_connected == "1"){
-   document.getElementById("mqtt_connected").innerHTML = "Yes";
-  } else {
-    document.getElementById("mqtt_connected").innerHTML = "No";
-  }
-
-  document.getElementById("free_heap").innerHTML = status.free_heap;
-  document.getElementById("version").innerHTML = status.version;
-
-
-  if (status.mode=="AP") {
-      document.getElementById("mode").innerHTML = "Access Point (AP)";
-      document.getElementById("client-view").style.display = 'none';
-      document.getElementById("ap-view").style.display = '';
-      document.getElementById("input-api").innerHTML = "<a href='http://"+status.ipaddress+"/input?string=ct1:3935,ct2:325'>"+"http://"+status.ipaddress+"/input?string=ct1:3935,ct2:325</a>";
-
-      var out = "";
-      for (var z in status.networks) {
-        if (status.rssi[z]=="undefined") status.rssi[z]="";
-        out += "<tr><td><input class='networkcheckbox' name='"+status.networks[z]+"' type='checkbox'></td><td>"+status.networks[z]+"</td><td>"+status.rssi[z]+"</td></tr>"
-      }
-      document.getElementById("networks").innerHTML = out;
-      var networkcheckboxes = document.getElementsByClassName("networkcheckbox");
-      for (var i = 0; i < networkcheckboxes.length; i++) {
-          networkcheckboxes[i].addEventListener('click', networkSelect, false);
-      }
-  } else {
-      if (status.mode=="STA+AP") {
-          document.getElementById("mode").innerHTML = "Client + Access Point (STA+AP)";
-          document.getElementById("apoff").style.display = '';
-      }
-      if (status.mode=="STA") document.getElementById("mode").innerHTML = "Client (STA)";
-
-      var out="";
-      out += "<tr><td>"+status.ssid+"</td><td>"+status.srssi+"</td></tr>"
-      document.getElementById("sta-ssid").innerHTML = out;
-      document.getElementById("sta-ip").innerHTML = "<a href='http://"+status.ipaddress+"'>"+status.ipaddress+"</a>";
-      document.getElementById("input-api").innerHTML = "<a href='http://"+status.ipaddress+"/input?string=ct1:3935,ct2:325'>"+"http://"+status.ipaddress+"/input?string=ct1:3935,ct2:325</a>";
-      document.getElementById("ap-view").style.display = 'none';
-      document.getElementById("client-view").style.display = '';
-      ipaddress = status.ipaddress;
-  }
-
-  updateLastValues();
+BaseViewModel.prototype.update = function (after = function () { }) {
+  var self = this;
+  self.fetching(true);
+  $.get(self.remoteUrl, function (data) {
+    ko.mapping.fromJS(data, self);
+  }, 'json').always(function () {
+    self.fetching(false);
+    after();
+  });
 };
-r1.send();
 
-setInterval(updateStatus,10000);
 
-// -----------------------------------------------------------------------
-// Periodic 10s update of last data values and packets sent
-// -----------------------------------------------------------------------
-function updateLastValues() {
-    var r = new XMLHttpRequest();
-    r.open("GET", "lastvalues", true);
-    r.onreadystatechange = function () {
-	    if (r.readyState != 4) {
-        return;
-      }
+function StatusViewModel() {
+  var self = this;
 
-      if(r.status == 200)
-      {
-  	    var str = r.responseText;
-  	    var namevaluepairs = str.split(",");
-  	    var out = "";
-        if (namevaluepairs == ""){
-          out = "<tr><td>no data</td><td>received</td></tr>" ;
-        }else{
-    	    for (var z in namevaluepairs) {
-    	        var namevalue = namevaluepairs[z].split(":");
-    	        var units = "";
-    	        if (namevalue[0].toLowerCase().indexOf("ct")==0) units = "W";
-    	        if (namevalue[0].toLowerCase().indexOf("t")==0) units = "&deg;C";
-    	        out += "<tr><td>"+namevalue[0]+"</td><td>"+namevalue[1]+units+"</td></tr>";
-    	    }
-        }
-        document.getElementById("datavalues").innerHTML = out;
-      }
-    };
-    r.send();
+  BaseViewModel.call(self, {
+    "mode": "ERR",
+    "networks": [],
+    "rssi": [],
+    "srssi": "",
+    "ipaddress": "",
+    "packets_sent": "",
+    "packets_success": "",
+    "emoncms_connected": "",
+    "mqtt_connected": "",
+    "free_heap": ""
+  }, baseEndpoint + '/status');
+
+  // Some devired values
+  self.isWifiClient = ko.pureComputed(function () {
+    return ("STA" == self.mode()) || ("STA+AP" == self.mode());
+  });
+  self.isWifiAccessPoint = ko.pureComputed(function () {
+    return ("AP" == self.mode()) || ("STA+AP" == self.mode());
+  });
+  self.fullMode = ko.pureComputed(function () {
+    switch (self.mode()) {
+      case "AP":
+        return "Access Point (AP)";
+      case "STA":
+        return "Client (STA)";
+      case "STA+AP":
+        return "Client + Access Point (STA+AP)";
+    }
+
+    return "Unknown (" + self.mode() + ")";
+  });
 }
+StatusViewModel.prototype = Object.create(BaseViewModel.prototype);
+StatusViewModel.prototype.constructor = StatusViewModel;
 
-function updateStatus() {
-    var r2 = new XMLHttpRequest();
-    r2.open("GET", "status", true);
-    r2.onreadystatechange = function () {
-      if (r2.readyState != 4) {
-        return;
-      }
-
-      if(r2.status == 200) {
-        var status = JSON.parse(r2.responseText);
-
-        document.getElementById("free_heap").innerHTML = status.free_heap;
-
-        if (status.emoncms_connected == "1"){
-         document.getElementById("emoncms_connected").innerHTML = "Yes";
-         if  ((status.packets_success!="undefined") & (status.packets_sent!="undefined")){
-           document.getElementById("psuccess").innerHTML = "Successful posts: " + status.packets_success + " / " + status.packets_sent;
-         }
-        } else {
-          document.getElementById("emoncms_connected").innerHTML = "No";
-        }
-
-        if (status.mqtt_connected == "1"){
-         document.getElementById("mqtt_connected").innerHTML = "Yes";
-        } else {
-         document.getElementById("mqtt_connected").innerHTML = "No";
-        }
-
-        if ((status.mode=="STA") || (status.mode=="STA+AP")){
-          // Update connected network RSSI
-          var out="";
-          out += "<tr><td>"+status.ssid+"</td><td>"+status.srssi+"</td></tr>"
-          document.getElementById("sta-ssid").innerHTML = out;
-        }
-
-        document.getElementById("psent").innerHTML = status.packets_sent;
-        document.getElementById("psuccess").innerHTML = status.packets_success;
-        if(status.packets_sent > 0) {
-          document.getElementById("ppercent").innerHTML = ((status.packets_success / status.packets_sent) * 100) + "%";
-        }
-      }
-
-      updateLastValues();
-    };
-    r2.send();
+function ConfigViewModel() {
+  BaseViewModel.call(this, {
+    "ssid": "",
+    "pass": "",
+    "emoncms_server": "data.openevse.com/emoncms",
+    "emoncms_apikey": "",
+    "emoncms_node": "",
+    "emoncms_fingerprint": "",
+    "mqtt_server": "",
+    "mqtt_topic": "",
+    "mqtt_feed_prefix": "",
+    "mqtt_user": "",
+    "mqtt_pass": "",
+    "www_username": "",
+    "www_password": "",
+    "espflash": "",
+    "version": "0.0.0"
+  }, baseEndpoint + '/config');
 }
-// -----------------------------------------------------------------------
+ConfigViewModel.prototype = Object.create(BaseViewModel.prototype);
+ConfigViewModel.prototype.constructor = ConfigViewModel;
 
+function LastValuesViewModel() {
+  BaseViewModel.call(this, [], baseEndpoint + '/lastvalues');
+}
+LastValuesViewModel.prototype = Object.create(BaseViewModel.prototype);
+LastValuesViewModel.prototype.constructor = LastValuesViewModel;
 
-function updateWiFiStatus() {
-  // Update status on Wifi connection
-  var r1 = new XMLHttpRequest();
-  r1.open("GET", "status", true);
-  r1.timeout = 2000;
-  r1.onreadystatechange = function () {
-    if (r1.readyState != 4) {
+function EmonEspViewModel() {
+  var self = this;
+
+  self.config = new ConfigViewModel();
+  self.status = new StatusViewModel();
+  self.last = new LastValuesViewModel();
+
+  self.initialised = ko.observable(false);
+  self.updating = ko.observable(false);
+
+  var updateTimer = null;
+  var updateTime = 1 * 1000;
+
+  // Upgrade URL
+  self.upgradeUrl = ko.observable('about:blank');
+
+  // -----------------------------------------------------------------------
+  // Initialise the app
+  // -----------------------------------------------------------------------
+  self.start = function () {
+    self.updating(true);
+    self.config.update(function () {
+      self.status.update(function () {
+        self.last.update(function () {
+          self.initialised(true);
+          updateTimer = setTimeout(self.update, updateTime);
+          self.upgradeUrl(baseEndpoint + '/update');
+          self.updating(false);
+        });
+      });
+    });
+  };
+
+  // -----------------------------------------------------------------------
+  // Get the updated state from the ESP
+  // -----------------------------------------------------------------------
+  self.update = function () {
+    if (self.updating()) {
       return;
     }
-
-    if(r1.status == 200) {
-      var status = JSON.parse(r1.responseText);
-
-      if (status.mode=="STA+AP" || status.mode=="STA") {
-        // Hide waiting message
-        document.getElementById("wait-view").style.display = 'none';
-        // Display mode
-        if (status.mode=="STA+AP") {
-            document.getElementById("mode").innerHTML = "Client + Access Point (STA+AP)";
-            document.getElementById("apoff").style.display = '';
-        }
-        if (status.mode=="STA") document.getElementById("mode").innerHTML = "Client (STA)";
-        document.getElementById("sta-ssid").innerHTML = status.ssid;
-        document.getElementById("sta-ip").innerHTML = "<a href='http://"+status.ipaddress+"'>"+status.ipaddress+"</a>";
-
-        // View display
-        document.getElementById("ap-view").style.display = 'none';
-        document.getElementById("client-view").style.display = '';
-      }
+    self.updating(true);
+    if (null !== updateTimer) {
+      clearTimeout(updateTimer);
+      updateTimer = null;
     }
-    lastmode = status.mode;
+    self.status.update(function () {
+      self.last.update(function () {
+        updateTimer = setTimeout(self.update, updateTime);
+        self.updating(false);
+      });
+    });
   };
-  r1.send();
-}
 
-// -----------------------------------------------------------------------
-// Event: WiFi Connect
-// -----------------------------------------------------------------------
-document.getElementById("connect").addEventListener("click", function(e) {
-    var passkey = document.getElementById("passkey").value;
-    if (selected_network_ssid=="") {
-        alert("Please select network");
+  self.wifiConnecting = ko.observable(false);
+  self.status.mode.subscribe(function (newValue) {
+    if(newValue === "STA+AP" || newValue === "STA") {
+      self.wifiConnecting(false);
+    }
+  });
+
+  // -----------------------------------------------------------------------
+  // Event: WiFi Connect
+  // -----------------------------------------------------------------------
+  self.saveNetworkFetching = ko.observable(false);
+  self.saveNetworkSuccess = ko.observable(false);
+  self.saveNetwork = function () {
+    if (self.config.ssid() === "") {
+      alert("Please select network");
     } else {
-        document.getElementById("ap-view").style.display = 'none';
-        document.getElementById("wait-view").style.display = '';
-
-        var r = new XMLHttpRequest();
-        r.open("POST", "savenetwork", false);
-        r.setRequestHeader("Content-type","application/x-www-form-urlencoded");
-        r.onreadystatechange = function () {
-	        if (r.readyState != 4 || r.status != 200) return;
-	        var str = r.responseText;
-	        console.log(str);
-	        document.getElementById("connect").innerHTML = "Connecting...please wait 10s";
-
-	        statusupdate = setInterval(updateWiFiStatus, 5000);
-        };
-        r.send("ssid="+selected_network_ssid+"&pass="+passkey);
+      self.saveNetworkFetching(true);
+      self.saveNetworkSuccess(false);
+      $.post(baseEndpoint + "/savenetwork", { ssid: self.config.ssid(), pass: self.config.pass() }, function (data) {
+          self.saveNetworkSuccess(true);
+          self.wifiConnecting(true);
+        }).fail(function () {
+          alert("Failed to save WiFi config");
+        }).always(function () {
+          self.saveNetworkFetching(false);
+        });
     }
-});
+  };
 
-// -----------------------------------------------------------------------
-// Event: Emoncms save
-// -----------------------------------------------------------------------
-document.getElementById("save-emoncms").addEventListener("click", function(e) {
+  // -----------------------------------------------------------------------
+  // Event: Admin save
+  // -----------------------------------------------------------------------
+  self.saveAdminFetching = ko.observable(false);
+  self.saveAdminSuccess = ko.observable(false);
+  self.saveAdmin = function () {
+    self.saveAdminFetching(true);
+    self.saveAdminSuccess(false);
+    $.post(baseEndpoint + "/saveadmin", { user: self.config.www_username(), pass: self.config.www_password() }, function (data) {
+      self.saveAdminSuccess(true);
+    }).fail(function () {
+      alert("Failed to save Admin config");
+    }).always(function () {
+      self.saveAdminFetching(false);
+    });
+  };
+
+  // -----------------------------------------------------------------------
+  // Event: Emoncms save
+  // -----------------------------------------------------------------------
+  self.saveEmonCmsFetching = ko.observable(false);
+  self.saveEmonCmsSuccess = ko.observable(false);
+  self.saveEmonCms = function () {
     var emoncms = {
-      server: document.getElementById("emoncms_server").value,
-      apikey: document.getElementById("emoncms_apikey").value,
-      node: document.getElementById("emoncms_node").value,
-      fingerprint: document.getElementById("emoncms_fingerprint").value
-    }
-    if (emoncms.server=="" || emoncms.node==""){
-        alert("Please enter Emoncms server and node");
-      } else if (emoncms.apikey.length!=32) {
-          alert("Please enter valid Emoncms apikey");
-      } else if (emoncms.fingerprint!="" && emoncms.fingerprint.length!=59) {
-        alert("Please enter valid SSL SHA-1 fingerprint");
-      } else {
-          document.getElementById("save-emoncms").innerHTML = "Saving...";
-          var r = new XMLHttpRequest();
-          r.open("POST", "saveemoncms", true);
-          r.setRequestHeader("Content-type","application/x-www-form-urlencoded");
-          r.send("&server="+emoncms.server+"&apikey="+emoncms.apikey+"&node="+emoncms.node+"&fingerprint="+emoncms.fingerprint);
-          r.onreadystatechange = function () {
-            if (r.readyState != 4 || r.status != 200) return;
-            var str = r.responseText;
-      	    console.log(str);
-      	    if (str!=0) document.getElementById("save-emoncms").innerHTML = "Saved";
-          }
-        }
-});
+      server: self.config.emoncms_server(),
+      apikey: self.config.emoncms_apikey(),
+      node: self.config.emoncms_node(),
+      fingerprint: self.config.emoncms_fingerprint()
+    };
 
-// -----------------------------------------------------------------------
-// Event: MQTT save
-// -----------------------------------------------------------------------
-document.getElementById("save-mqtt").addEventListener("click", function(e) {
-    var mqtt = {
-      server: document.getElementById("mqtt_server").value,
-      topic: document.getElementById("mqtt_topic").value,
-      prefix: document.getElementById("mqtt_feed_prefix").value,
-      user: document.getElementById("mqtt_user").value,
-      pass: document.getElementById("mqtt_pass").value
+    if (emoncms.server === "" || emoncms.node === "") {
+      alert("Please enter Emoncms server and node");
+    } else if (emoncms.apikey.length != 32) {
+      alert("Please enter valid Emoncms apikey");
+    } else if (emoncms.fingerprint !== "" && emoncms.fingerprint.length != 59) {
+      alert("Please enter valid SSL SHA-1 fingerprint");
+    } else {
+      self.saveEmonCmsFetching(true);
+      self.saveEmonCmsSuccess(false);
+      $.post(baseEndpoint + "/saveemoncms", emoncms, function (data) {
+        self.saveEmonCmsSuccess(true);
+      }).fail(function () {
+        alert("Failed to save Admin config");
+      }).always(function () {
+        self.saveEmonCmsFetching(false);
+      });
     }
-    if (mqtt.server=="") {
+  };
+
+  // -----------------------------------------------------------------------
+  // Event: MQTT save
+  // -----------------------------------------------------------------------
+  self.saveMqttFetching = ko.observable(false);
+  self.saveMqttSuccess = ko.observable(false);
+  self.saveMqtt = function () {
+    var mqtt = {
+      server: self.config.mqtt_server(),
+      topic: self.config.mqtt_topic(),
+      prefix: self.config.mqtt_feed_prefix(),
+      user: self.config.mqtt_user(),
+      pass: self.config.mqtt_pass()
+    };
+
+    if (mqtt.server === "") {
       alert("Please enter MQTT server");
     } else {
-      document.getElementById("save-mqtt").innerHTML = "Saving...";
-      var r = new XMLHttpRequest();
-      r.open("POST", "savemqtt", true);
-      r.setRequestHeader("Content-type","application/x-www-form-urlencoded");
-      r.send("&server="+mqtt.server+"&topic="+mqtt.topic+"&prefix="+mqtt.prefix+"&user="+mqtt.user+"&pass="+mqtt.pass);
-      r.onreadystatechange = function () {
-        console.log(mqtt);
-        if (r.readyState != 4 || r.status != 200) return;
-        var str = r.responseText;
-  	    console.log(str);
-  	    if (str!=0) document.getElementById("save-mqtt").innerHTML = "Saved";
-      };
+      self.saveMqttFetching(true);
+      self.saveMqttSuccess(false);
+      $.post(baseEndpoint + "/savemqtt", mqtt, function (data) {
+        self.saveMqttSuccess(true);
+      }).fail(function () {
+        alert("Failed to save MQTT config");
+      }).always(function () {
+        self.saveMqttFetching(false);
+      });
     }
-});
+  };
+}
 
-// -----------------------------------------------------------------------
-// Event: Admin save
-// -----------------------------------------------------------------------
-document.getElementById("save-admin").addEventListener("click", function(e) {
-    var admin = {
-      user: document.getElementById("www_user").value,
-      pass: document.getElementById("www_pass").value
-    }
-    document.getElementById("save-admin").innerHTML = "Saving...";
-    var r = new XMLHttpRequest();
-    r.open("POST", "saveadmin", true);
-    r.setRequestHeader("Content-type","application/x-www-form-urlencoded");
-    r.send("&user="+admin.user+"&pass="+admin.pass);
-    r.onreadystatechange = function () {
-      console.log(admin);
-      if (r.readyState != 4 || r.status != 200) return;
-      var str = r.responseText;
-	    console.log(str);
-	    if (str!=0) document.getElementById("save-admin").innerHTML = "Saved";
-    };
+$(function () {
+  // Activates knockout.js
+  var emonesp = new EmonEspViewModel();
+  ko.applyBindings(emonesp);
+  emonesp.start();
 });
 
 // -----------------------------------------------------------------------
 // Event: Turn off Access Point
 // -----------------------------------------------------------------------
-document.getElementById("apoff").addEventListener("click", function(e) {
-    var r = new XMLHttpRequest();
-    r.open("POST", "apoff", true);
-    r.onreadystatechange = function () {
-        if (r.readyState != 4 || r.status != 200) return;
-        var str = r.responseText;
-        console.log(str);
-        document.getElementById("apoff").style.display = 'none';
-        if (ipaddress!="") window.location = "http://"+ipaddress;
+document.getElementById("apoff").addEventListener("click", function (e) {
 
-	  };
-    r.send();
+  var r = new XMLHttpRequest();
+  r.open("POST", "apoff", true);
+  r.onreadystatechange = function () {
+    if (r.readyState != 4 || r.status != 200)
+      return;
+    var str = r.responseText;
+    console.log(str);
+    document.getElementById("apoff").style.display = 'none';
+    if (ipaddress !== "")
+      window.location = "http://" + ipaddress;
+  };
+  r.send();
 });
 
 // -----------------------------------------------------------------------
 // Event: Reset config and reboot
 // -----------------------------------------------------------------------
-document.getElementById("reset").addEventListener("click", function(e) {
+document.getElementById("reset").addEventListener("click", function (e) {
 
-    if (confirm("CAUTION: Do you really want to Factory Reset? All setting and config will be lost.")){
-      var r = new XMLHttpRequest();
-      r.open("POST", "reset", true);
-      r.onreadystatechange = function () {
-          if (r.readyState != 4 || r.status != 200) return;
-          var str = r.responseText;
-          console.log(str);
-          if (str!=0) document.getElementById("reset").innerHTML = "Resetting...";
-  	  };
-      r.send();
-    }
+  if (confirm("CAUTION: Do you really want to Factory Reset? All setting and config will be lost.")) {
+    var r = new XMLHttpRequest();
+    r.open("POST", "reset", true);
+    r.onreadystatechange = function () {
+      if (r.readyState != 4 || r.status != 200)
+        return;
+      var str = r.responseText;
+      console.log(str);
+      if (str !== 0)
+        document.getElementById("reset").innerHTML = "Resetting...";
+    };
+    r.send();
+  }
 });
 
 // -----------------------------------------------------------------------
 // Event: Restart
 // -----------------------------------------------------------------------
-document.getElementById("restart").addEventListener("click", function(e) {
+document.getElementById("restart").addEventListener("click", function (e) {
 
-    if (confirm("Restart emonESP? Current config will be saved, takes approximately 10s.")){
-      var r = new XMLHttpRequest();
-      r.open("POST", "restart", true);
-      r.onreadystatechange = function () {
-          if (r.readyState != 4 || r.status != 200) return;
-          var str = r.responseText;
-          console.log(str);
-          if (str!=0) document.getElementById("reset").innerHTML = "Restarting";
-  	  };
-      r.send();
-    }
+  if (confirm("Restart emonESP? Current config will be saved, takes approximately 10s.")) {
+    var r = new XMLHttpRequest();
+    r.open("POST", "restart", true);
+    r.onreadystatechange = function () {
+      if (r.readyState != 4 || r.status != 200)
+        return;
+      var str = r.responseText;
+      console.log(str);
+      if (str !== 0)
+        document.getElementById("reset").innerHTML = "Restarting";
+    };
+    r.send();
+  }
 });
-
-// -----------------------------------------------------------------------
-// UI: Network select
-// -----------------------------------------------------------------------
-var networkSelect = function() {
-    selected_network_ssid = this.getAttribute("name");
-
-    for (var i = 0; i < networkcheckboxes.length; i++) {
-        if (networkcheckboxes[i].getAttribute("name")!=selected_network_ssid)
-            networkcheckboxes[i].checked = 0;
-    }
-};
 
 // -----------------------------------------------------------------------
 // Event:Check for updates & display current / latest
@@ -426,6 +374,7 @@ document.getElementById("updatecheck").addEventListener("click", function(e) {
 // -----------------------------------------------------------------------
 // Event:Upload Firmware
 // -----------------------------------------------------------------------
-document.getElementById("upload").addEventListener("click", function(e) {
-  window.location.href='/upload'
-});
+//document.getElementById("upload").addEventListener("click", function(e) {
+//  window.location.href='/upload'
+//});
+
