@@ -102,10 +102,33 @@ ConfigViewModel.prototype = Object.create(BaseViewModel.prototype);
 ConfigViewModel.prototype.constructor = ConfigViewModel;
 
 function LastValuesViewModel() {
-  BaseViewModel.call(this, [], baseEndpoint + '/lastvalues');
+  var self = this;
+  self.remoteUrl = baseEndpoint + '/lastvalues';
+
+  // Observable properties
+  self.fetching = ko.observable(false);
+  self.values = ko.mapping.fromJS([]);
+
+  self.update = function (after = function () { }) {
+    self.fetching(true);
+    $.get(self.remoteUrl, function (data) {
+      // Transform the data into somethinf a bit easier to handle as a binding
+      var namevaluepairs = data.split(",");
+      var vals = [];
+      for (var z in namevaluepairs) {
+        var namevalue = namevaluepairs[z].split(":");
+        var units = "";
+        if (namevalue[0].indexOf("CT") === 0) units = "W";
+        if (namevalue[0].indexOf("T") === 0) units = String.fromCharCode(176)+"C";
+        vals.push({key: namevalue[0], value: namevalue[1]+units});
+      }
+      ko.mapping.fromJS(vals, self.values);
+    }, 'text').always(function () {
+      self.fetching(false);
+      after();
+    });
+  };
 }
-LastValuesViewModel.prototype = Object.create(BaseViewModel.prototype);
-LastValuesViewModel.prototype.constructor = LastValuesViewModel;
 
 function EmonEspViewModel() {
   var self = this;

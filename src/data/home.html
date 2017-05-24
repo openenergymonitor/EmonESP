@@ -157,17 +157,17 @@
               <th>Key</th>
               <th>Value</th>
             </tr>
-            <tbody data-bind="foreach: last">
+            <tbody data-bind="foreach: last.values">
               <tr>
-                <td data-bind="text: $data"></td>
-                <td data-bind="text: $data"></td>
+                <td data-bind="text: key"></td>
+                <td data-bind="text: value"></td>
               </tr>
             </tbody>
           </table><br>
         </div>
         <div class="small-text">
           Input key value pairs received via serial UART (e.g "CT1:3935,CT2:325") or HTTP input API e.g.: <br>
-          <a data-bind="attr: {href: 'http://'+status.ipaddress()+'/input?string=ct1:3935,ct2:325'}">http://<span data-bind="text: status.ipaddress"></span>/input?string=ct1:3935,ct2:325</a>
+          <a data-bind="attr: {href: 'http://'+status.ipaddress()+'/input?string=CT1:3935,CT2:325,T0=20.5'}">http://<span data-bind="text: status.ipaddress"></span>/input?string=CT1:3935,CT2:325,T0=20.5</a>
         </div>
       </div>
       <!--//////////////////////////////////////////////////////////////////////////////////-->

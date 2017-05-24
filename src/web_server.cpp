@@ -225,7 +225,7 @@ handleSaveMqtt(AsyncWebServerRequest *request) {
 
   char tmpStr[200];
   snprintf(tmpStr, sizeof(tmpStr), "Saved: %s %s %s %s %s", mqtt_server.c_str(),
-          mqtt_topic.c_str(), mqtt_feed_prefix.c_str(), mqtt_user.c_str(), mqtt_pass.c_str());
+           mqtt_topic.c_str(), mqtt_feed_prefix.c_str(), mqtt_user.c_str(), mqtt_pass.c_str());
   DBUGLN(tmpStr);
 
   response->setCode(200);
@@ -263,12 +263,12 @@ handleSaveAdmin(AsyncWebServerRequest *request) {
 // -------------------------------------------------------------------
 void handleLastValues(AsyncWebServerRequest *request) {
   AsyncResponseStream *response;
-  if(false == requestPreProcess(request, response)) {
+  if(false == requestPreProcess(request, response, "text/plain")) {
     return;
   }
 
   response->setCode(200);
-  response->printf("{%s}", last_datastr.c_str());
+  response->print(last_datastr);
   request->send(response);
 }
 
