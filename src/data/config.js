@@ -1,10 +1,10 @@
 // Work out the endpoint to use, for dev you can change to point at a remote ESP
 // and run the HTML/JS from file, no need to upload to the ESP to test
 
-//var baseHost = window.location.hostname;
+var baseHost = window.location.hostname;
 //var baseHost = 'emonesp.local';
 //var baseHost = '192.168.4.1';
-var baseHost = '172.16.0.52';
+//var baseHost = '172.16.0.52';
 var baseEndpoint = 'http://' + baseHost;
 
 var statusupdate = false;
