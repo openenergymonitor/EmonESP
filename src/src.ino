@@ -76,7 +76,8 @@ void loop()
 
   String input = "";
   boolean gotInput = input_get(input);
-  if (wifi_mode==WIFI_MODE_STA || wifi_mode==WIFI_MODE_AP_AND_STA)
+
+  if (wifi_mode == WIFI_MODE_STA || wifi_mode == WIFI_MODE_AP_AND_STA)
   {
     if(emoncms_apikey != 0 && gotInput) {
       emoncms_publish(input);
@@ -90,3 +91,4 @@ void loop()
     }
   }
 } // end loop
+

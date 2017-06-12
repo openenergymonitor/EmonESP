@@ -31,11 +31,7 @@
 
 #include <ArduinoOTA.h>               // local OTA update from Arduino IDE
 #include <ESP8266httpUpdate.h>        // remote OTA update from server
-#include <ESP8266HTTPUpdateServer.h>  // upload update
 #include <FS.h>
-
-ESP8266HTTPUpdateServer httpUpdater;  // Create class for webupdate handleWebUpdate()
-
 
 // -------------------------------------------------------------------
 //OTA UPDATE SETTINGS
@@ -44,7 +40,6 @@ ESP8266HTTPUpdateServer httpUpdater;  // Create class for webupdate handleWebUpd
 // Array of strings Used to check firmware version
 const char* u_host = "217.9.195.227";
 const char* u_url = "/esp/firmware.php";
-const char* firmware_update_path = "/upload";
 
 extern const char *esp_hostname;
 
@@ -53,9 +48,13 @@ void ota_setup()
   // Start local OTA update server
   ArduinoOTA.setHostname(esp_hostname);
   ArduinoOTA.begin();
-
-  // Setup firmware upload
-  httpUpdater.setup(&server, firmware_update_path);
+  #ifdef WIFI_LED
+  ArduinoOTA.onProgress([](unsigned int pos, unsigned int size) {
+    static int state = LOW;
+    state = !state;
+    digitalWrite(WIFI_LED, state);
+  });
+  #endif
 }
 
 void ota_loop()

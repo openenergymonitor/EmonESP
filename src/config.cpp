@@ -104,10 +104,11 @@ void ResetEEPROM(){
   EEPROM.commit();
 }
 
-void EEPROM_read_srting(int start, int count, String& val) {
+void EEPROM_read_string(int start, int count, String & val) {
   for (int i = 0; i < count; ++i){
     byte c = EEPROM.read(start+i);
-    if (c!=0 && c!=255) val += (char) c;
+    if (c != 0 && c != 255)
+      val += (char) c;
   }
 }
 
@@ -129,25 +130,29 @@ void config_load_settings()
   EEPROM.begin(EEPROM_SIZE);
 
   // Load WiFi values
-  EEPROM_read_srting(EEPROM_ESID_START, EEPROM_ESID_SIZE, esid);
-  EEPROM_read_srting(EEPROM_EPASS_START, EEPROM_EPASS_SIZE, epass);
+  EEPROM_read_string(EEPROM_ESID_START, EEPROM_ESID_SIZE, esid);
+  EEPROM_read_string(EEPROM_EPASS_START, EEPROM_EPASS_SIZE, epass);
 
   // EmonCMS settings
-  EEPROM_read_srting(EEPROM_EMON_API_KEY_START, EEPROM_EMON_API_KEY_SIZE, emoncms_apikey);
-  EEPROM_read_srting(EEPROM_EMON_SERVER_START, EEPROM_EMON_SERVER_SIZE, emoncms_server);
-  EEPROM_read_srting(EEPROM_EMON_NODE_START, EEPROM_EMON_NODE_SIZE, emoncms_node);
-  EEPROM_read_srting(EEPROM_EMON_FINGERPRINT_START, EEPROM_EMON_FINGERPRINT_SIZE, emoncms_fingerprint);
+  EEPROM_read_string(EEPROM_EMON_API_KEY_START, EEPROM_EMON_API_KEY_SIZE,
+                     emoncms_apikey);
+  EEPROM_read_string(EEPROM_EMON_SERVER_START, EEPROM_EMON_SERVER_SIZE,
+                     emoncms_server);
+  EEPROM_read_string(EEPROM_EMON_NODE_START, EEPROM_EMON_NODE_SIZE,
+                     emoncms_node);
+  EEPROM_read_string(EEPROM_EMON_FINGERPRINT_START,
+                     EEPROM_EMON_FINGERPRINT_SIZE, emoncms_fingerprint);
 
   // MQTT settings
-  EEPROM_read_srting(EEPROM_MQTT_SERVER_START, EEPROM_MQTT_SERVER_SIZE, mqtt_server);
-  EEPROM_read_srting(EEPROM_MQTT_TOPIC_START, EEPROM_MQTT_TOPIC_SIZE, mqtt_topic);
-  EEPROM_read_srting(EEPROM_MQTT_FEED_PREFIX_START, EEPROM_MQTT_FEED_PREFIX_SIZE, mqtt_feed_prefix);
-  EEPROM_read_srting(EEPROM_MQTT_USER_START, EEPROM_MQTT_USER_SIZE, mqtt_user);
-  EEPROM_read_srting(EEPROM_MQTT_PASS_START, EEPROM_MQTT_PASS_SIZE, mqtt_pass);
+  EEPROM_read_string(EEPROM_MQTT_SERVER_START, EEPROM_MQTT_SERVER_SIZE, mqtt_server);
+  EEPROM_read_string(EEPROM_MQTT_TOPIC_START, EEPROM_MQTT_TOPIC_SIZE, mqtt_topic);
+  EEPROM_read_string(EEPROM_MQTT_FEED_PREFIX_START, EEPROM_MQTT_FEED_PREFIX_SIZE, mqtt_feed_prefix);
+  EEPROM_read_string(EEPROM_MQTT_USER_START, EEPROM_MQTT_USER_SIZE, mqtt_user);
+  EEPROM_read_string(EEPROM_MQTT_PASS_START, EEPROM_MQTT_PASS_SIZE, mqtt_pass);
 
   // Web server credentials
-  EEPROM_read_srting(EEPROM_WWW_USER_START, EEPROM_WWW_USER_SIZE, www_username);
-  EEPROM_read_srting(EEPROM_WWW_PASS_START, EEPROM_WWW_PASS_SIZE, www_password);
+  EEPROM_read_string(EEPROM_WWW_USER_START, EEPROM_WWW_USER_SIZE, www_username);
+  EEPROM_read_string(EEPROM_WWW_PASS_START, EEPROM_WWW_PASS_SIZE, www_password);
 }
 
 void config_save_emoncms(String server, String node, String apikey, String fingerprint)

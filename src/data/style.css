@@ -28,7 +28,7 @@ body {
 }
 
 @media screen and (min-width: 1024px) {
-  
+
 #right-hand-container {
     width: 50%;
     float: right;
@@ -83,7 +83,7 @@ input[type="password"] {
     background-color: red;
 }
 
-#small-text{
+.small-text{
 font-size: 10px;
 word-wrap: break-word;
 }
@@ -196,14 +196,14 @@ button {
 }
 
 @media screen and (min-width: 1024px) {
-  
+
 #footer-small-scrn {
     display: none;
 }
 }
 
 @media screen and (min-width: 1024px) {
-  
+
 #footer-large-scrn {
     position: fixed;
     display: block;
@@ -227,3 +227,8 @@ button {
     color: #777777;
 }
 
+.loading {
+  margin-top: 40px;
+  margin-bottom: 40px;
+  text-align: center;
+}
