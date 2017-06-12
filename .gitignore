@@ -56,4 +56,6 @@ $RECYCLE.BIN/
 .piolibdeps
 .clang_complete
 .gcc-flags.json
+*~
+.vscode/browse.vc.db*
 .vscode
