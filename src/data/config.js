@@ -19,7 +19,10 @@ function scaleString(string, scale, precision) {
   return tmpval.toFixed(precision);
 }
 
-function BaseViewModel(defaults, remoteUrl, mappings = {}) {
+function BaseViewModel(defaults, remoteUrl, mappings) {
+  if(mappings === undefined){
+   mappings = {};
+  }
   var self = this;
   self.remoteUrl = remoteUrl;
 
@@ -28,7 +31,10 @@ function BaseViewModel(defaults, remoteUrl, mappings = {}) {
   self.fetching = ko.observable(false);
 }
 
-BaseViewModel.prototype.update = function (after = function () { }) {
+BaseViewModel.prototype.update = function (after) {
+  if(after === undefined){
+   after = function () { };
+  }
   var self = this;
   self.fetching(true);
   $.get(self.remoteUrl, function (data) {
@@ -109,7 +115,10 @@ function LastValuesViewModel() {
   self.fetching = ko.observable(false);
   self.values = ko.mapping.fromJS([]);
 
-  self.update = function (after = function () { }) {
+  self.update = function (after) {
+    if(after === undefined){
+     after = function () { };
+    }
     self.fetching(true);
     $.get(self.remoteUrl, function (data) {
       // Transform the data into somethinf a bit easier to handle as a binding
@@ -363,4 +372,3 @@ document.getElementById("restart").addEventListener("click", function (e) {
 //document.getElementById("upload").addEventListener("click", function(e) {
 //  window.location.href='/upload'
 //});
-
