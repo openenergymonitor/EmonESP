@@ -6,9 +6,11 @@ ESP8266 WIFI serial to emoncms link
 
 For applications that only require basic posting of data from one emonTx to a remote server such as Emoncms.org an emonTx with this WiFi module provides a lower cost route than an emonBase or emonPi base-station installation.
 
-The core of EmonESP is also used for [emonPixel](https://github.com/openenergymonitor/emonpixel) and [OpenEVSE ESP WiFi 2.0](https://github.com/OpenEVSE/ESP8266_WiFi_v2.x).
+#*The core of EmonESP is also used for [emonPixel](https://github.com/openenergymonitor/emonpixel) and [OpenEVSE ESP WiFi 2.0](https://github.com/OpenEVSE/ESP8266_WiFi_v2.x).*
 
 ![EmonEsp WiFi AP Setup Portal](docs/emonesp.png)
+
+## Contents
 
 <!-- toc -->
 - [EmonESP](#emonesp)
@@ -56,13 +58,13 @@ The core of EmonESP is also used for [emonPixel](https://github.com/openenergymo
 
 
 
-## Requirements
+# Requirements
 
 - ESP-12E module with 4M Flash
 
 ***
 
-# EmonESP User Guide
+# User Guide
 
 ## Hardware Setup
 
@@ -335,7 +337,7 @@ Required to include `data` folder with HTML etc in the upload
 
 #### Erase Flash
 
-If you are experiancing ESP hanging in a reboot loop after upload it may be that the ESP flash has remnants of previous code (which may have the used the ESP memory in a different way). The ESP flash can be fully erased using [esptool](https://github.com/themadinventor/esptool). With the unit in bootloder mode run:
+If you are experiencing ESP hanging in a reboot loop after upload it may be that the ESP flash has remnants of previous code (which may have the used the ESP memory in a different way). The ESP flash can be fully erased using [esptool](https://github.com/themadinventor/esptool). With the unit in bootloder mode run:
 
 `$ esptool.py erase_flash`
 
@@ -353,7 +355,7 @@ Erase took 8.0 seconds
 
 #### Fully erase ESP-12E
 
-To fully erase all memory locations on an ESP-12 (4Mb) we neeed to upload a blank file to each memory location
+To fully erase all memory locations on an ESP-12 (4Mb) we need to upload a blank file to each memory location
 
 `esptool.py write_flash 0x000000 blank_1MB.bin 0x100000 blank_1MB.bin 0x200000 blank_1MB.bin 0x300000 blank_1MB.bin`
 
