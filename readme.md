@@ -213,33 +213,6 @@ Upload SPIFFS filesystem over OTA (and don't flash):
 
 OTA uses port 8266. See [PlatformIO ESP OTA docs](http://docs.platformio.org/en/latest/platforms/espressif.html#over-the-air-ota-update):
 
-#### Troubleshooting Upload
-
-##### Erase Flash
-
-If you are experiancing ESP hanging in a reboot loop after upload it may be that the ESP flash has remnants of previous code (which may have the used the ESP memory in a different way). The ESP flash can be fully erased using [esptool](https://github.com/themadinventor/esptool). With the unit in bootloder mode run:
-
-`$ esptool.py erase_flash`
-
-*`sudo` maybe be required*
-
-Output:
-
-```
-esptool.py v1.2-dev
-Connecting...
-Running Cesanta flasher stub...
-Erasing flash (this may take a while)...
-Erase took 8.0 seconds
-```
-
-##### Fully erase ESP-12E
-
-To fully erase all memory locations on an ESP-12 (4Mb) we neeed to upload a blank file to each memory location
-
-`esptool.py write_flash 0x000000 blank_1MB.bin 0x100000 blank_1MB.bin 0x200000 blank_1MB.bin 0x300000 blank_1MB.bin`
-
-
 #### 4. Debugging ESP subsystems
 
 The ESP subsystems have a lot of logging that can be enabled via setting various build options.
@@ -272,7 +245,6 @@ pio run -t clean
 pio run
 pio run -t upload --upload-port 172.16.0.80
 ```
-
 ***
 
 ### Option 2: Using Arduino IDE
@@ -312,6 +284,34 @@ Required to include `data` folder with HTML etc in the upload
 - **Upload main sketch:** Compile and Upload as normal using Arduino IDE [CTRL + u]
 - **Upload 'data' folder**: Upload data folder (home.html web page etc) using `tools > ESP8266 Sketch Data Upload tool`.
 - If compiling fails because PubSubClient.h library cannot be found. Open the Library Manager again (Sketch > Include Library > Library Manager) and search for 'PubSubClient', install.
+***
+
+### Troubleshooting Upload
+
+#### Erase Flash
+
+If you are experiancing ESP hanging in a reboot loop after upload it may be that the ESP flash has remnants of previous code (which may have the used the ESP memory in a different way). The ESP flash can be fully erased using [esptool](https://github.com/themadinventor/esptool). With the unit in bootloder mode run:
+
+`$ esptool.py erase_flash`
+
+*`sudo` maybe be required*
+
+Output:
+
+```
+esptool.py v1.2-dev
+Connecting...
+Running Cesanta flasher stub...
+Erasing flash (this may take a while)...
+Erase took 8.0 seconds
+```
+
+#### Fully erase ESP-12E
+
+To fully erase all memory locations on an ESP-12 (4Mb) we neeed to upload a blank file to each memory location
+
+`esptool.py write_flash 0x000000 blank_1MB.bin 0x100000 blank_1MB.bin 0x200000 blank_1MB.bin 0x300000 blank_1MB.bin`
+
 ***
 
 ### Development Forum Threads
