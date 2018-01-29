@@ -1,15 +1,60 @@
-
 # EmonESP
 
 [![Build Status](https://travis-ci.org/openenergymonitor/EmonESP.svg?branch=master)](https://travis-ci.org/openenergymonitor/EmonESP)
 
 ESP8266 WIFI serial to emoncms link
 
-For applications that only require basic posting of data from one emonTx to a remote server such as Emoncms.org an emonTx with this WiFi module provides a lower cost route than an emonBase or emonPi base-station installation. 
+For applications that only require basic posting of data from one emonTx to a remote server such as Emoncms.org an emonTx with this WiFi module provides a lower cost route than an emonBase or emonPi base-station installation.
 
 The core of EmonESP is also used for [emonPixel](https://github.com/openenergymonitor/emonpixel) and [OpenEVSE ESP WiFi 2.0](https://github.com/OpenEVSE/ESP8266_WiFi_v2.x).
 
 ![EmonEsp WiFi AP Setup Portal](docs/emonesp.png)
+
+<!-- toc -->
+- [EmonESP](#emonesp)
+  * [Requirements](#requirements)
+- [EmonESP User Guide](#emonesp-user-guide)
+  * [Hardware Setup](#hardware-setup)
+  * [First Setup](#first-setup)
+    + [1. WiFi Connection](#1-wifi-connection)
+  * [2. Emoncms](#2-emoncms)
+  * [3. MQTT](#3-mqtt)
+  * [5. Admin (Authentication)](#5-admin-authentication)
+  * [7. System](#7-system)
+  * [OTA Firmware Update](#ota-firmware-update)
+  * [HTTP API Examples](#http-api-examples)
+    + [View units status:](#view-units-status)
+    + [4. Data Input](#4-data-input)
+      - [UART Input](#uart-input)
+      - [HTTP API](#http-api)
+    + [Save Emoncms server details](#save-emoncms-server-details)
+    + [Save Emoncms MQTT server details](#save-emoncms-mqtt-server-details)
+  * [Installation](#installation)
+    + [Option 1: Using PlatformIO](#option-1-using-platformio)
+      - [1a. Install PlatformIO command line](#1a-install-platformio-command-line)
+      - [1b. And / Or use PlatformIO IDE](#1b-and--or-use-platformio-ide)
+      - [2. Clone this repo](#2-clone-this-repo)
+      - [3. Compile](#3-compile)
+      - [3. Upload](#3-upload)
+        * [a.) Upload main program:](#a-upload-main-program)
+        * [b.) Upload data folder to the file system (html, CSS etc.) (SPIFFS):](#b-upload-data-folder-to-the-file-system-html-css-etc-spiffs)
+      - [Or upload all in one go](#or-upload-all-in-one-go)
+        * [c.) OTA upload over local network](#c-ota-upload-over-local-network)
+      - [4. Debugging ESP subsystems](#4-debugging-esp-subsystems)
+    + [Option 2: Using Arduino IDE](#option-2-using-arduino-ide)
+      - [1. Install ESP for Arduino IDE with Boards Manager](#1-install-esp-for-arduino-ide-with-boards-manager)
+      - [2. Install ESP filesystem file uploader](#2-install-esp-filesystem-file-uploader)
+      - [3. Clone this repo](#3-clone-this-repo)
+      - [4. Compile and Upload](#4-compile-and-upload)
+    + [Troubleshooting Upload](#troubleshooting-upload)
+      - [Erase Flash](#erase-flash)
+      - [Fully erase ESP-12E](#fully-erase-esp-12e)
+    + [Development Forum Threads](#development-forum-threads)
+    + [License](#license)
+
+<!-- tocstop -->
+
+
 
 ## Requirements
 
@@ -19,7 +64,7 @@ The core of EmonESP is also used for [emonPixel](https://github.com/openenergymo
 
 # EmonESP User Guide
 
-## Hardware Setup 
+## Hardware Setup
 
 - [Purchase a pre-loaded ESP8266](https://shop.openenergymonitor.com/esp8266-wifi-adapter-for-emontx/)
 - To connect an ESP to emonTx see [This User Guide Section](https://guide.openenergymonitor.org/setup/esp8266-adapter-emontx/)
