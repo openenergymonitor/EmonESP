@@ -101,7 +101,8 @@ void setup() {
 } // end setup
 
 void led_flash(int ton, int toff) {
-  digitalWrite(13,LOW); delay(ton); digitalWrite(13,HIGH); delay(toff);
+  // LEDpin 13 on sonoff
+  digitalWrite(2,LOW); delay(ton); digitalWrite(2,HIGH); delay(toff);
 }
 
 // -------------------------------------------------------------------

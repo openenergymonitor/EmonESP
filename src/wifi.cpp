@@ -48,6 +48,8 @@ String ipaddress = "";
 unsigned long Timer;
 String st, rssi;
 
+int LEDpin = 2; // or 13 on sonoff s20
+
 // -------------------------------------------------------------------
 int wifi_mode = WIFI_MODE_STA;
 
@@ -108,7 +110,7 @@ void startClient() {
   WiFi.hostname(node_name.c_str());
 
   //WiFi.mode(WIFI_STA);
-  digitalWrite(13,LOW);
+  digitalWrite(LEDpin,LOW);
   WiFi.begin(esid.c_str(),epass.c_str());
 
   int t = 0;
@@ -117,12 +119,12 @@ void startClient() {
   while (WiFi.status() != WL_CONNECTED) {
 
     delay(200);
-    digitalWrite(13,HIGH); delay(20); digitalWrite(13,LOW);
+    digitalWrite(LEDpin,HIGH); delay(20); digitalWrite(LEDpin,LOW);
 
     // Timeout
     if ((millis()-start_connect)>30000) {
       delay(2000);
-      digitalWrite(13,HIGH);
+      digitalWrite(LEDpin,HIGH);
       ESP.reset(); // ESP.restart(); ?
     }
 
@@ -145,12 +147,12 @@ void startClient() {
     ipaddress = tmpStr;
 
     for (int f=0; f<10; f++) {
-        digitalWrite(13,HIGH); 
+        digitalWrite(LEDpin,HIGH); 
         delay(80); 
-        digitalWrite(13,LOW); 
+        digitalWrite(LEDpin,LOW); 
         delay(20);
     }
-    digitalWrite(13,HIGH); 
+    digitalWrite(LEDpin,HIGH); 
   } else {
     DEBUG.print("startClient wifi_mode is not STA??");
   }

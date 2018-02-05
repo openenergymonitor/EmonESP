@@ -22,7 +22,7 @@
  * Free Software Foundation, Inc., 59 Temple Place - Suite 330,
  * Boston, MA 02111-1307, USA.
  */
-
+#include "config.h"
 #include "emonesp.h"
 #include "ota.h"
 #include "web_server.h"
@@ -46,7 +46,7 @@ extern const char *esp_hostname;
 void ota_setup()
 {
   // Start local OTA update server
-  ArduinoOTA.setHostname(esp_hostname);
+  ArduinoOTA.setHostname(node_name.c_str());
   ArduinoOTA.begin();
   #ifdef WIFI_LED
   ArduinoOTA.onProgress([](unsigned int pos, unsigned int size) {
