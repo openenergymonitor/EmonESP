@@ -21,7 +21,11 @@
  * along with EmonESP; see the file COPYING.  If not, write to the
  * Free Software Foundation, Inc., 59 Temple Place - Suite 330,
  * Boston, MA 02111-1307, USA.
+ * 
+ * COMPILATION AND UPLOAD
+ * SONOFF S20: GENERIC ESP8266 MODULE 1M (512K)
  */
+
 
 #include "emonesp.h"
 #include "config.h"
@@ -31,11 +35,14 @@
 #include "input.h"
 #include "emoncms.h"
 #include "mqtt.h"
+// #include "http.h"
+// #include "autoauth.h"
 
 // -------------------------------------------------------------------
 // SETUP
 // -------------------------------------------------------------------
 void setup() {
+  
   delay(2000);
 
   Serial.begin(115200);
@@ -51,19 +58,51 @@ void setup() {
   // Read saved settings from the config
   config_load_settings();
 
+  // ---------------------------------------------------------
+  // Hard-coded initial config for node_name and node_describe
+  // ---------------------------------------------------------
+  node_type = "hpmon";
+  node_id = 1;
+  
+  node_name = node_type + String(node_id);
+  node_status = "emon/"+node_name+"/status";
+  
+  node_describe = "describe:"+node_type;
+  // ---------------------------------------------------------
+
+  if (node_type=="smartplug") {
+    pinMode(12, OUTPUT);
+    pinMode(13, OUTPUT);
+    pinMode(16, OUTPUT);
+
+    led_flash(3000,100);
+    
+  } else if (node_type=="wifirelay") {
+    pinMode(5, OUTPUT);
+  }
+
   // Initialise the WiFi
   wifi_setup();
+  led_flash(50,50);
 
   // Bring up the web server
   web_server_setup();
+  led_flash(50,50);
 
   // Start the OTA update systems
   ota_setup();
 
   DEBUG.println("Server started");
 
+  // Start auto auth
+  // auth_setup();
+  
   delay(100);
 } // end setup
+
+void led_flash(int ton, int toff) {
+  digitalWrite(13,LOW); delay(ton); digitalWrite(13,HIGH); delay(toff);
+}
 
 // -------------------------------------------------------------------
 // LOOP
@@ -90,5 +129,7 @@ void loop()
       }
     }
   }
-} // end loop
 
+  // auth_loop();
+  
+} // end loop

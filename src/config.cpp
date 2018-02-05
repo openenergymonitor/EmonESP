@@ -29,6 +29,12 @@
 #include <Arduino.h>
 #include <EEPROM.h>                   // Save config settings
 
+String node_type = "";
+int node_id = 0;
+String node_name = "";
+String node_describe = "";
+String node_status = "";
+
 // Wifi Network Strings
 String esid = "";
 String epass = "";
@@ -199,6 +205,16 @@ void config_save_mqtt(String server, String topic, String prefix, String user, S
 
   // Save MQTT pass max 64 characters
   EEPROM_write_string(EEPROM_MQTT_PASS_START, EEPROM_MQTT_PASS_SIZE, mqtt_pass);
+
+  EEPROM.commit();
+}
+
+void config_save_mqtt_server(String server)
+{
+  mqtt_server = server;
+
+  // Save MQTT server max 45 characters
+  EEPROM_write_string(EEPROM_MQTT_SERVER_START, EEPROM_MQTT_SERVER_SIZE, mqtt_server);
 
   EEPROM.commit();
 }

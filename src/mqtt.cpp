@@ -38,6 +38,47 @@ long lastMqttReconnectAttempt = 0;
 int clientTimeout = 0;
 int i = 0;
 
+// -------------------------------------------------------------------
+// MQTT Control callback for WIFI Relay and Sonoff smartplug
+// -------------------------------------------------------------------
+void mqtt_callback(char* topic, byte* payload, unsigned int length) {
+  DEBUG.print("Message arrived [");
+  DEBUG.print(topic);
+  DEBUG.print("] ");
+  for (int i=0;i<length;i++) {
+    DEBUG.print((char)payload[i]);
+  }
+  DEBUG.println();
+
+  if (node_type=="smartplug") {
+    if (strcmp(topic,node_status.c_str())==0) {
+      char state = (char) payload[0];
+      if (state=='1') {
+        DEBUG.println("STATE:1");
+        digitalWrite(12,HIGH);
+        digitalWrite(16,HIGH); 
+      } else {
+        DEBUG.println("STATE:0");
+        digitalWrite(12,LOW);
+        digitalWrite(16,LOW); 
+      }
+    }
+  }
+
+  if (node_type=="wifirelay") {
+    if (strcmp(topic,node_status.c_str())==0) {
+      char state = (char) payload[0];
+      if (state=='1') {
+        DEBUG.println("STATE:1");
+        digitalWrite(5,HIGH);
+      } else {
+        DEBUG.println("STATE:0");
+        digitalWrite(5,LOW);
+      }
+    }
+  }
+  
+}
 
 // -------------------------------------------------------------------
 // MQTT Connect
@@ -45,11 +86,17 @@ int i = 0;
 boolean mqtt_connect()
 {
   mqttclient.setServer(mqtt_server.c_str(), 1883);
+  mqttclient.setCallback(mqtt_callback);
+  
   DEBUG.println("MQTT Connecting...");
   String strID = String(ESP.getChipId());
   if (mqttclient.connect(strID.c_str(), mqtt_user.c_str(), mqtt_pass.c_str())) {  // Attempt to connect
     DEBUG.println("MQTT connected");
-    mqttclient.publish(mqtt_topic.c_str(), "connected"); // Once connected, publish an announcement..
+    mqtt_publish(node_describe);
+    
+    String subscribe_topic = mqtt_topic + "/" + node_name + "/" + mqtt_feed_prefix + "#";
+    mqttclient.subscribe(subscribe_topic.c_str());
+    
   } else {
     DEBUG.print("MQTT failed: ");
     DEBUG.println(mqttclient.state());
@@ -68,7 +115,7 @@ boolean mqtt_connect()
 void mqtt_publish(String data)
 {
   String mqtt_data = "";
-  String topic = mqtt_topic + "/" + mqtt_feed_prefix;
+  String topic = mqtt_topic + "/" + node_name + "/" + mqtt_feed_prefix;
   int i=0;
   while (int (data[i]) != 0)
   {
@@ -93,13 +140,13 @@ void mqtt_publish(String data)
     //delay(100);
     DEBUG.printf("%s = %s\r\n", topic.c_str(), mqtt_data.c_str());
     mqttclient.publish(topic.c_str(), mqtt_data.c_str());
-    topic = mqtt_topic + "/" + mqtt_feed_prefix;
+    topic = mqtt_topic + "/" + node_name + "/" + mqtt_feed_prefix;
     mqtt_data="";
     i++;
     if (int(data[i]) == 0) break;
   }
 
-  String ram_topic = mqtt_topic + "/" + mqtt_feed_prefix + "freeram";
+  String ram_topic = mqtt_topic + "/" + node_name + "/" + mqtt_feed_prefix + "freeram";
   String free_ram = String(ESP.getFreeHeap());
   mqttclient.publish(ram_topic.c_str(), free_ram.c_str());
 }
@@ -114,10 +161,11 @@ void mqtt_loop()
   if (!mqttclient.connected()) {
     long now = millis();
     // try and reconnect continuously for first 5s then try again once every 10s
-    if ( (now < 50000) || ((now - lastMqttReconnectAttempt)  > 100000) ) {
+    if ( (now < 5000) || ((now - lastMqttReconnectAttempt)  > 10000) ) {
       lastMqttReconnectAttempt = now;
       if (mqtt_connect()) { // Attempt to reconnect
-        lastMqttReconnectAttempt = 0;
+        lastMqttReconnectAttempt = millis();
+        delay(100);
       }
     }
   } else {
@@ -126,14 +174,12 @@ void mqtt_loop()
   }
 }
 
-void mqtt_restart()
-{
+void mqtt_restart() {
   if (mqttclient.connected()) {
     mqttclient.disconnect();
   }
 }
 
-boolean mqtt_connected()
-{
+boolean mqtt_connected() {
   return mqttclient.connected();
 }

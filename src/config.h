@@ -35,6 +35,11 @@
 // -------------------------------------------------------------------
 
 // Global config varables
+extern String node_type;
+extern int node_id;
+extern String node_name;
+extern String node_describe;
+extern String node_status;
 
 // Wifi Network Strings
 extern String esid;
@@ -71,6 +76,7 @@ extern void config_save_emoncms(String server, String node, String apikey, Strin
 // Save the MQTT broker details
 // -------------------------------------------------------------------
 extern void config_save_mqtt(String server, String topic, String prefix, String user, String pass);
+extern void config_save_mqtt_server(String server);
 
 // -------------------------------------------------------------------
 // Save the admin/web interface details
