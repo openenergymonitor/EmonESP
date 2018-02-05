@@ -48,8 +48,6 @@ String ipaddress = "";
 unsigned long Timer;
 String st, rssi;
 
-int LEDpin = 2; // or 13 on sonoff s20
-
 // -------------------------------------------------------------------
 int wifi_mode = WIFI_MODE_STA;
 

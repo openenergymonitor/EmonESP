@@ -29,6 +29,8 @@
 #include <Arduino.h>
 #include <EEPROM.h>                   // Save config settings
 
+int LEDpin = 2;
+
 String node_type = "";
 int node_id = 0;
 String node_name = "";

@@ -70,6 +70,8 @@ void setup() {
   node_describe = "describe:"+node_type;
   // ---------------------------------------------------------
 
+  pinMode(LEDpin, OUTPUT);
+
   if (node_type=="smartplug") {
     pinMode(12, OUTPUT);
     pinMode(13, OUTPUT);
@@ -101,8 +103,7 @@ void setup() {
 } // end setup
 
 void led_flash(int ton, int toff) {
-  // LEDpin 13 on sonoff
-  digitalWrite(2,LOW); delay(ton); digitalWrite(2,HIGH); delay(toff);
+  digitalWrite(LEDpin,LOW); delay(ton); digitalWrite(LEDpin,HIGH); delay(toff);
 }
 
 // -------------------------------------------------------------------
