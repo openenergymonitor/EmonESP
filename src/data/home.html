@@ -83,12 +83,21 @@
       <div id="two">
         <h2>2. Emoncms</h2>
         <div class="itembody-wrapper">
-          <b>Emoncms Server*:</b><br>
-          <input type="text" data-bind="textInput: config.emoncms_server"><br/>
-          <span>
-            e.g '<a href="https://emoncms.org">emoncms.org</a>',
-            'emonpi/emoncms', or '192.168.1.4/emoncms'
-          </span><br/>
+          <p>
+            <b>Emoncms Server*:</b><br>
+            <input type="text" data-bind="textInput: config.emoncms_server"><br/>
+            <span>
+              e.g '<a href="https://emoncms.org">emoncms.org</a>',
+              'emonpi', or '192.168.1.4'
+            </span><br/>
+          </p>
+          <p>
+            <b>Emoncms path:</b><br>
+            <input type="text" data-bind="textInput: config.emoncms_path"><br/>
+            <span>
+              e.g '/emoncms', or empty for emoncms.org
+            </span><br/>
+          </p>
           <p>
             <b>Emoncms Node Name*:</b><br>
             <input type="text" data-bind="textInput: config.emoncms_node">

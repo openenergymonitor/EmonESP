@@ -89,7 +89,8 @@ function ConfigViewModel() {
   BaseViewModel.call(this, {
     "ssid": "",
     "pass": "",
-    "emoncms_server": "data.openevse.com/emoncms",
+    "emoncms_server": "data.openevse.com",
+    "emoncms_path": "/emoncms",
     "emoncms_apikey": "",
     "emoncms_node": "",
     "emoncms_fingerprint": "",
@@ -246,6 +247,7 @@ function EmonEspViewModel() {
   self.saveEmonCms = function () {
     var emoncms = {
       server: self.config.emoncms_server(),
+      path: self.config.emoncms_path(),
       apikey: self.config.emoncms_apikey(),
       node: self.config.emoncms_node(),
       fingerprint: self.config.emoncms_fingerprint()
