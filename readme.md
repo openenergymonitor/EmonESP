@@ -104,9 +104,17 @@ On future boots EmonESP will automatically connect to this network.
 
 EmonESP can post data to [emoncms.org](https://emoncms.org) or any other  Emoncms server (e.g. emonPi) using [Emoncms API](https://emoncms.org/site/api#input).
 
-Data ca be posted using HTTP or HTTPS. For HTTPS the Emoncms server must support HTTPS (emoncms.org does, emonPi does not).Due to the limited resources on the ESP the SSL SSH-1 fingerprint for the Emoncms server must be manually entered and regularly updated.
+Data ca be posted using HTTP or HTTPS. For HTTPS the Emoncms server must support HTTPS (emoncms.org does, emonPi does not). Due to the limited resources on the ESP the SSL SHA-1 fingerprint for the Emoncms server certificate must be manually entered and regularly updated.
 
 *Note: the emoncms.org fingerprint will change every 90 days when the SSL certificate is renewed.*
+*Note 2: currently, when using a custon server with HTTPS, the Emoncms Server field must be just the hostname without any additional path, see issue #34.*
+
+To obtain the certificate fingerprint, you can use several methods, some examples:
+* Chrome under Windows: click the secure icon next to the address bar and click on the certificate row to get the details, in the *Details* tab copy the hexadecimal digits from the box *Thumbprint* substituting spaces with colons and paying attention not to include any leading invisible character;
+* Firefox under Linux: click the secure icon next to the address bar, Show connection details, More information, in the security tab click *View Certificate* and copy the *SHA1 Fingerprint*
+* openssl under Linux: issue the following command substituting your host in place of www.example.com:
+
+`echo | openssl s_client -connect www.example.com:443 -servername www.example.com |& openssl x509 -fingerprint -sha1 -noout`
 
 ## 3. MQTT
 
