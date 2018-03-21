@@ -75,6 +75,7 @@ void emoncms_publish(String data)
   if (result == "ok"){
     packets_success++;
     emoncms_connected = true;
+    emoncms_connection_error_count = 0;
   }
   else{
     emoncms_connected=false;
