@@ -46,7 +46,13 @@ boolean mqtt_connect()
 {
   mqttclient.setServer(mqtt_server.c_str(), 1883);
   DEBUG.println("MQTT Connecting...");
+  
+  #ifdef ESP32
+  String strID = String((uint32_t)ESP.getEfuseMac());
+  #else
   String strID = String(ESP.getChipId());
+  #endif
+  
   if (mqttclient.connect(strID.c_str(), mqtt_user.c_str(), mqtt_pass.c_str())) {  // Attempt to connect
     DEBUG.println("MQTT connected");
     mqttclient.publish(mqtt_topic.c_str(), "connected"); // Once connected, publish an announcement..

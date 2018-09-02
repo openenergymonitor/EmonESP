@@ -1,34 +1,41 @@
 /*
- * -------------------------------------------------------------------
- * EmonESP Serial to Emoncms gateway
- * -------------------------------------------------------------------
- * Adaptation of Chris Howells OpenEVSE ESP Wifi
- * by Trystan Lea, Glyn Hudson, OpenEnergyMonitor
- * All adaptation GNU General Public License as below.
- *
- * -------------------------------------------------------------------
- *
- * This file is part of OpenEnergyMonitor.org project.
- * EmonESP is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 3, or (at your option)
- * any later version.
- * EmonESP is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- * You should have received a copy of the GNU General Public License
- * along with EmonESP; see the file COPYING.  If not, write to the
- * Free Software Foundation, Inc., 59 Temple Place - Suite 330,
- * Boston, MA 02111-1307, USA.
- */
+   -------------------------------------------------------------------
+   EmonESP Serial to Emoncms gateway
+   -------------------------------------------------------------------
+   Adaptation of Chris Howells OpenEVSE ESP Wifi
+   by Trystan Lea, Glyn Hudson, OpenEnergyMonitor
+   All adaptation GNU General Public License as below.
+
+   -------------------------------------------------------------------
+
+   This file is part of OpenEnergyMonitor.org project.
+   EmonESP is free software; you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation; either version 3, or (at your option)
+   any later version.
+   EmonESP is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
+   You should have received a copy of the GNU General Public License
+   along with EmonESP; see the file COPYING.  If not, write to the
+   Free Software Foundation, Inc., 59 Temple Place - Suite 330,
+   Boston, MA 02111-1307, USA.
+*/
 
 #include "emonesp.h"
 #include "wifi.h"
 #include "config.h"
 
-#include <ESP8266WiFi.h>              // Connect to Wifi
+#ifdef ESP32
+#include <esp_wifi.h>              // Connect to Wifi
+#include <WiFi.h>
+#include <ESPmDNS.h>              // Resolve URL for update server etc.
+#elif defined(ESP8266)
+#include <ESP8266WiFi.h>
 #include <ESP8266mDNS.h>              // Resolve URL for update server etc.
+#endif
+
 #include <DNSServer.h>                // Required for captive portal
 
 DNSServer dnsServer;                  // Create class DNS server, captive portal re-direct
@@ -69,7 +76,7 @@ unsigned long wifiLedTimeOut = millis();
 #endif
 
 // -------------------------------------------------------------------
-int wifi_mode = WIFI_MODE_STA;
+int wifi_mode = WIFI_MODE_CLIENT;
 
 
 // -------------------------------------------------------------------
@@ -88,9 +95,9 @@ startAP() {
   DEBUG.println(" networks found");
   st = "";
   rssi = "";
-  for (int i = 0; i < n; ++i){
-    st += "\""+WiFi.SSID(i)+"\"";
-    rssi += "\""+String(WiFi.RSSI(i))+"\"";
+  for (int i = 0; i < n; ++i) {
+    st += "\"" + WiFi.SSID(i) + "\"";
+    rssi += "\"" + String(WiFi.RSSI(i)) + "\"";
     if (i < n - 1)
       st += ",";
     if (i < n - 1)
@@ -99,10 +106,19 @@ startAP() {
   delay(100);
 
   WiFi.softAPConfig(apIP, apIP, netMsk);
+
   // Create Unique SSID e.g "emonESP_XXXXXX"
+#ifdef ESP32
   String softAP_ssid_ID =
-    String(softAP_ssid) + "_" + String(ESP.getChipId());;
-  WiFi.softAP(softAP_ssid_ID.c_str(), softAP_password);
+    String(softAP_ssid) + "_" + String((uint32_t)ESP.getEfuseMac());
+#else
+  String softAP_ssid_ID =
+    String(softAP_ssid) + "_" + String(ESP.getChipId());
+#endif
+
+  // Pick a random channel out of 1, 6 or 11
+  int channel = (random(3) * 5) + 1;
+  WiFi.softAP(softAP_ssid_ID.c_str(), softAP_password, channel);
 
   // Setup the DNS server redirecting all the domains to the apIP
   dnsServer.setErrorReplyCode(DNSReplyCode::NoError);
@@ -110,7 +126,7 @@ startAP() {
 
   IPAddress myIP = WiFi.softAPIP();
   char tmpStr[40];
-  sprintf(tmpStr,"%d.%d.%d.%d",myIP[0],myIP[1],myIP[2],myIP[3]);
+  sprintf(tmpStr, "%d.%d.%d.%d", myIP[0], myIP[1], myIP[2], myIP[3]);
   DEBUG.print("AP IP Address: ");
   DEBUG.println(tmpStr);
   ipaddress = tmpStr;
@@ -119,20 +135,23 @@ startAP() {
 // -------------------------------------------------------------------
 // Start Client, attempt to connect to Wifi network
 // -------------------------------------------------------------------
-void
-startClient() {
+void startClient() {
   DEBUG.print("Connecting to SSID: ");
   DEBUG.println(esid.c_str());
   // DEBUG.print(" epass:");
   // DEBUG.println(epass.c_str());
-  WiFi.hostname(esp_hostname);
+
   WiFi.begin(esid.c_str(), epass.c_str());
+#ifndef ESP32
+  WiFi.hostname(esp_hostname);
+#endif // !ESP32
+  WiFi.enableSTA(true);
 
   delay(50);
 
   int t = 0;
   int attempt = 0;
-  while (WiFi.status() != WL_CONNECTED){
+  while (WiFi.status() != WL_CONNECTED) {
 #ifdef WIFI_LED
     wifiLedState = !wifiLedState;
     digitalWrite(WIFI_LED, wifiLedState);
@@ -143,9 +162,9 @@ startClient() {
     // push and hold boot button after power on to skip stright to AP mode
     if (t >= 20
 #if !defined(WIFI_LED) || 0 != WIFI_LED
-       || digitalRead(0) == LOW
+        || digitalRead(0) == LOW
 #endif
-     ) {
+       ) {
       DEBUG.println(" ");
       DEBUG.println("Try Again...");
       delay(2000);
@@ -153,7 +172,7 @@ startClient() {
       WiFi.begin(esid.c_str(), epass.c_str());
       t = 0;
       attempt++;
-      if (attempt >= 5 || digitalRead(0) == LOW){
+      if (attempt >= 5 || digitalRead(0) == LOW) {
         startAP();
         // AP mode with SSID in EEPROM, connection will retry in 5 minutes
         wifi_mode = WIFI_MODE_AP_STA_RETRY;
@@ -162,7 +181,7 @@ startClient() {
     }
   }
 
-  if (wifi_mode == WIFI_MODE_STA || wifi_mode == WIFI_MODE_AP_AND_STA){
+  if (wifi_mode == WIFI_MODE_CLIENT || wifi_mode == WIFI_MODE_AP_AND_STA) {
 #ifdef WIFI_LED
     wifiLedState = WIFI_LED_ON_STATE;
     digitalWrite(WIFI_LED, wifiLedState);
@@ -180,8 +199,7 @@ startClient() {
   }
 }
 
-void
-wifi_setup() {
+void wifi_setup() {
 #ifdef WIFI_LED
   pinMode(WIFI_LED, OUTPUT);
   digitalWrite(WIFI_LED, wifiLedState);
@@ -196,12 +214,12 @@ wifi_setup() {
   // 2) else try and connect to the configured network
   else {
     WiFi.mode(WIFI_STA);
-    wifi_mode = WIFI_MODE_STA;
+    wifi_mode = WIFI_MODE_CLIENT;
     startClient();
   }
 
   // Start hostname broadcast in STA mode
-  if ((wifi_mode==WIFI_MODE_STA || wifi_mode==WIFI_MODE_AP_AND_STA)){
+  if ((wifi_mode == WIFI_MODE_CLIENT || wifi_mode == WIFI_MODE_AP_AND_STA)) {
     if (MDNS.begin(esp_hostname)) {
       MDNS.addService("http", "tcp", 80);
     }
@@ -210,8 +228,7 @@ wifi_setup() {
   Timer = millis();
 }
 
-void
-wifi_loop() {
+void wifi_loop() {
 #ifdef WIFI_LED
   if (wifi_mode == WIFI_MODE_AP_ONLY && millis() > wifiLedTimeOut) {
     wifiLedState = !wifiLedState;
@@ -223,23 +240,31 @@ wifi_loop() {
   dnsServer.processNextRequest(); // Captive portal DNS re-dierct
 
   // Remain in AP mode for 5 Minutes before resetting
-  if (wifi_mode == WIFI_MODE_AP_STA_RETRY){
-     if ((millis() - Timer) >= 300000){
-       ESP.reset();
-       DEBUG.println("WIFI Mode = 1, resetting");
-     }
+  if (wifi_mode == WIFI_MODE_AP_STA_RETRY) {
+    if ((millis() - Timer) >= 300000) {
+#ifdef ESP32
+      esp_restart();
+#else
+      ESP.reset();
+#endif
+      DEBUG.println("WIFI Mode = 1, resetting");
+    }
   }
 }
 
-void
-wifi_restart() {
+void wifi_restart() {
   // Startup in STA + AP mode
   WiFi.mode(WIFI_AP_STA);
   WiFi.softAPConfig(apIP, apIP, netMsk);
 
   // Create Unique SSID e.g "emonESP_XXXXXX"
+#ifdef ESP32
   String softAP_ssid_ID =
-    String(softAP_ssid) + "_" + String(ESP.getChipId());;
+    String(softAP_ssid) + "_" + String((uint32_t)ESP.getEfuseMac());
+#else
+  String softAP_ssid_ID =
+    String(softAP_ssid) + "_" + String(ESP.getChipId());
+#endif
   WiFi.softAP(softAP_ssid_ID.c_str(), softAP_password);
 
   // Setup the DNS server redirecting all the domains to the apIP
@@ -249,17 +274,16 @@ wifi_restart() {
   startClient();
 }
 
-void
-wifi_scan() {
+void wifi_scan() {
   DEBUG.println("WIFI Scan");
   int n = WiFi.scanNetworks();
   DEBUG.print(n);
   DEBUG.println(" networks found");
   st = "";
   rssi = "";
-  for (int i = 0; i < n; ++i){
-    st += "\""+WiFi.SSID(i)+"\"";
-    rssi += "\""+String(WiFi.RSSI(i))+"\"";
+  for (int i = 0; i < n; ++i) {
+    st += "\"" + WiFi.SSID(i) + "\"";
+    rssi += "\"" + String(WiFi.RSSI(i)) + "\"";
     if (i < n - 1)
       st += ",";
     if (i < n - 1)
@@ -267,7 +291,6 @@ wifi_scan() {
   }
 }
 
-void
-wifi_disconnect() {
+void wifi_disconnect() {
   WiFi.disconnect();
 }

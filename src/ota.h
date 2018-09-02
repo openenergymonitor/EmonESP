@@ -31,7 +31,11 @@
 // -------------------------------------------------------------------
 
 #include <Arduino.h>
-#include <ESP8266httpUpdate.h>
+#ifdef ESP32
+#include <ESP32httpUpdate.h>        // remote OTA update from server
+#elif defined(ESP8266)
+#include <ESP8266httpUpdate.h>        // remote OTA update from server
+#endif
 
 
 void ota_setup();

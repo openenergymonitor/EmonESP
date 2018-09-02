@@ -34,10 +34,11 @@
 // 2 - AP only
 // 3 - AP + STA
 
-#define WIFI_MODE_STA           0
+#define WIFI_MODE_CLIENT        0
 #define WIFI_MODE_AP_STA_RETRY  1
 #define WIFI_MODE_AP_ONLY       2
 #define WIFI_MODE_AP_AND_STA    3
+
 
 // The current WiFi mode
 extern int wifi_mode;

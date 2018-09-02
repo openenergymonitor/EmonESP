@@ -56,4 +56,6 @@ extern void mqtt_restart();
 // -------------------------------------------------------------------
 extern boolean mqtt_connected();
 
+String uint64ToString(uint64_t input);
+
 #endif // _EMONESP_MQTT_H

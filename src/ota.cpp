@@ -29,16 +29,22 @@
 #include "wifi.h"
 #include "http.h"
 
-#include <ArduinoOTA.h>               // local OTA update from Arduino IDE
-#include <ESP8266httpUpdate.h>        // remote OTA update from server
 #include <FS.h>
+
+#include <ArduinoOTA.h>               // local OTA update from Arduino IDE
+#ifdef ESP32
+#include <ESP32httpUpdate.h>        // remote OTA update from server
+#elif defined(ESP8266)
+#include <ESP8266httpUpdate.h>        // remote OTA update from server
+#endif
+
 
 // -------------------------------------------------------------------
 //OTA UPDATE SETTINGS
 // -------------------------------------------------------------------
 //UPDATE SERVER strings and interfers for upate server
 // Array of strings Used to check firmware version
-const char* u_host = "217.9.195.227";
+const char* u_host = "192.168.1.124";
 const char* u_url = "/esp/firmware.php";
 
 extern const char *esp_hostname;
