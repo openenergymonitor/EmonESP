@@ -27,7 +27,11 @@
 #define _EMONESP_WEB_SERVER_H
 
 #include <Hash.h>
+#ifdef ESP32
+#include <AsyncTCP.h>  //https://github.com/me-no-dev/AsyncTCP
+#elif defined(ESP8266)
 #include <ESPAsyncTCP.h>
+#endif
 #include <ESPAsyncWebServer.h>
 
 extern AsyncWebServer server;
