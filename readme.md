@@ -305,7 +305,11 @@ pio run -t upload --upload-port 172.16.0.80
 
 ### Option 2: Using Arduino IDE
 
-This is a 2 part process. The first part uploads src.ino, the second part uploads the Spiffs. Each time the device will need resetting and holding down GPIO0 to go into bootloader mode.
+An overview of this process is:
+- Install ESP boards using board manager.
+- Install Arduino IDE plug-in for uploading spiffs files.
+- Download the emonESP source files.
+- Upload src.ino and Upload spiffs.
 
 #### 1. Install ESP8266 boards for Arduino IDE with Boards Manager
 
