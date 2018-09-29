@@ -4,11 +4,8 @@
    -------------------------------------------------------------------
    Adaptation of Chris Howells OpenEVSE ESP Wifi
    by Trystan Lea, Glyn Hudson, OpenEnergyMonitor
-<<<<<<< HEAD
 
    Modified to use CircuitSetup.us Energy Meter by jdeglavina
-=======
->>>>>>> 4fd788b6b35715701dd5849cfbc5ec5a4c2f0062
    All adaptation GNU General Public License as below.
 
    -------------------------------------------------------------------
@@ -41,7 +38,7 @@
 #include <SPI.h>
 #include <ATM90E32_SPI.h>
 
-<<<<<<< HEAD
+/***** CALIBRATION SETTINGS *****/
 unsigned short LineGain = 7481; //0x1D39 
 unsigned short VoltageGain = 32428; //0x7EAC - default value is for a 12v AC Transformer
 unsigned short CurrentGainCT1 = 46539; //0xB5CB - 
@@ -49,32 +46,19 @@ unsigned short CurrentGainCT2 = 46539; //0xB5CB -
 
 #ifdef ESP8266
 const int CS_pin = 16;
-=======
-#ifdef ESP8266
-ATM90E32 eic(16); //set CS pin
->>>>>>> 4fd788b6b35715701dd5849cfbc5ec5a4c2f0062
 /*
   D5/14 - CLK
   D6/12 - MISO
   D7/13 - MOSI
-<<<<<<< HEAD
 */
 #endif
 
 #ifdef ESP32
 const int CS_pin = 5;
-=======
-  D0/16 - CS
-*/
-#endif
-#ifdef ESP32
-ATM90E32 eic(5); //set CS pin
->>>>>>> 4fd788b6b35715701dd5849cfbc5ec5a4c2f0062
 /*
   18 - CLK
   19 - MISO
   23 - MOSI
-<<<<<<< HEAD
 */
 #endif
 
@@ -100,14 +84,6 @@ const int CS_pin = SS; // Use default SS pin for unknown Arduino
 
 ATM90E32 eic(CS_pin, LineGain, VoltageGain, CurrentGainCT1, CurrentGainCT2); //pass CS pin and calibrations to ATM90E32 library
 
-=======
-  5 - CS
-*/
-#else
-ATM90E32 eic(5); //set CS pin
-#endif
-
->>>>>>> 4fd788b6b35715701dd5849cfbc5ec5a4c2f0062
 // -------------------------------------------------------------------
 // SETUP
 // -------------------------------------------------------------------
@@ -155,14 +131,8 @@ void loop()
   web_server_loop();
   wifi_loop();
 
-<<<<<<< HEAD
   /*Repeatedly fetch some values from the ATM90E32 */
   float voltageA, voltageC, totalVoltage, currentCT1, currentCT2, totalCurrent, realPower, powerFactor, temp, freq, totalWatts;
-=======
-
-  /*Repeatedly fetch some values from the ATM90E32 */
-  float voltageA, voltageC, totalVoltage, currentA, currentC, totalCurrent, realPower, powerFactor, temp, freq, totalWatts;
->>>>>>> 4fd788b6b35715701dd5849cfbc5ec5a4c2f0062
 
   unsigned short sys0 = eic.GetSysStatus0();
   unsigned short sys1 = eic.GetSysStatus1();
@@ -177,36 +147,20 @@ void loop()
   // Voltage B is not used
   voltageC = eic.GetLineVoltageC();
   totalVoltage = voltageA + voltageC ;
-<<<<<<< HEAD
   currentCT1 = eic.GetLineCurrentA();
   // Current B is not used
   currentCT2 = eic.GetLineCurrentC();
   totalCurrent = currentCT1 + currentCT2;
-=======
-  currentA = eic.GetLineCurrentA();
-  // Current B is not used
-  currentC = eic.GetLineCurrentC();
-  totalCurrent = currentA + currentC;
->>>>>>> 4fd788b6b35715701dd5849cfbc5ec5a4c2f0062
   realPower = eic.GetTotalActivePower();
   powerFactor = eic.GetTotalPowerFactor();
   temp = eic.GetTemperature();
   freq = eic.GetFrequency();
-<<<<<<< HEAD
   totalWatts = (voltageA * currentCT1) + (voltageC * currentCT2);
 
   Serial.println("VA:" + String(voltageA) + "V");
   Serial.println("VC:" + String(voltageC) + "V");
   Serial.println("IA:" + String(currentCT1) + "A");
   Serial.println("IC:" + String(currentCT2) + "A");
-=======
-  totalWatts = (voltageA * currentA) + (voltageC * currentC);
-
-  Serial.println("VA:" + String(voltageA) + "V");
-  Serial.println("VC:" + String(voltageC) + "V");
-  Serial.println("IA:" + String(currentA) + "A");
-  Serial.println("IC:" + String(currentC) + "A");
->>>>>>> 4fd788b6b35715701dd5849cfbc5ec5a4c2f0062
   Serial.println("AP:" + String(realPower));
   Serial.println("PF:" + String(powerFactor));
   Serial.println(String(temp) + "C");
@@ -219,15 +173,9 @@ void loop()
   postStr += ",totV:";
   postStr += String(totalVoltage);
   postStr += ",IA:";
-<<<<<<< HEAD
   postStr += String(currentCT1);
   postStr += ",IC:";
   postStr += String(currentCT2);
-=======
-  postStr += String(currentA);
-  postStr += ",IC:";
-  postStr += String(currentC);
->>>>>>> 4fd788b6b35715701dd5849cfbc5ec5a4c2f0062
   postStr += ",totI:";
   postStr += String(totalCurrent);
   postStr += ",AP:";
