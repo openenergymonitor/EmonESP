@@ -259,10 +259,17 @@ void wifi_restart() {
 
   // Create Unique SSID e.g "emonESP_XXXXXX"
 #ifdef ESP32
+<<<<<<< HEAD
   String softAP_ssid_ID =
     String(softAP_ssid) + "_" + String((uint32_t)ESP.getEfuseMac());
 #else
   String softAP_ssid_ID =
+=======
+  String softAP_ssid_ID =
+    String(softAP_ssid) + "_" + String((uint32_t)ESP.getEfuseMac());
+#else
+  String softAP_ssid_ID =
+>>>>>>> 4fd788b6b35715701dd5849cfbc5ec5a4c2f0062
     String(softAP_ssid) + "_" + String(ESP.getChipId());
 #endif
   WiFi.softAP(softAP_ssid_ID.c_str(), softAP_password);

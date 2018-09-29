@@ -58,4 +58,8 @@ extern boolean mqtt_connected();
 
 String uint64ToString(uint64_t input);
 
+<<<<<<< HEAD
 #endif // _EMONESP_MQTT_H
+=======
+#endif // _EMONESP_MQTT_H
+>>>>>>> 4fd788b6b35715701dd5849cfbc5ec5a4c2f0062
