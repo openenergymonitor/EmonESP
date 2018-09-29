@@ -4,6 +4,8 @@
    -------------------------------------------------------------------
    Adaptation of Chris Howells OpenEVSE ESP Wifi
    by Trystan Lea, Glyn Hudson, OpenEnergyMonitor
+
+   Modified to use CircuitSetup.us Energy Meter by jdeglavina
    All adaptation GNU General Public License as below.
 
    -------------------------------------------------------------------
@@ -36,26 +38,50 @@
 #include <SPI.h>
 #include <ATM90E32_SPI.h>
 
+unsigned short LineGain = 7481; //0x1D39 
+unsigned short VoltageGain = 32428; //0x7EAC - default value is for a 12v AC Transformer
+unsigned short CurrentGainCT1 = 46539; //0xB5CB - 
+unsigned short CurrentGainCT2 = 46539; //0xB5CB - 
+
 #ifdef ESP8266
-ATM90E32 eic(16); //set CS pin
+const int CS_pin = 16;
 /*
   D5/14 - CLK
   D6/12 - MISO
   D7/13 - MOSI
-  D0/16 - CS
 */
 #endif
+
 #ifdef ESP32
-ATM90E32 eic(5); //set CS pin
+const int CS_pin = 5;
 /*
   18 - CLK
   19 - MISO
   23 - MOSI
-  5 - CS
 */
-#else
-ATM90E32 eic(5); //set CS pin
 #endif
+
+#ifdef ARDUINO_ESP8266_WEMOS_D1MINI  // WeMos mini and D1 R2
+const int CS_pin = D8; // WEMOS SS pin
+#endif
+
+#ifdef ARDUINO_ESP8266_ESP12  // Adafruit Huzzah
+const int CS_pin = 15; // HUZZAH SS pins ( 0 or 15)
+#endif
+
+#ifdef ARDUINO_ARCH_SAMD //M0 board
+const int CS_pin = 10; // M0 SS pin
+#endif 
+
+#ifdef __AVR_ATmega32U4__ //32u4 board
+const int CS_pin = 10; // 32u4 SS pin
+#endif 
+
+#if !(defined ARDUINO_ESP8266_WEMOS_D1MINI || defined ARDUINO_ESP8266_ESP12 || defined ARDUINO_ARCH_SAMD || defined __AVR_ATmega32U4__ || defined ESP32 || defined ESP8266)
+const int CS_pin = SS; // Use default SS pin for unknown Arduino
+#endif
+
+ATM90E32 eic(CS_pin, LineGain, VoltageGain, CurrentGainCT1, CurrentGainCT2); //pass CS pin and calibrations to ATM90E32 library
 
 // -------------------------------------------------------------------
 // SETUP
@@ -104,9 +130,8 @@ void loop()
   web_server_loop();
   wifi_loop();
 
-
   /*Repeatedly fetch some values from the ATM90E32 */
-  float voltageA, voltageC, totalVoltage, currentA, currentC, totalCurrent, realPower, powerFactor, temp, freq, totalWatts;
+  float voltageA, voltageC, totalVoltage, currentCT1, currentCT2, totalCurrent, realPower, powerFactor, temp, freq, totalWatts;
 
   unsigned short sys0 = eic.GetSysStatus0();
   unsigned short sys1 = eic.GetSysStatus1();
@@ -121,20 +146,20 @@ void loop()
   // Voltage B is not used
   voltageC = eic.GetLineVoltageC();
   totalVoltage = voltageA + voltageC ;
-  currentA = eic.GetLineCurrentA();
+  currentCT1 = eic.GetLineCurrentA();
   // Current B is not used
-  currentC = eic.GetLineCurrentC();
-  totalCurrent = currentA + currentC;
+  currentCT2 = eic.GetLineCurrentC();
+  totalCurrent = currentCT1 + currentCT2;
   realPower = eic.GetTotalActivePower();
   powerFactor = eic.GetTotalPowerFactor();
   temp = eic.GetTemperature();
   freq = eic.GetFrequency();
-  totalWatts = (voltageA * currentA) + (voltageC * currentC);
+  totalWatts = (voltageA * currentCT1) + (voltageC * currentCT2);
 
   Serial.println("VA:" + String(voltageA) + "V");
   Serial.println("VC:" + String(voltageC) + "V");
-  Serial.println("IA:" + String(currentA) + "A");
-  Serial.println("IC:" + String(currentC) + "A");
+  Serial.println("IA:" + String(currentCT1) + "A");
+  Serial.println("IC:" + String(currentCT2) + "A");
   Serial.println("AP:" + String(realPower));
   Serial.println("PF:" + String(powerFactor));
   Serial.println(String(temp) + "C");
@@ -147,9 +172,9 @@ void loop()
   postStr += ",totV:";
   postStr += String(totalVoltage);
   postStr += ",IA:";
-  postStr += String(currentA);
+  postStr += String(currentCT1);
   postStr += ",IC:";
-  postStr += String(currentC);
+  postStr += String(currentCT2);
   postStr += ",totI:";
   postStr += String(totalCurrent);
   postStr += ",AP:";
