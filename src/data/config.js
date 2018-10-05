@@ -122,7 +122,7 @@ function LastValuesViewModel() {
     }
     self.fetching(true);
     $.get(self.remoteUrl, function (data) {
-      // Transform the data into somethinf a bit easier to handle as a binding
+      // Transform the data into something a bit easier to handle as a binding
       var namevaluepairs = data.split(",");
       var vals = [];
       for (var z in namevaluepairs) {
