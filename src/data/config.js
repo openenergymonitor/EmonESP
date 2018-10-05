@@ -122,7 +122,7 @@ function LastValuesViewModel() {
     }
     self.fetching(true);
     $.get(self.remoteUrl, function (data) {
-      // Transform the data into somethinf a bit easier to handle as a binding
+      // Transform the data into something a bit easier to handle as a binding
       var namevaluepairs = data.split(",");
       var vals = [];
       for (var z in namevaluepairs) {
@@ -140,18 +140,60 @@ function LastValuesViewModel() {
   };
 }
 
+function LogsViewModel() {
+  var self = this;
+  self.remoteUrl = baseEndpoint + "/lastvalues";
+
+  // Observable properties
+  self.fetching = ko.observable(false);
+  self.entries = ko.mapping.fromJS([]);
+
+  let oldData = "";
+
+  self.update = function (after) {
+    if (after === undefined) {
+      after = function () { };
+    }
+    self.fetching(true);
+
+    $.get(
+      self.remoteUrl,
+      function (data) {
+        if (data !== oldData) {
+          var logEntries = self.entries.slice();
+          logEntries.push({
+            timestamp: new Date().toISOString(),
+            log: data
+          });
+
+          ko.mapping.fromJS(logEntries, self.entries);
+          oldData = data;
+        }
+      },
+      "text"
+    ).always(function () {
+      self.fetching(false);
+      after();
+    });
+  };
+}
+
 function EmonEspViewModel() {
   var self = this;
 
   self.config = new ConfigViewModel();
   self.status = new StatusViewModel();
   self.last = new LastValuesViewModel();
+  self.logs = new LogsViewModel();
 
   self.initialised = ko.observable(false);
   self.updating = ko.observable(false);
 
   var updateTimer = null;
   var updateTime = 1 * 1000;
+
+  var logUpdateTimer = null;
+  var logUpdateTime = 100;
 
   // Upgrade URL
   self.upgradeUrl = ko.observable('about:blank');
@@ -165,7 +207,10 @@ function EmonEspViewModel() {
       self.status.update(function () {
         self.last.update(function () {
           self.initialised(true);
+
           updateTimer = setTimeout(self.update, updateTime);
+          logUpdateTimer = setTimeout(self.updateLogs, logUpdateTime);
+
           self.upgradeUrl(baseEndpoint + '/update');
           self.updating(false);
         });
@@ -190,6 +235,16 @@ function EmonEspViewModel() {
         updateTimer = setTimeout(self.update, updateTime);
         self.updating(false);
       });
+    });
+  };
+
+  self.updateLogs = function () {
+    if (null !== logUpdateTimer) {
+      clearTimeout(logUpdateTimer);
+      logUpdateTimer = null;
+    }
+    self.logs.update(function () {
+      logUpdateTimer = setTimeout(self.updateLogs, logUpdateTime);
     });
   };
 
