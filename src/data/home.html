@@ -232,6 +232,24 @@
           <button id="reset">Factory Reset</button>
         </div>
       </div>
+      <!--//////////////////////////////////////////////////////////////////////////////////-->
+      <div id="eight">
+        <h2>8. Logs</h2>
+        <div class="itembody-wrapper scrollable-logs">
+          <table>
+            <tr>
+              <th>Timestamp</th>
+              <th>Log</th>
+            </tr>
+            <tbody data-bind="foreach: logs.entries">
+              <tr>
+                <td data-bind="text: timestamp"></td>
+                <td data-bind="text: log"></td>
+              </tr>
+            </tbody>
+          </table><br>
+        </div>
+      </div>
     </div>
   </div>
   <div id="footer-small-scrn">
