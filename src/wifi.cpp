@@ -1,7 +1,7 @@
 #include "emonesp.h"
 #include "wifi.h"
 #include "config.h"
-#include "lcd.h"
+//#include "lcd.h"
 
 #include <ESP8266WiFi.h>              // Connect to Wifi
 #include <ESP8266mDNS.h>              // Resolve URL for update server etc.
@@ -11,14 +11,14 @@ DNSServer dnsServer;                  // Create class DNS server, captive portal
 const byte DNS_PORT = 53;
 
 // Access Point SSID, password & IP address. SSID will be softAP_ssid + chipID to make SSID unique
-const char *softAP_ssid = "OpenEVSE";
-const char *softAP_password = "openevse";
+const char *softAP_ssid = "emonESP";
+const char *softAP_password = "";
 IPAddress apIP(192, 168, 4, 1);
 IPAddress netMsk(255, 255, 255, 0);
 int apClients = 0;
 
 // hostname for mDNS. Should work at least on windows. Try http://openevse or http://openevse.local
-const char *esp_hostname = "openevse";
+const char *esp_hostname = "emonesp";
 
 // Wifi Network Strings
 String connected_network = "";
@@ -103,8 +103,8 @@ startAP() {
   ipaddress = tmpStr;
   DEBUG.print("AP IP Address: ");
   DEBUG.println(tmpStr);
-  lcd_display(F("SSID: OpenEVSE"), 0, 0, 0, LCD_CLEAR_LINE);
-  lcd_display(F("Pass: openevse"), 0, 1, 15 * 1000, LCD_CLEAR_LINE);
+  //lcd_display(F("SSID: OpenEVSE"), 0, 0, 0, LCD_CLEAR_LINE);
+  //lcd_display(F("Pass: openevse"), 0, 1, 15 * 1000, LCD_CLEAR_LINE);
 
   apClients = 0;
 }
@@ -154,8 +154,8 @@ void wifi_onStationModeGotIP(const WiFiEventStationModeGotIP &event)
   ipaddress = tmpStr;
   DEBUG.print("Connected, IP: ");
   DEBUG.println(tmpStr);
-  lcd_display(F("IP Address"), 0, 0, 0, LCD_CLEAR_LINE);
-  lcd_display(tmpStr, 0, 1, 5000, LCD_CLEAR_LINE);
+  //lcd_display(F("IP Address"), 0, 0, 0, LCD_CLEAR_LINE);
+  //lcd_display(tmpStr, 0, 1, 5000, LCD_CLEAR_LINE);
 
   // Copy the connected network and ipaddress to global strings for use in status request
   connected_network = esid;
@@ -226,8 +226,8 @@ wifi_setup() {
   static auto _onStationModeGotIP = WiFi.onStationModeGotIP(wifi_onStationModeGotIP);
   static auto _onStationModeDisconnected = WiFi.onStationModeDisconnected(wifi_onStationModeDisconnected);
   static auto _onSoftAPModeStationConnected = WiFi.onSoftAPModeStationConnected([](const WiFiEventSoftAPModeStationConnected &event) {
-    lcd_display(F("IP Address"), 0, 0, 0, LCD_CLEAR_LINE);
-    lcd_display(ipaddress, 0, 1, (0 == apClients ? 15 : 5) * 1000, LCD_CLEAR_LINE);
+  //  lcd_display(F("IP Address"), 0, 0, 0, LCD_CLEAR_LINE);
+  //  lcd_display(ipaddress, 0, 1, (0 == apClients ? 15 : 5) * 1000, LCD_CLEAR_LINE);
     apClients++;
   });
   static auto _onSoftAPModeStationDisconnected = WiFi.onSoftAPModeStationDisconnected([](const WiFiEventSoftAPModeStationDisconnected &event) {
@@ -242,7 +242,7 @@ wifi_setup() {
 }
 
 void
-wifi_loop() 
+wifi_loop()
 {
   Profile_Start(wifi_loop);
 
@@ -294,23 +294,23 @@ wifi_loop()
 
   if(LOW == wifiButtonState && millis() > wifiButtonTimeOut + WIFI_BUTTON_FACTORY_RESET_TIMEOUT)
   {
-    lcd_display(F("Factory Reset"), 0, 0, 0, LCD_CLEAR_LINE);
-    lcd_display(F(""), 0, 1, 10 * 1000, LCD_CLEAR_LINE);
-    lcd_loop();
+  //  lcd_display(F("Factory Reset"), 0, 0, 0, LCD_CLEAR_LINE);
+  //  lcd_display(F(""), 0, 1, 10 * 1000, LCD_CLEAR_LINE);
+  //  lcd_loop();
 
-    delay(1000);
+    delay(100);
 
     config_reset();
     ESP.eraseConfig();
-
+    Serial.println("Factory reset completed! Resetting...")
     delay(50);
     ESP.reset();
   }
-  else if(false == apMessage && LOW == wifiButtonState && millis() > wifiButtonTimeOut + WIFI_BUTTON_AP_TIMEOUT) 
+  else if(false == apMessage && LOW == wifiButtonState && millis() > wifiButtonTimeOut + WIFI_BUTTON_AP_TIMEOUT)
   {
-    lcd_display(F("Access Point"), 0, 0, 0, LCD_CLEAR_LINE);
-    lcd_display(F(""), 0, 1, 10 * 1000, LCD_CLEAR_LINE);
-    lcd_loop();
+  //  lcd_display(F("Access Point"), 0, 0, 0, LCD_CLEAR_LINE);
+  //  lcd_display(F(""), 0, 1, 10 * 1000, LCD_CLEAR_LINE);
+  //  lcd_loop();
     apMessage = true;
   }
 
