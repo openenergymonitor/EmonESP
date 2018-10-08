@@ -36,7 +36,7 @@
 // SETUP
 // -------------------------------------------------------------------
 void setup() {
-  delay(100);
+  delay(1000);
 
   Serial.begin(115200);
 #ifdef DEBUG_SERIAL1
@@ -62,7 +62,7 @@ void setup() {
 
   DEBUG.println("Server started");
 
-  delay(10);
+  delay(100);
 } // end setup
 
 // -------------------------------------------------------------------
