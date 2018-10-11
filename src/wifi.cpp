@@ -1,36 +1,11 @@
-/*
-   -------------------------------------------------------------------
-   EmonESP Serial to Emoncms gateway
-   -------------------------------------------------------------------
-   Adaptation of Chris Howells OpenEVSE ESP Wifi
-   by Trystan Lea, Glyn Hudson, OpenEnergyMonitor
-   All adaptation GNU General Public License as below.
-
-   -------------------------------------------------------------------
-
-   This file is part of OpenEnergyMonitor.org project.
-   EmonESP is free software; you can redistribute it and/or modify
-   it under the terms of the GNU General Public License as published by
-   the Free Software Foundation; either version 3, or (at your option)
-   any later version.
-   EmonESP is distributed in the hope that it will be useful,
-   but WITHOUT ANY WARRANTY; without even the implied warranty of
-   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-   GNU General Public License for more details.
-   You should have received a copy of the GNU General Public License
-   along with EmonESP; see the file COPYING.  If not, write to the
-   Free Software Foundation, Inc., 59 Temple Place - Suite 330,
-   Boston, MA 02111-1307, USA.
-*/
 
 #include "emonesp.h"
 #include "wifi.h"
 #include "config.h"
+
 #include <ESP8266WiFi.h>              // Connect to Wifi
 #include <ESP8266mDNS.h>              // Resolve URL for update server etc.
 #include <DNSServer.h>                // Required for captive portal
-
-int factoryreset_holdtime = (10 * 1000); //10 seconds hold down GPIO0 for factory reset.
 
 DNSServer dnsServer;                  // Create class DNS server, captive portal re-direct
 const byte DNS_PORT = 53;
@@ -68,6 +43,29 @@ String st, rssi;
 int wifiLedState = !WIFI_LED_ON_STATE;
 unsigned long wifiLedTimeOut = millis();
 #endif
+
+//
+
+//int digitalWrite(0) = HIGH;
+
+unsigned long wifiButtonTimeOut = millis();
+
+#ifndef WIFI_BUTTON
+#define WIFI_BUTTON 0
+#endif
+
+#ifndef WIFI_BUTTON_AP_TIMEOUT
+#define WIFI_BUTTON_AP_TIMEOUT              (5 * 1000)
+#endif
+
+#ifndef WIFI_BUTTON_FACTORY_RESET_TIMEOUT
+#define WIFI_BUTTON_FACTORY_RESET_TIMEOUT   (10 * 1000)
+#endif
+
+#ifndef WIFI_CLIENT_RETRY_TIMEOUT
+#define WIFI_CLIENT_RETRY_TIMEOUT (5 * 60 * 1000)
+#endif
+//
 
 // -------------------------------------------------------------------
 int wifi_mode = WIFI_MODE_STA;
@@ -221,28 +219,56 @@ wifi_loop() {
   }
 #endif
 
-  // Factory reset on GPIO0.
-  while (digitalRead(0) == LOW) {
-    delay(factoryreset_holdtime);
-    if (digitalRead(0) == LOW) {
-      Serial.println("Commencing factory reset.");
-      config_reset();
-      ESP.eraseConfig();
-      Serial.println("Factory reset complete! Resetting...");
-      ESP.reset();
-    }
-  }
-  // end factory reset.
-
   dnsServer.processNextRequest(); // Captive portal DNS re-dierct
 
   // Remain in AP mode for 5 Minutes before resetting
   if (wifi_mode == WIFI_MODE_AP_STA_RETRY) {
     if ((millis() - Timer) >= 300000) {
+      Serial.println("WIFI Mode = 1, resetting");
       ESP.reset();
-      DEBUG.println("WIFI Mode = 1, resetting");
+
     }
   }
+
+  if (digitalRead(0) == LOW)
+  {
+
+    if (digitalRead(0) == LOW) {
+      Serial.println("Button pressed");
+      wifiButtonTimeOut = millis();
+      //   apMessage = false;
+    } else {
+      Serial.println("Button released");
+      if (millis() > wifiButtonTimeOut + WIFI_BUTTON_AP_TIMEOUT) {
+        startAP();
+      }
+    }
+  }
+
+  if (LOW == digitalRead(0) && millis() > wifiButtonTimeOut + WIFI_BUTTON_FACTORY_RESET_TIMEOUT)
+  {
+    //  lcd_display(F("Factory Reset"), 0, 0, 0, LCD_CLEAR_LINE);
+    //  lcd_display(F(""), 0, 1, 10 * 1000, LCD_CLEAR_LINE);
+    //  lcd_loop();
+
+    delay(100);
+
+    config_reset();
+    ESP.eraseConfig();
+
+    delay(50);
+    ESP.reset();
+  }
+  /*
+    else if(false == apMessage && LOW == wifiButtonState && millis() > wifiButtonTimeOut + WIFI_BUTTON_AP_TIMEOUT)
+    {
+     lcd_display(F("Access Point"), 0, 0, 0, LCD_CLEAR_LINE);
+     lcd_display(F(""), 0, 1, 10 * 1000, LCD_CLEAR_LINE);
+     lcd_loop();
+     apMessage = true;
+    }
+  */
+
 }
 
 void
