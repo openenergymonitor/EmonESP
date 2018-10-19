@@ -2,7 +2,7 @@
 
 [![Build Status](https://travis-ci.org/openenergymonitor/EmonESP.svg?branch=master)](https://travis-ci.org/openenergymonitor/EmonESP)
 
-ESP8266 WIFI serial to emoncms link
+ESP8266/ESP32 WIFI serial to emoncms link
 
 For applications that only require basic posting of data from one emonTx to a remote server such as Emoncms.org an emonTx with this WiFi module provides a lower cost route than an emonBase or emonPi base-station installation.
 
@@ -61,6 +61,8 @@ For applications that only require basic posting of data from one emonTx to a re
 # Requirements
 
 - ESP-12E module with 4M Flash
+OR
+- ESP32
 
 ***
 
@@ -194,9 +196,9 @@ Data in string:pairs can be sent to EmonESP via HTTP API. This is useful to emul
 
 ***
 
-## Installation
+## Installation 
 
-EmonESP uses [ESP8266 Arduino core](https://github.com/esp8266/Arduino)
+EmonESP uses [ESP8266 Arduino core](https://github.com/esp8266/Arduino) or the [ESP32 Arduino core]()
 
 Firmware can be compiled and uploaded either using PlatfomIO ([see blog post](https://blog.openenergymonitor.org/2016/06/platformio/)) or Arduino IDE.
 
@@ -219,7 +221,7 @@ Standalone built on GitHub Atom IDE, or use PlatformIO Atom IDE plug-in if you a
 
 #### 2. Clone this repo
 
-`$ git clone https://github.com/openenergymonitor/EmonESP`
+`$ git clone https://github.com/jdeglavina/EmonESP`
 
 #### 3. Compile
 
@@ -307,6 +309,8 @@ pio run -t upload --upload-port 172.16.0.80
 
 #### 1. Install ESP for Arduino IDE with Boards Manager
 
+##### a. For ESP8266:
+
 Install steps from: https://github.com/esp8266/Arduino
 
 - Install Arduino IDE 1.6.8 from the Arduino website.
@@ -315,7 +319,22 @@ Install steps from: https://github.com/esp8266/Arduino
 - Open `Tools > Board > Board Manager`, scroll down and click on esp8266 platform, select version then install
 - Select `Tools > Board > Generic ESP8266 Module` (required for EmonESP)
 
+##### b. For ESP32:
+
+Install steps from: https://github.com/espressif/arduino-esp32/blob/master/docs/arduino-ide/boards_manager.md
+
+- Install the current upstream Arduino IDE at the 1.8 level or later. The current version is at the [Arduino website](http://www.arduino.cc/en/main/software).
+- Start Arduino and open Preferences window.
+- Enter ```https://dl.espressif.com/dl/package_esp32_index.json``` into *Additional Board Manager URLs* field. You can add multiple URLs, separating them with commas.
+- Open Boards Manager from Tools > Board menu and install *esp32* platform (and don't forget to select your ESP32 board from Tools > Board menu after installation).
+
+Stable release link: `https://dl.espressif.com/dl/package_esp32_index.json`
+
+Development release link: `https://dl.espressif.com/dl/package_esp32_dev_index.json`
+
 #### 2. Install ESP filesystem file uploader
+
+##### a. For ESP8266:
 
 Required to include `data` folder with HTML etc in the upload
 
@@ -327,9 +346,21 @@ Required to include `data` folder with HTML etc in the upload
 - Unpack the plug-in into `ESP8266FS` directory (the path will look like `<home_dir>/Arduino/tools/ESP8266FS/tool/esp8266fs.jar`)
 - Restart Arduino IDE
 
+##### a. For ESP32:
+
+You will need the latest release from this page: https://github.com/me-no-dev/arduino-esp32fs-plugin/releases
+
+Then follow instructions from here: https://github.com/me-no-dev/arduino-esp32fs-plugin
+
+- In your Arduino sketchbook directory, create tools directory if it doesn't exist yet.
+- Unpack the tool into tools directory (the path will look like ```<home_dir>/Arduino/tools/ESP32FS/tool/esp32fs.jar```).
+- Restart Arduino IDE. 
+
+
+
 #### 3. Clone this repo
 
-`$ git clone https://github.com/openenergymonitor/EmonESP`
+`$ git clone https://github.com/jdeglavina/EmonESP`
 
 #### 4. Compile and Upload
 
@@ -338,7 +369,7 @@ Required to include `data` folder with HTML etc in the upload
    - On Heatpump monitor use jumper to pull `GPIO0` low then reset then connect power (simulates reset)
    - On other ESP boards (Adafruit HUZZAH) press and hold `GPIO0` button then press Reset, LED should light dimly to indicate bootloader mode
 - **Upload main sketch:** Compile and Upload as normal using Arduino IDE [CTRL + u]
-- **Upload 'data' folder**: Upload data folder (home.html web page etc) using `tools > ESP8266 Sketch Data Upload tool`.
+- **Upload 'data' folder**: Upload data folder (home.html web page etc) using `tools > ESP8266/ESP32 Sketch Data Upload tool`.
 - If compiling fails because PubSubClient.h library cannot be found. Open the Library Manager again (Sketch > Include Library > Library Manager) and search for 'PubSubClient', install.
 ***
 
