@@ -369,11 +369,19 @@ Then follow instructions from here: https://github.com/me-no-dev/arduino-esp32fs
    - On Heatpump monitor use jumper to pull `GPIO0` low then reset then connect power (simulates reset)
    - On other ESP boards (Adafruit HUZZAH) press and hold `GPIO0` button then press Reset, LED should light dimly to indicate bootloader mode
 - **Upload main sketch:** Compile and Upload as normal using Arduino IDE [CTRL + u]
-- **Upload 'data' folder**: Upload data folder (home.html web page etc) using `tools > ESP8266/ESP32 Sketch Data Upload tool`.
-- If compiling fails because PubSubClient.h library cannot be found. Open the Library Manager again (Sketch > Include Library > Library Manager) and search for 'PubSubClient', install.
-***
+- **Upload 'data' folder**: Upload data folder (home.html web page etc) using `tools > ESP8266/ESP32 Sketch Data Upload tool`
+
 
 ### Troubleshooting Upload
+
+#### Library errors 
+
+- If compiling fails because PubSubClient.h library cannot be found. Open the Library Manager again (Sketch > Include Library > Library Manager) and search for 'PubSubClient', install.
+***
+- For the ESP32, you will probably need these libraries (installed to Arduino/libraries):
+    - https://github.com/me-no-dev/AsyncTCP
+    - https://github.com/me-no-dev/ESPAsyncWebServer
+- If you get an error for hash.h, put a folder under Arduino/libraries "Hash" and load it with these files: https://github.com/esp8266/Arduino/tree/master/libraries/Hash/src
 
 #### Erase Flash
 
