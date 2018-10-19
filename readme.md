@@ -198,7 +198,7 @@ Data in string:pairs can be sent to EmonESP via HTTP API. This is useful to emul
 
 ## Installation 
 
-EmonESP uses [ESP8266 Arduino core](https://github.com/esp8266/Arduino) or the [ESP32 Arduino core]()
+EmonESP uses [ESP8266 Arduino core](https://github.com/esp8266/Arduino) or the [ESP32 Arduino core](https://github.com/espressif/arduino-esp32)
 
 Firmware can be compiled and uploaded either using PlatfomIO ([see blog post](https://blog.openenergymonitor.org/2016/06/platformio/)) or Arduino IDE.
 
