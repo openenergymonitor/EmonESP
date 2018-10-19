@@ -377,7 +377,6 @@ Then follow instructions from here: https://github.com/me-no-dev/arduino-esp32fs
 #### Library errors 
 
 - If compiling fails because PubSubClient.h library cannot be found. Open the Library Manager again (Sketch > Include Library > Library Manager) and search for 'PubSubClient', install.
-***
 - For the ESP32, you will probably need these libraries (installed to Arduino/libraries):
     - https://github.com/me-no-dev/AsyncTCP
     - https://github.com/me-no-dev/ESPAsyncWebServer
