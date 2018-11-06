@@ -189,13 +189,15 @@ handleSaveEmoncms(AsyncWebServerRequest *request) {
   }
 
   config_save_emoncms(request->arg("server"),
+                      request->arg("path"),
                       request->arg("node"),
                       request->arg("apikey"),
                       request->arg("fingerprint"));
 
   char tmpStr[200];
-  snprintf(tmpStr, sizeof(tmpStr), "Saved: %s %s %s %s",
+  snprintf(tmpStr, sizeof(tmpStr), "Saved: %s %s %s %s %s",
            emoncms_server.c_str(),
+           emoncms_path.c_str(),
            emoncms_node.c_str(),
            emoncms_apikey.c_str(),
            emoncms_fingerprint.c_str());
@@ -310,6 +312,7 @@ handleStatus(AsyncWebServerRequest *request) {
   s += ",\"ssid\":\"" + esid + "\"";
   //s += ",\"pass\":\""+epass+"\""; security risk: DONT RETURN PASSWORDS
   s += ",\"emoncms_server\":\"" + emoncms_server + "\"";
+  s += ",\"emoncms_path\":\"" + emoncms_path + "\"";
   s += ",\"emoncms_node\":\"" + emoncms_node + "\"";
   //s += ",\"emoncms_apikey\":\""+emoncms_apikey+"\""; security risk: DONT RETURN APIKEY
   s += ",\"emoncms_fingerprint\":\"" + emoncms_fingerprint + "\"";
@@ -346,6 +349,7 @@ handleConfig(AsyncWebServerRequest *request) {
   s += "\"ssid\":\"" + esid + "\",";
   //s += "\"pass\":\""+epass+"\","; security risk: DONT RETURN PASSWORDS
   s += "\"emoncms_server\":\"" + emoncms_server + "\",";
+  s += "\"emoncms_path\":\"" + emoncms_path + "\",";
   s += "\"emoncms_node\":\"" + emoncms_node + "\",";
   // s += "\"emoncms_apikey\":\""+emoncms_apikey+"\","; security risk: DONT RETURN APIKEY
   s += "\"emoncms_fingerprint\":\"" + emoncms_fingerprint + "\",";

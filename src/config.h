@@ -53,6 +53,7 @@ extern String www_password;
 
 // EMONCMS SERVER strings
 extern String emoncms_server;
+extern String emoncms_path;
 extern String emoncms_node;
 extern String emoncms_apikey;
 extern String emoncms_fingerprint;
@@ -72,7 +73,7 @@ extern void config_load_settings();
 // -------------------------------------------------------------------
 // Save the EmonCMS server details
 // -------------------------------------------------------------------
-extern void config_save_emoncms(String server, String node, String apikey, String fingerprint);
+extern void config_save_emoncms(String server, String path, String node, String apikey, String fingerprint);
 
 // -------------------------------------------------------------------
 // Save the MQTT broker details

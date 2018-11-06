@@ -83,12 +83,21 @@
       <div id="two">
         <h2>2. Emoncms</h2>
         <div class="itembody-wrapper">
-          <b>Emoncms Server*:</b><br>
-          <input type="text" data-bind="textInput: config.emoncms_server"><br/>
-          <span>
-            e.g '<a href="https://emoncms.org">emoncms.org</a>',
-            'emonpi/emoncms', or '192.168.1.4/emoncms'
-          </span><br/>
+          <p>
+            <b>Emoncms Server*:</b><br>
+            <input type="text" data-bind="textInput: config.emoncms_server"><br/>
+            <span>
+              e.g '<a href="https://emoncms.org">emoncms.org</a>',
+              'emonpi', or '192.168.1.4'
+            </span><br/>
+          </p>
+          <p>
+            <b>Emoncms Path:</b><br>
+            <input type="text" data-bind="textInput: config.emoncms_path"><br/>
+            <span>
+              e.g '/emoncms', or empty for emoncms.org
+            </span><br/>
+          </p>
           <p>
             <b>Emoncms Node Name*:</b><br>
             <input type="text" data-bind="textInput: config.emoncms_node">
@@ -98,7 +107,7 @@
             <input type="text" data-bind="textInput: config.emoncms_apikey"><br>
           </p>
           <p>
-            <b>SSL SSH-1 Fingerprint:</b><br>
+            <b>SSL SHA-1 Fingerprint:</b><br>
             <input type="text" data-bind="textInput: config.emoncms_fingerprint"><br>
             <br></p>HTTPS will be enabled if present e.g:<br>
             <br>
@@ -221,6 +230,24 @@
           <p><b>Version:</b> <a href="https://github.com/openenergymonitor/EmonESP/releases">v<span data-bind="text: config.version"></span></a></p>
           <button id="restart">Restart</button>
           <button id="reset">Factory Reset</button>
+        </div>
+      </div>
+      <!--//////////////////////////////////////////////////////////////////////////////////-->
+      <div id="eight">
+        <h2>8. Logs</h2>
+        <div class="itembody-wrapper scrollable-logs">
+          <table>
+            <tr>
+              <th>Timestamp</th>
+              <th>Log</th>
+            </tr>
+            <tbody data-bind="foreach: logs.entries">
+              <tr>
+                <td data-bind="text: timestamp"></td>
+                <td data-bind="text: log"></td>
+              </tr>
+            </tbody>
+          </table><br>
         </div>
       </div>
     </div>

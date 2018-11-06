@@ -104,9 +104,18 @@ On future boots EmonESP will automatically connect to this network.
 
 EmonESP can post data to [emoncms.org](https://emoncms.org) or any other  Emoncms server (e.g. emonPi) using [Emoncms API](https://emoncms.org/site/api#input).
 
-Data ca be posted using HTTP or HTTPS. For HTTPS the Emoncms server must support HTTPS (emoncms.org does, emonPi does not).Due to the limited resources on the ESP the SSL SSH-1 fingerprint for the Emoncms server must be manually entered and regularly updated.
+In the *Emoncms Server* field, enter just the hostname or address without any path (e.g. emoncms.org), in the *Emoncms Path* field enter the path including the leading slash (e.g. /emoncms) or leave it empty if not required.
+
+Data can be posted using HTTP or HTTPS. For HTTPS the Emoncms server must support HTTPS (emoncms.org does, emonPi does not). Due to the limited resources on the ESP the SSL SHA-1 fingerprint for the Emoncms server certificate must be manually entered and regularly updated.
 
 *Note: the emoncms.org fingerprint will change every 90 days when the SSL certificate is renewed.*
+
+To obtain the certificate fingerprint, you can use several methods, some examples:
+* Chrome under Windows: click the secure icon next to the address bar and click on the certificate row to get the details, in the *Details* tab copy the hexadecimal digits from the box *Thumbprint* substituting spaces with colons and paying attention not to include any leading invisible character;
+* Firefox under Linux: click the secure icon next to the address bar, Show connection details, More information, in the security tab click *View Certificate* and copy the *SHA1 Fingerprint*
+* openssl under Linux: issue the following command substituting your host in place of www.example.com:
+
+`echo | openssl s_client -connect www.example.com:443 -servername www.example.com |& openssl x509 -fingerprint -sha1 -noout`
 
 ## 3. MQTT
 
@@ -296,41 +305,49 @@ pio run -t upload --upload-port 172.16.0.80
 
 ### Option 2: Using Arduino IDE
 
-#### 1. Install ESP for Arduino IDE with Boards Manager
+An overview of this process is:
+- Install ESP boards using board manager.
+- Install Arduino IDE plug-in for uploading spiffs files.
+- Download the emonESP source files.
+- Upload src.ino and Upload spiffs.
+
+#### 1. Install ESP8266 boards for Arduino IDE with Boards Manager
 
 Install steps from: https://github.com/esp8266/Arduino
 
-- Install Arduino IDE 1.6.8 from the Arduino website.
-- Start Arduino and open Preferences window.
+- Install Arduino IDE 1.6.8 or later from the Arduino website.
+- Start Arduino and open ‘Preferences’ window from the menu bar.
 - At the bottom of this window find the field “Additional Board Manager URLs” and enter ‘http://arduino.esp8266.com/stable/package_esp8266com_index.json`. You can add multiple URLs, separating them with commas.
-- Open `Tools > Board > Board Manager`, scroll down and click on esp8266 platform, select version then install
-- Select `Tools > Board > Generic ESP8266 Module` (required for EmonESP)
+- Open `Tools > Board > Board Manager`, scroll down and click on esp8266 platform, select the latest version then install. Now the Arduino IDE can communicate with ESP8266 based modules.
 
-#### 2. Install ESP filesystem file uploader
+#### 2. Install ESP spiffs filesystem file uploader plug-in.
 
-Required to include `data` folder with HTML etc in the upload
+Install steps from: http://esp8266.github.io/Arduino/versions/2.0.0/doc/filesystem.html
 
-[Follow esp8266 filesystem instructions (copied  below):](https://github.com/esp8266/Arduino/blob/master/doc/filesystem.md)
-
-- [Download the Arduino IDE plug-in (.zip)](https://github.com/esp8266/arduino-esp8266fs-plugin/releases/download/0.2.0/ESP8266FS-0.2.0.zip)
-- Navigate to the `tools` folder in your Arduino sketchbook directory, (create directory if it doesn't exist)
-- Create `tools > ESP8266FS` folder
-- Unpack the plug-in into `ESP8266FS` directory (the path will look like `<home_dir>/Arduino/tools/ESP8266FS/tool/esp8266fs.jar`)
+- Download the plug-in (.zip) from (https://github.com/esp8266/arduino-esp8266fs-plugin/releases/).
+- Open Arduino IDE ‘Preferences’ from the menu bar. Note ‘Sketchbook location:’ and navigate to there using your file explorer, then:
+- Create folder ‘tools’ if it doesn’t exist, and within ’tools’ create folder ‘ESP8266FS’.
+- The folder structure should be “…/Arduino/tools/ESP8266FS/
+- Unpack the plug-in from the .zip here, in total it should look like “…/Arduino/tools/ESP8266FS/tool/esp8266fs.jar”.
 - Restart Arduino IDE
 
 #### 3. Clone this repo
 
 `$ git clone https://github.com/openenergymonitor/EmonESP`
 
+or click the green ‘Clone or download’ button at the top of this page.
+
 #### 4. Compile and Upload
 
-- Open src/src.ino in the Arduino IDE.
-- Put ESP into bootloader mode
+- Select `Tools > Board > Generic ESP8266 Module`.
+- Open src/src.ino in the Arduino IDE from this cloned or downloaded repo.
+- Put ESP into bootloader mode/
    - On Heatpump monitor use jumper to pull `GPIO0` low then reset then connect power (simulates reset)
-   - On other ESP boards (Adafruit HUZZAH) press and hold `GPIO0` button then press Reset, LED should light dimly to indicate bootloader mode
+   - On other ESP boards (Adafruit HUZZAH) press and hold `GPIO0` button then press Reset, LED should light dimly to indicate bootloader mode.
 - **Upload main sketch:** Compile and Upload as normal using Arduino IDE [CTRL + u]
+- Reset into bootloader mode again.
 - **Upload 'data' folder**: Upload data folder (home.html web page etc) using `tools > ESP8266 Sketch Data Upload tool`.
-- If compiling fails because PubSubClient.h library cannot be found. Open the Library Manager again (Sketch > Include Library > Library Manager) and search for 'PubSubClient', install.
+- If compiling fails because PubSubClient.h library (or any other libraries) cannot be found. Open the Library Manager again (Sketch > Include Library > Library Manager) and search for 'PubSubClient', install.
 ***
 
 ### Troubleshooting Upload

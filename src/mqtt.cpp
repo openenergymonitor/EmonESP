@@ -174,12 +174,14 @@ void mqtt_loop()
   }
 }
 
-void mqtt_restart() {
+void mqtt_restart()
+{
   if (mqttclient.connected()) {
     mqttclient.disconnect();
   }
 }
 
-boolean mqtt_connected() {
+boolean mqtt_connected()
+{
   return mqttclient.connected();
 }

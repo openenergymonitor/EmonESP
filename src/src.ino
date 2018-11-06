@@ -21,11 +21,7 @@
  * along with EmonESP; see the file COPYING.  If not, write to the
  * Free Software Foundation, Inc., 59 Temple Place - Suite 330,
  * Boston, MA 02111-1307, USA.
- * 
- * COMPILATION AND UPLOAD
- * SONOFF S20: GENERIC ESP8266 MODULE 1M (512K)
  */
-
 
 #include "emonesp.h"
 #include "config.h"
@@ -42,7 +38,6 @@
 // SETUP
 // -------------------------------------------------------------------
 void setup() {
-  
   delay(2000);
 
   Serial.begin(115200);

@@ -1,35 +1,36 @@
 /*
- * -------------------------------------------------------------------
- * EmonESP Serial to Emoncms gateway
- * -------------------------------------------------------------------
- * Adaptation of Chris Howells OpenEVSE ESP Wifi
- * by Trystan Lea, Glyn Hudson, OpenEnergyMonitor
- * All adaptation GNU General Public License as below.
- *
- * -------------------------------------------------------------------
- *
- * This file is part of OpenEnergyMonitor.org project.
- * EmonESP is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 3, or (at your option)
- * any later version.
- * EmonESP is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- * You should have received a copy of the GNU General Public License
- * along with EmonESP; see the file COPYING.  If not, write to the
- * Free Software Foundation, Inc., 59 Temple Place - Suite 330,
- * Boston, MA 02111-1307, USA.
- */
+   -------------------------------------------------------------------
+   EmonESP Serial to Emoncms gateway
+   -------------------------------------------------------------------
+   Adaptation of Chris Howells OpenEVSE ESP Wifi
+   by Trystan Lea, Glyn Hudson, OpenEnergyMonitor
+   All adaptation GNU General Public License as below.
+
+   -------------------------------------------------------------------
+
+   This file is part of OpenEnergyMonitor.org project.
+   EmonESP is free software; you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation; either version 3, or (at your option)
+   any later version.
+   EmonESP is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
+   You should have received a copy of the GNU General Public License
+   along with EmonESP; see the file COPYING.  If not, write to the
+   Free Software Foundation, Inc., 59 Temple Place - Suite 330,
+   Boston, MA 02111-1307, USA.
+*/
 
 #include "emonesp.h"
 #include "wifi.h"
 #include "config.h"
-
 #include <ESP8266WiFi.h>              // Connect to Wifi
 #include <ESP8266mDNS.h>              // Resolve URL for update server etc.
 #include <DNSServer.h>                // Required for captive portal
+
+int factoryreset_holdtime = (10 * 1000); //10 seconds hold down GPIO0 for factory reset.
 
 DNSServer dnsServer;                  // Create class DNS server, captive portal re-direct
 const byte DNS_PORT = 53;
@@ -68,9 +69,9 @@ startAP() {
   DEBUG.println(" networks found");
   st = "";
   rssi = "";
-  for (int i = 0; i < n; ++i){
-    st += "\""+WiFi.SSID(i)+"\"";
-    rssi += "\""+String(WiFi.RSSI(i))+"\"";
+  for (int i = 0; i < n; ++i) {
+    st += "\"" + WiFi.SSID(i) + "\"";
+    rssi += "\"" + String(WiFi.RSSI(i)) + "\"";
     if (i < n - 1)
       st += ",";
     if (i < n - 1)
@@ -89,7 +90,7 @@ startAP() {
 
   IPAddress myIP = WiFi.softAPIP();
   char tmpStr[40];
-  sprintf(tmpStr,"%d.%d.%d.%d",myIP[0],myIP[1],myIP[2],myIP[3]);
+  sprintf(tmpStr, "%d.%d.%d.%d", myIP[0], myIP[1], myIP[2], myIP[3]);
   DEBUG.print("AP IP Address: ");
   DEBUG.println(tmpStr);
   ipaddress = tmpStr;
@@ -98,8 +99,8 @@ startAP() {
 // -------------------------------------------------------------------
 // Start Client, attempt to connect to Wifi network
 // -------------------------------------------------------------------
-void startClient() {
-  
+void
+startClient() {
   DEBUG.print("Connecting to SSID: ");
   DEBUG.print(esid.c_str());
   DEBUG.print(" PSK:");
@@ -186,11 +187,11 @@ void wifi_loop() {
   dnsServer.processNextRequest(); // Captive portal DNS re-dierct
 
   // Remain in AP mode for 5 Minutes before resetting
-  if (wifi_mode == WIFI_MODE_AP_STA_RETRY){
-     if ((millis() - Timer) >= 300000){
-       ESP.reset();
-       DEBUG.println("WIFI Mode = 1, resetting");
-     }
+  if (wifi_mode == WIFI_MODE_AP_STA_RETRY) {
+    if ((millis() - Timer) >= 300000) {
+      ESP.reset();
+      DEBUG.println("WIFI Mode = 1, resetting");
+    }
   }
 }
 
@@ -218,9 +219,9 @@ wifi_scan() {
   DEBUG.println(" networks found");
   st = "";
   rssi = "";
-  for (int i = 0; i < n; ++i){
-    st += "\""+WiFi.SSID(i)+"\"";
-    rssi += "\""+String(WiFi.RSSI(i))+"\"";
+  for (int i = 0; i < n; ++i) {
+    st += "\"" + WiFi.SSID(i) + "\"";
+    rssi += "\"" + String(WiFi.RSSI(i)) + "\"";
     if (i < n - 1)
       st += ",";
     if (i < n - 1)

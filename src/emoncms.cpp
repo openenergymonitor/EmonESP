@@ -41,7 +41,8 @@ unsigned long emoncms_connection_error_count = 0;
 void emoncms_publish(String data)
 {
   // We now create a URL for server data upload
-  String url = e_url;
+  String url = emoncms_path.c_str();
+  url += e_url;
   url += "{";
   // Copy across, data length
   for (int i = 0; i < data.length(); ++i){
@@ -75,6 +76,7 @@ void emoncms_publish(String data)
   if (result == "ok"){
     packets_success++;
     emoncms_connected = true;
+    emoncms_connection_error_count = 0;
   }
   else{
     emoncms_connected=false;

@@ -47,6 +47,7 @@ String www_password = "";
 
 // EMONCMS SERVER strings
 String emoncms_server = "";
+String emoncms_path = "";
 String emoncms_node = "";
 String emoncms_apikey = "";
 String emoncms_fingerprint = "";
@@ -62,6 +63,7 @@ String mqtt_feed_prefix = "";
 #define EEPROM_EPASS_SIZE         64
 #define EEPROM_EMON_API_KEY_SIZE  32
 #define EEPROM_EMON_SERVER_SIZE   45
+#define EEPROM_EMON_PATH_SIZE     16
 #define EEPROM_EMON_NODE_SIZE     32
 #define EEPROM_MQTT_SERVER_SIZE   45
 #define EEPROM_MQTT_TOPIC_SIZE    32
@@ -99,6 +101,8 @@ String mqtt_feed_prefix = "";
 #define EEPROM_WWW_USER_END       (EEPROM_WWW_USER_START + EEPROM_WWW_USER_SIZE)
 #define EEPROM_WWW_PASS_START     EEPROM_WWW_USER_END
 #define EEPROM_WWW_PASS_END       (EEPROM_WWW_PASS_START + EEPROM_WWW_PASS_SIZE)
+#define EEPROM_EMON_PATH_START    EEPROM_WWW_PASS_END
+#define EEPROM_EMON_PATH_END      (EEPROM_EMON_PATH_START + EEPROM_EMON_PATH_SIZE)
 
 // -------------------------------------------------------------------
 // Reset EEPROM, wipes all settings
@@ -146,6 +150,8 @@ void config_load_settings()
                      emoncms_apikey);
   EEPROM_read_string(EEPROM_EMON_SERVER_START, EEPROM_EMON_SERVER_SIZE,
                      emoncms_server);
+  EEPROM_read_string(EEPROM_EMON_PATH_START, EEPROM_EMON_PATH_SIZE,
+                     emoncms_path);
   EEPROM_read_string(EEPROM_EMON_NODE_START, EEPROM_EMON_NODE_SIZE,
                      emoncms_node);
   EEPROM_read_string(EEPROM_EMON_FINGERPRINT_START,
@@ -163,9 +169,10 @@ void config_load_settings()
   EEPROM_read_string(EEPROM_WWW_PASS_START, EEPROM_WWW_PASS_SIZE, www_password);
 }
 
-void config_save_emoncms(String server, String node, String apikey, String fingerprint)
+void config_save_emoncms(String server, String path, String node, String apikey, String fingerprint)
 {
   emoncms_server = server;
+  emoncms_path = path;
   emoncms_node = node;
   emoncms_apikey = apikey;
   emoncms_fingerprint = fingerprint;
@@ -175,6 +182,9 @@ void config_save_emoncms(String server, String node, String apikey, String finge
 
   // save emoncms server to EEPROM max 45 characters
   EEPROM_write_string(EEPROM_EMON_SERVER_START, EEPROM_EMON_SERVER_SIZE, emoncms_server);
+
+  // save emoncms server to EEPROM max 16 characters
+  EEPROM_write_string(EEPROM_EMON_PATH_START, EEPROM_EMON_PATH_SIZE, emoncms_path);
 
   // save emoncms node to EEPROM max 32 characters
   EEPROM_write_string(EEPROM_EMON_NODE_START, EEPROM_EMON_NODE_SIZE, emoncms_node);
