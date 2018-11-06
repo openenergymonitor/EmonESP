@@ -29,7 +29,7 @@
 #include <Arduino.h>
 #include <EEPROM.h>                   // Save config settings
 
-int LEDpin = 2;
+int LEDpin = 13;
 
 String node_type = "";
 int node_id = 0;
