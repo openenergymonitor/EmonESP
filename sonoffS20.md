@@ -15,11 +15,17 @@ It's advised not to connect to the mains when the case is open from a saftey per
 
 **Firmware modifications:**
 
-1. git checkout control_merge 
-2. The sonoff S20 LED is on pin 13, change LEDpin to 13 in config.cpp
-3. In src.ino, uncommment "#include http.h" and "#include autoauth.h".
-4. Rename node_type to "smartplug"
-5. Set node\_id as required, each plug must have a unique node\_id in the house.
+Download EmonESP and switch to control_merge branch:
+
+    git clone https://github.com/openenergymonitor/EmonESP.git
+    git checkout control_merge 
+
+Make the following firmware modifications:
+
+1. The sonoff S20 LED is on pin 13, change LEDpin to 13 in config.cpp
+2. In src.ino, uncommment "#include http.h" and "#include autoauth.h".
+3. Rename node_type to "smartplug"
+4. Set node\_id as required, each plug must have a unique node\_id in the house.
 5. Uncomment auth\_setup(); and auth\_loop();
 
 **Compilation:**
@@ -32,7 +38,6 @@ Select in Arduino > Tools:
 - Flash Size "1M (512K SPIFFS)"
 
 Compile and upload both the firmware and the sketch data.
-
 
 ### Setup
 
