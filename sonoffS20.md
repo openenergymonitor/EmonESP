@@ -8,7 +8,7 @@ A standard USB to UART programing cable can be used to upload firmware to the So
 
 To upload firmware, hold down the push button, reset the power to the plug (unplug and plug the programmer back in) and then keep holding down the push button until the firmware upload progress starts. 
 
-Saftey: The plug does not need to be connected to mains when programming. It's advised not to connect to the mains when the case is open from a saftey perspective.
+**aftey: Disconnect the plug from the mains when programming.** It's advised not to connect to the mains when the case is open from a saftey perspective.
 
 **Firmware modifications:**
 
