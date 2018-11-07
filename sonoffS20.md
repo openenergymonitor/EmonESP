@@ -2,6 +2,8 @@
 
 **Sonoff S20 programmer:**
 
+![sonoffs20.png](docs/sonoffs20.png)
+
 **Firmware modifications:**
 
 1. git checkout control_merge 
