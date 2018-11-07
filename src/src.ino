@@ -57,7 +57,7 @@ void setup() {
   // Hard-coded initial config for node_name and node_describe
   // ---------------------------------------------------------
   node_type = "smartplug";
-  node_id = 2;
+  node_id = 1;
   
   node_name = node_type + String(node_id);
   node_status = "emon/"+node_name+"/status";
