@@ -1,6 +1,8 @@
 # Using EmonESP on the Sonoff S20 smart plug
 
-This guide details how to use EmonESP on the Sonoff S20 smart plug in conjunction with the emoncms demandshaper module for appliance scheduling based on the best time to use from a grid or/and carbon perspective.
+This guide details how to use EmonESP on the Sonoff S20 smart plug. The SonOff can then be turned on and off via MQTT or/and used in conjunction with the emoncms demandshaper module for appliance scheduling based on the best time to use from a grid or/and carbon perspective. See:
+
+[https://github.com/emoncms/demandshaper](https://github.com/emoncms/demandshaper)
 
 **Sonoff S20 programmer:**
 
