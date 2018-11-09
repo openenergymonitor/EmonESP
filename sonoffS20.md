@@ -20,15 +20,7 @@ It's advised not to connect to the mains when the case is open from a saftey per
 Download EmonESP and switch to control_merge branch:
 
     git clone https://github.com/openenergymonitor/EmonESP.git
-    git checkout control_merge 
-
-Make the following firmware modifications:
-
-1. The sonoff S20 LED is on pin 13, change LEDpin to 13 in config.cpp
-2. In src.ino, uncommment "#include http.h" and "#include autoauth.h".
-3. Rename node_type to "smartplug"
-4. Set node\_id as required, each plug must have a unique node\_id in the house.
-5. Uncomment auth\_setup(); and auth\_loop();
+    git checkout control_merge
 
 **Compilation:**
 
@@ -45,6 +37,16 @@ Compile and upload both the firmware and the sketch data.
 
 1. SmartPlug creates a WIFI access point, connect to access point, enter home WIFI network.
 
-2. Login to emoncms, if UDP broadcast is enabled, smart plug will apear in emoncms device list with a popup asking to connect.
+2. To use the plug with the emoncms demand shaper module see the user guide at the bottom of the readme here: [https://github.com/emoncms/demandshaper](https://github.com/emoncms/demandshaper).
 
-3. One connected the smart plug can be scheduled using the scheduler.
+3. Alternatively to control the Sonoff S20 directly via MQTT. Enter the MQTT server details on the EmonESP configuration page.
+
+To turn the plug on, publish a topic:message of the following format:
+
+    topic                     message
+    emon/smartplug1/status    1
+    
+To turn the plug off, publish a topic:message of the following format:
+
+    topic                     message
+    emon/smartplug1/status    1
