@@ -49,4 +49,4 @@ To turn the plug on, publish a topic:message of the following format:
 To turn the plug off, publish a topic:message of the following format:
 
     topic                     message
-    emon/smartplug1/status    1
+    emon/smartplug1/status    0
