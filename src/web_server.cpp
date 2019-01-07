@@ -545,6 +545,12 @@ handleUpdateUpload(AsyncWebServerRequest *request, String filename, size_t index
   }
 }
 
+void handleDescribe(AsyncWebServerRequest *request) {
+  AsyncWebServerResponse *response = request->beginResponse(200, "text/plain", "smartplug");
+  response->addHeader("Access-Control-Allow-Origin", "*");  
+  request->send(response);
+}
+
 
 void handleNotFound(AsyncWebServerRequest *request)
 {
@@ -634,6 +640,7 @@ web_server_setup()
 
   server.on("/firmware", handleUpdateCheck);
   server.on("/update", handleUpdate);
+  server.on("/emoncms/describe", handleDescribe);
 
   server.onNotFound(handleNotFound);
   server.begin();
