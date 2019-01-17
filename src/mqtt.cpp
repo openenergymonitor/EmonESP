@@ -50,34 +50,16 @@ void mqtt_callback(char* topic, byte* payload, unsigned int length) {
   }
   DEBUG.println();
 
-  if (node_type=="smartplug") {
-    if (strcmp(topic,node_status.c_str())==0) {
-      char state = (char) payload[0];
-      if (state=='1') {
-        DEBUG.println("STATE:1");
-        digitalWrite(12,HIGH);
-        digitalWrite(16,HIGH); 
-      } else {
-        DEBUG.println("STATE:0");
-        digitalWrite(12,LOW);
-        digitalWrite(16,LOW); 
-      }
+  if (strcmp(topic,node_status.c_str())==0) {
+    char state = (char) payload[0];
+    if (state=='1') {
+      DEBUG.println("STATE:1");
+      ctrl_mode = "On";
+    } else {
+      DEBUG.println("STATE:0");
+      ctrl_mode = "Off";
     }
   }
-
-  if (node_type=="wifirelay") {
-    if (strcmp(topic,node_status.c_str())==0) {
-      char state = (char) payload[0];
-      if (state=='1') {
-        DEBUG.println("STATE:1");
-        digitalWrite(5,HIGH);
-      } else {
-        DEBUG.println("STATE:0");
-        digitalWrite(5,LOW);
-      }
-    }
-  }
-  
 }
 
 // -------------------------------------------------------------------

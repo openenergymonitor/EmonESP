@@ -252,8 +252,12 @@
       </div>
       <!--//////////////////////////////////////////////////////////////////////////////////-->
       <div id="nine">
-        <h2>9. Timer</h2>
+        <h2>9. Control</h2>
         <div class="itembody-wrapper">
+          <br>
+          <div class="btn-group">
+            <button id="on" data-bind="click: ctrlMode.bind($data,'On'), css: (status.ctrl_mode()=='On'?'green':'')">On</button><button id="off" data-bind="click: ctrlMode.bind($data,'Off'), css: (status.ctrl_mode()=='Off'?'red':'')">Off</button><button id="timer" data-bind="click: ctrlMode.bind($data,'Timer'), css: (status.ctrl_mode()=='Timer'?(status.ctrl_state()==1?'green':'red'):'')">Timer</button>
+          </div>
           <p><b>Time now:</b> <span data-bind="text: status.time">12:34:56</span></p>
           <div style="display:inline-block"><b>Period 1:</b></div>
           <div style="display:inline-block; margin-left:20px">Start: <input type="time" data-bind="textInput: config.f_timer_start1"></div>

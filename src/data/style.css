@@ -237,3 +237,35 @@ button {
   margin-bottom: 40px;
   text-align: center;
 }
+
+.btn-group button{
+  width:auto;
+  height:40px;
+  padding:10px 20px 10px 20px;
+  border:none;
+  /*border-right:1px solid #888;*/
+  background-color:#666;
+  color:#fff;
+  cursor:pointer;
+  border-radius: 0px;
+  margin:0px;
+}
+
+.btn-group button:hover{
+  /*background-color:#888;*/
+}
+
+.btn-group .active{
+  background-color:#888;
+}
+
+.btn-group .green {background-color:#76de32;}
+.btn-group .red {background-color:#ff5d32;}
+
+.btn-group button:first-child {
+  border-radius: 20px 0px 0px 20px;
+}
+
+.btn-group button:last-child {
+  border-radius: 0px 20px 20px 0px;
+}

@@ -331,8 +331,9 @@ handleStatus(AsyncWebServerRequest *request) {
   s += "\"mqtt_connected\":\""+String(mqtt_connected())+"\",";
 
   s += "\"free_heap\":\"" + String(ESP.getFreeHeap()) + "\",";
-  s += "\"time\":\"" + String(getTime()) + "\"";
-
+  s += "\"time\":\"" + String(getTime()) + "\",";
+  s += "\"ctrl_mode\":\"" + String(ctrl_mode) + "\",";
+  s += "\"ctrl_state\":\"" + String(ctrl_state) + "\"";
 
 #ifdef ENABLE_LEGACY_API
   s += ",\"version\":\"" + currentfirmware + "\"";
@@ -584,7 +585,21 @@ void handleDescribe(AsyncWebServerRequest *request) {
 
 void handleTime(AsyncWebServerRequest *request) {
   AsyncWebServerResponse *response = request->beginResponse(200, "text/plain",getTime());
-  response->addHeader("Access-Control-Allow-Origin", "*");  
+  request->send(response);
+}
+
+void handleCtrlMode(AsyncWebServerRequest *request) {
+  AsyncResponseStream *response;
+  if(false == requestPreProcess(request, response, "text/plain")) {
+    return;
+  }
+  String qmode = request->arg("mode");
+  if (qmode=="On") ctrl_mode = "On";
+  if (qmode=="Off") ctrl_mode = "Off";
+  if (qmode=="Timer") ctrl_mode = "Timer";
+
+  response->setCode(200);
+  response->print(qmode);
   request->send(response);
 }
 
@@ -680,6 +695,8 @@ web_server_setup()
   server.on("/update", handleUpdate);
   server.on("/emoncms/describe", handleDescribe);
   server.on("/time", handleTime);
+  server.on("/ctrlmode", handleCtrlMode);
+
 
   server.onNotFound(handleNotFound);
   server.begin();

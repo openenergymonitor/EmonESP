@@ -65,6 +65,9 @@ String timer_stop1 = "";
 String timer_start2 = "";
 String timer_stop2 = "";
 
+extern String ctrl_mode = "Timer";
+extern bool ctrl_update = 0;
+extern bool ctrl_state = 0;
 
 #define EEPROM_ESID_SIZE          32
 #define EEPROM_EPASS_SIZE         64

@@ -1,7 +1,10 @@
 // Work out the endpoint to use, for dev you can change to point at a remote ESP
 // and run the HTML/JS from file, no need to upload to the ESP to test
 
-var baseHost = window.location.hostname;
+// development folder
+var development = "";
+
+var baseHost = window.location.hostname+development;
 //var baseHost = 'emonesp.local';
 //var baseHost = '192.168.4.1';
 //var baseHost = '172.16.0.52';
@@ -64,7 +67,9 @@ function StatusViewModel() {
     "emoncms_connected": "",
     "mqtt_connected": "",
     "free_heap": "",
-    "time":""
+    "time":"",
+    "ctrl_mode":"off",
+    "ctrl_state":0
   }, baseEndpoint + '/status');
 
   // Some devired values
@@ -234,7 +239,7 @@ function EmonEspViewModel() {
 
   self.initialised = ko.observable(false);
   self.updating = ko.observable(false);
-
+    
   var updateTimer = null;
   var updateTime = 1 * 1000;
 
@@ -355,10 +360,30 @@ function EmonEspViewModel() {
       timer_stop2: self.config.timer_stop2() 
     }, function (data) {
       self.saveTimerSuccess(true);
+      setTimeout(function(){
+          self.saveTimerSuccess(false);
+      },5000);
     }).fail(function () {
       alert("Failed to save Timer config");
     }).always(function () {
       self.saveTimerFetching(false);
+    });
+  };
+  
+  // -----------------------------------------------------------------------
+  // Event: Switch On, Off, Timer
+  // -----------------------------------------------------------------------  
+  //self.btn_off = ko.observable(false);
+  //self.btn_timer = ko.observable(false);
+  
+  self.ctrlMode = function (mode) {
+    var last = self.status.ctrl_mode();
+    self.status.ctrl_mode(mode);
+    $.post(baseEndpoint + "/ctrlmode?mode="+mode,{}, function (data) {
+      // success
+    }).fail(function () {
+      self.status.ctrl_mode(last);
+      alert("Failed to switch "+mode);
     });
   };
 

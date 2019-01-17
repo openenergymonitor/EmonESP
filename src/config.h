@@ -71,6 +71,10 @@ extern String timer_stop1;
 extern String timer_start2;
 extern String timer_stop2;
 
+extern String ctrl_mode;
+extern bool ctrl_update;
+extern bool ctrl_state;
+
 // -------------------------------------------------------------------
 // Load saved settings
 // -------------------------------------------------------------------

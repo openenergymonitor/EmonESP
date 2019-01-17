@@ -37,7 +37,7 @@
 
 WiFiUDP ntpUDP;
 NTPClient timeClient(ntpUDP,"europe.pool.ntp.org",0,60000);
-unsigned long last_ntp = 0;
+unsigned long last_ctrl_update = 0;
 
 // -------------------------------------------------------------------
 // SETUP
@@ -61,7 +61,7 @@ void setup() {
   // ---------------------------------------------------------
   // Hard-coded initial config for node_name and node_describe
   // ---------------------------------------------------------
-  node_type = "smartplug";
+  node_type = "huzzah";
   node_id = 2;
   
   node_name = node_type + String(node_id);
@@ -76,11 +76,12 @@ void setup() {
     pinMode(12, OUTPUT);
     pinMode(13, OUTPUT);
     pinMode(16, OUTPUT);
-
-    led_flash(3000,100);
-    
+    led_flash(3000,100);    
   } else if (node_type=="wifirelay") {
     pinMode(5, OUTPUT);
+  } else if (node_type=="huzzah") {
+    pinMode(2,OUTPUT);
+    digitalWrite(2,HIGH);
   }
 
   // Initialise the WiFi
@@ -134,30 +135,56 @@ void loop()
         mqtt_publish(input);
       }
     }
-
-    if ((millis()-last_ntp)>10000) {
-      last_ntp = millis();
-      // Serial.println(getTime());
-
-      int start1 = timer_start1.toInt();
-      int stop1 = timer_stop1.toInt();
-      int start2 = timer_start2.toInt();
-      int stop2 = timer_stop2.toInt();
-      
-      int timenow = timeClient.getHours()*100+timeClient.getMinutes();
-
-      bool state = 0;
-      if (timenow>=start1 && timenow<stop1) state = 1;
-      if (timenow>=start2 && timenow<stop2) state = 1;
-      if (state) {
-        Serial.println("on");
-      } else {
-        Serial.println("off");
-      }
-    }
   }
 
   auth_loop();
+
+  // --------------------------------------------------------------
+  // CONTROL UPDATE
+  // --------------------------------------------------------------
+  if ((millis()-last_ctrl_update)>1000 || ctrl_update) {
+    last_ctrl_update = millis();
+    ctrl_update = 0;
+    ctrl_state = 0; // default off
+
+    // 1. Timer
+    int start1 = timer_start1.toInt();
+    int stop1 = timer_stop1.toInt();
+    int start2 = timer_start2.toInt();
+    int stop2 = timer_stop2.toInt();
+    int timenow = timeClient.getHours()*100+timeClient.getMinutes();
+    
+    if (timenow>=start1 && timenow<stop1) ctrl_state = 1;
+    if (timenow>=start2 && timenow<stop2) ctrl_state = 1;
+
+    // 2. On/Off
+    if (ctrl_mode=="On") ctrl_state = 1;
+    if (ctrl_mode=="Off") ctrl_state = 0;
+
+    // 3. Apply
+    if (ctrl_state) {
+      // ON
+      if (node_type=="smartplug") {
+        digitalWrite(12,HIGH);
+        digitalWrite(16,HIGH); 
+      } else if (node_type=="wifirelay") {
+        digitalWrite(5,HIGH);
+      } else if (node_type=="huzzah") {
+        digitalWrite(2,LOW);
+      }
+    } else {
+      // OFF
+      if (node_type=="smartplug") {
+        digitalWrite(12,LOW);
+        digitalWrite(16,LOW); 
+      } else if (node_type=="wifirelay") {
+        digitalWrite(5,LOW);
+      } else if (node_type=="huzzah") {
+        digitalWrite(2,HIGH);
+      }
+    }   
+  }
+  // --------------------------------------------------------------
   
 } // end loop
 
