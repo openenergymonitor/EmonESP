@@ -36,6 +36,8 @@
 #include "emoncms.h"
 #include "ota.h"
 #include "debug.h"
+#include <NTPClient.h>
+
 
 AsyncWebServer server(80);          //Create class for Web server
 
@@ -259,6 +261,29 @@ handleSaveAdmin(AsyncWebServerRequest *request) {
   request->send(response);
 }
 
+
+// -------------------------------------------------------------------
+// Save timer
+// url: /savetimer
+// -------------------------------------------------------------------
+void
+handleSaveTimer(AsyncWebServerRequest *request) {
+  AsyncResponseStream *response;
+  if(false == requestPreProcess(request, response, "text/plain")) {
+    return;
+  }
+
+  String qtimer_start1 = request->arg("timer_start1");
+  String qtimer_stop1 = request->arg("timer_stop1");
+  String qtimer_start2 = request->arg("timer_start2");
+  String qtimer_stop2 = request->arg("timer_stop2");
+  config_save_timer(qtimer_start1, qtimer_stop1, qtimer_start2, qtimer_stop2);
+
+  response->setCode(200);
+  response->print("saved");
+  request->send(response);
+}
+
 // -------------------------------------------------------------------
 // Last values on atmega serial
 // url: /lastvalues
@@ -305,7 +330,9 @@ handleStatus(AsyncWebServerRequest *request) {
 
   s += "\"mqtt_connected\":\""+String(mqtt_connected())+"\",";
 
-  s += "\"free_heap\":\"" + String(ESP.getFreeHeap()) + "\"";
+  s += "\"free_heap\":\"" + String(ESP.getFreeHeap()) + "\",";
+  s += "\"time\":\"" + String(getTime()) + "\"";
+
 
 #ifdef ENABLE_LEGACY_API
   s += ",\"version\":\"" + currentfirmware + "\"";
@@ -358,8 +385,12 @@ handleConfig(AsyncWebServerRequest *request) {
   s += "\"mqtt_feed_prefix\":\"" + mqtt_feed_prefix + "\",";
   s += "\"mqtt_user\":\"" + mqtt_user + "\",";
   //s += "\"mqtt_pass\":\""+mqtt_pass+"\","; security risk: DONT RETURN PASSWORDS
-  s += "\"www_username\":\"" + www_username + "\"";
+  s += "\"www_username\":\"" + www_username + "\",";
   //s += "\"www_password\":\""+www_password+"\","; security risk: DONT RETURN PASSWORDS
+  s += "\"timer_start1\":\"" + timer_start1 + "\",";
+  s += "\"timer_stop1\":\"" + timer_stop1 + "\",";
+  s += "\"timer_start2\":\"" + timer_start2 + "\",";
+  s += "\"timer_stop2\":\"" + timer_stop2 + "\"";
   s += "}";
 
   response->setCode(200);
@@ -551,6 +582,12 @@ void handleDescribe(AsyncWebServerRequest *request) {
   request->send(response);
 }
 
+void handleTime(AsyncWebServerRequest *request) {
+  AsyncWebServerResponse *response = request->beginResponse(200, "text/plain",getTime());
+  response->addHeader("Access-Control-Allow-Origin", "*");  
+  request->send(response);
+}
+
 
 void handleNotFound(AsyncWebServerRequest *request)
 {
@@ -625,6 +662,7 @@ web_server_setup()
   server.on("/saveemoncms", handleSaveEmoncms);
   server.on("/savemqtt", handleSaveMqtt);
   server.on("/saveadmin", handleSaveAdmin);
+  server.on("/savetimer", handleSaveTimer);
 
   server.on("/reset", handleRst);
   server.on("/restart", handleRestart);
@@ -641,6 +679,7 @@ web_server_setup()
   server.on("/firmware", handleUpdateCheck);
   server.on("/update", handleUpdate);
   server.on("/emoncms/describe", handleDescribe);
+  server.on("/time", handleTime);
 
   server.onNotFound(handleNotFound);
   server.begin();

@@ -19,6 +19,10 @@ function scaleString(string, scale, precision) {
   return tmpval.toFixed(precision);
 }
 
+function addcolon(t) {
+    return t.substr(0,2)+":"+t.substr(2,4);
+}
+
 function BaseViewModel(defaults, remoteUrl, mappings) {
   if(mappings === undefined){
    mappings = {};
@@ -59,7 +63,8 @@ function StatusViewModel() {
     "packets_success": "",
     "emoncms_connected": "",
     "mqtt_connected": "",
-    "free_heap": ""
+    "free_heap": "",
+    "time":""
   }, baseEndpoint + '/status');
 
   // Some devired values
@@ -102,8 +107,49 @@ function ConfigViewModel() {
     "www_username": "",
     "www_password": "",
     "espflash": "",
-    "version": "0.0.0"
+    "version": "0.0.0",
+    "timer_start1":"",
+    "timer_stop1":"",
+    "timer_start2":"",
+    "timer_stop2":"",
   }, baseEndpoint + '/config');
+  
+  this.f_timer_start1 = ko.pureComputed({
+      read: function () {
+          return addcolon(this.timer_start1());
+      },
+      write: function (value) {
+          this.timer_start1(value.replace(":",""));
+      },
+      owner: this
+  });
+  this.f_timer_stop1 = ko.pureComputed({
+      read: function () {
+          return addcolon(this.timer_stop1());
+      },
+      write: function (value) {
+          this.timer_stop1(value.replace(":",""));
+      },
+      owner: this
+  });
+  this.f_timer_start2 = ko.pureComputed({
+      read: function () {
+          return addcolon(this.timer_start2());
+      },
+      write: function (value) {
+          this.timer_start2(value.replace(":",""));
+      },
+      owner: this
+  });
+  this.f_timer_stop2 = ko.pureComputed({
+      read: function () {
+          return addcolon(this.timer_stop2());
+      },
+      write: function (value) {
+          this.timer_stop2(value.replace(":",""));
+      },
+      owner: this
+  });
 }
 ConfigViewModel.prototype = Object.create(BaseViewModel.prototype);
 ConfigViewModel.prototype.constructor = ConfigViewModel;
@@ -193,8 +239,8 @@ function EmonEspViewModel() {
   var updateTime = 1 * 1000;
 
   var logUpdateTimer = null;
-  var logUpdateTime = 100;
-
+  var logUpdateTime = 500;
+    
   // Upgrade URL
   self.upgradeUrl = ko.observable('about:blank');
 
@@ -225,7 +271,7 @@ function EmonEspViewModel() {
     if (self.updating()) {
       return;
     }
-    self.updating(true);
+    self.updating(true);    
     if (null !== updateTimer) {
       clearTimeout(updateTimer);
       updateTimer = null;
@@ -291,6 +337,28 @@ function EmonEspViewModel() {
       alert("Failed to save Admin config");
     }).always(function () {
       self.saveAdminFetching(false);
+    });
+  };
+  
+  // -----------------------------------------------------------------------
+  // Event: Timer save
+  // -----------------------------------------------------------------------
+  self.saveTimerFetching = ko.observable(false);
+  self.saveTimerSuccess = ko.observable(false);
+  self.saveTimer = function () {
+    self.saveTimerFetching(true);
+    self.saveTimerSuccess(false);
+    $.post(baseEndpoint + "/savetimer", { 
+      timer_start1: self.config.timer_start1(), 
+      timer_stop1: self.config.timer_stop1(), 
+      timer_start2: self.config.timer_start2(), 
+      timer_stop2: self.config.timer_stop2() 
+    }, function (data) {
+      self.saveTimerSuccess(true);
+    }).fail(function () {
+      alert("Failed to save Timer config");
+    }).always(function () {
+      self.saveTimerFetching(false);
     });
   };
 

@@ -59,6 +59,13 @@ String mqtt_user = "";
 String mqtt_pass = "";
 String mqtt_feed_prefix = "";
 
+// Timer Settings 
+String timer_start1 = "";
+String timer_stop1 = "";
+String timer_start2 = "";
+String timer_stop2 = "";
+
+
 #define EEPROM_ESID_SIZE          32
 #define EEPROM_EPASS_SIZE         64
 #define EEPROM_EMON_API_KEY_SIZE  32
@@ -74,6 +81,11 @@ String mqtt_feed_prefix = "";
 #define EEPROM_WWW_USER_SIZE      16
 #define EEPROM_WWW_PASS_SIZE      16
 #define EEPROM_SIZE 512
+#define EEPROM_TIMER_START1_SIZE  4
+#define EEPROM_TIMER_STOP1_SIZE   4
+#define EEPROM_TIMER_START2_SIZE  4
+#define EEPROM_TIMER_STOP2_SIZE   4
+
 
 #define EEPROM_ESID_START         0
 #define EEPROM_ESID_END           (EEPROM_ESID_START + EEPROM_ESID_SIZE)
@@ -103,6 +115,15 @@ String mqtt_feed_prefix = "";
 #define EEPROM_WWW_PASS_END       (EEPROM_WWW_PASS_START + EEPROM_WWW_PASS_SIZE)
 #define EEPROM_EMON_PATH_START    EEPROM_WWW_PASS_END
 #define EEPROM_EMON_PATH_END      (EEPROM_EMON_PATH_START + EEPROM_EMON_PATH_SIZE)
+
+#define EEPROM_TIMER_START1_START EEPROM_EMON_PATH_END
+#define EEPROM_TIMER_START1_END   (EEPROM_TIMER_START1_START + EEPROM_TIMER_START1_SIZE)
+#define EEPROM_TIMER_STOP1_START  EEPROM_TIMER_START1_END
+#define EEPROM_TIMER_STOP1_END    (EEPROM_TIMER_STOP1_START + EEPROM_TIMER_STOP1_SIZE)
+#define EEPROM_TIMER_START2_START EEPROM_TIMER_STOP1_END
+#define EEPROM_TIMER_START2_END   (EEPROM_TIMER_START2_START + EEPROM_TIMER_START2_SIZE)
+#define EEPROM_TIMER_STOP2_START  EEPROM_TIMER_START2_END
+#define EEPROM_TIMER_STOP2_END    (EEPROM_TIMER_STOP2_START + EEPROM_TIMER_STOP2_SIZE)
 
 // -------------------------------------------------------------------
 // Reset EEPROM, wipes all settings
@@ -167,6 +188,12 @@ void config_load_settings()
   // Web server credentials
   EEPROM_read_string(EEPROM_WWW_USER_START, EEPROM_WWW_USER_SIZE, www_username);
   EEPROM_read_string(EEPROM_WWW_PASS_START, EEPROM_WWW_PASS_SIZE, www_password);
+
+  // Read timer settings
+  EEPROM_read_string(EEPROM_TIMER_START1_START, EEPROM_TIMER_START1_SIZE, timer_start1);
+  EEPROM_read_string(EEPROM_TIMER_STOP1_START, EEPROM_TIMER_STOP1_SIZE, timer_stop1);
+  EEPROM_read_string(EEPROM_TIMER_START2_START, EEPROM_TIMER_START2_SIZE, timer_start2);
+  EEPROM_read_string(EEPROM_TIMER_STOP2_START, EEPROM_TIMER_STOP2_SIZE, timer_stop2);
 }
 
 void config_save_emoncms(String server, String path, String node, String apikey, String fingerprint)
@@ -238,6 +265,21 @@ void config_save_admin(String user, String pass)
 
   EEPROM_write_string(EEPROM_WWW_USER_START, EEPROM_WWW_USER_SIZE, user);
   EEPROM_write_string(EEPROM_WWW_PASS_START, EEPROM_WWW_PASS_SIZE, pass);
+
+  EEPROM.commit();
+}
+
+void config_save_timer(String start1, String stop1, String start2, String stop2)
+{
+  timer_start1 = start1;
+  timer_stop1 = stop1;
+  timer_start2 = start2;
+  timer_stop2 = stop2;
+
+  EEPROM_write_string(EEPROM_TIMER_START1_START, EEPROM_TIMER_START1_SIZE, start1);
+  EEPROM_write_string(EEPROM_TIMER_STOP1_START, EEPROM_TIMER_STOP1_SIZE, stop1);
+  EEPROM_write_string(EEPROM_TIMER_START2_START, EEPROM_TIMER_START2_SIZE, start2);
+  EEPROM_write_string(EEPROM_TIMER_STOP2_START, EEPROM_TIMER_STOP2_SIZE, stop2);
 
   EEPROM.commit();
 }

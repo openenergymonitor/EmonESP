@@ -33,6 +33,11 @@
 #include "mqtt.h"
 #include "http.h"
 #include "autoauth.h"
+#include <NTPClient.h>
+
+WiFiUDP ntpUDP;
+NTPClient timeClient(ntpUDP,"europe.pool.ntp.org",0,60000);
+unsigned long last_ntp = 0;
 
 // -------------------------------------------------------------------
 // SETUP
@@ -57,7 +62,7 @@ void setup() {
   // Hard-coded initial config for node_name and node_describe
   // ---------------------------------------------------------
   node_type = "smartplug";
-  node_id = 1;
+  node_id = 2;
   
   node_name = node_type + String(node_id);
   node_status = "emon/"+node_name+"/status";
@@ -93,6 +98,9 @@ void setup() {
 
   // Start auto auth
   auth_setup();
+
+  // Time
+  timeClient.begin();
   
   delay(100);
 } // end setup
@@ -109,6 +117,7 @@ void loop()
   ota_loop();
   web_server_loop();
   wifi_loop();
+  timeClient.update();
 
   String input = "";
   boolean gotInput = input_get(input);
@@ -125,8 +134,34 @@ void loop()
         mqtt_publish(input);
       }
     }
+
+    if ((millis()-last_ntp)>10000) {
+      last_ntp = millis();
+      // Serial.println(getTime());
+
+      int start1 = timer_start1.toInt();
+      int stop1 = timer_stop1.toInt();
+      int start2 = timer_start2.toInt();
+      int stop2 = timer_stop2.toInt();
+      
+      int timenow = timeClient.getHours()*100+timeClient.getMinutes();
+
+      bool state = 0;
+      if (timenow>=start1 && timenow<stop1) state = 1;
+      if (timenow>=start2 && timenow<stop2) state = 1;
+      if (state) {
+        Serial.println("on");
+      } else {
+        Serial.println("off");
+      }
+    }
   }
 
   auth_loop();
   
 } // end loop
+
+String getTime() {
+    return timeClient.getFormattedTime();
+}
+
