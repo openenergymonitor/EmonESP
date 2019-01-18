@@ -184,6 +184,19 @@ void wifi_setup() {
 
 void wifi_loop() {
 
+  // Factory reset on GPIO0.
+  while (digitalRead(0) == LOW) {
+    delay(factoryreset_holdtime);
+    if (digitalRead(0) == LOW) {
+      Serial.println("Commencing factory reset.");
+      config_reset();
+      ESP.eraseConfig();
+      Serial.println("Factory reset complete! Resetting...");
+      ESP.reset();
+    }
+  }
+  // end factory reset.
+
   dnsServer.processNextRequest(); // Captive portal DNS re-dierct
 
   // Remain in AP mode for 5 Minutes before resetting
