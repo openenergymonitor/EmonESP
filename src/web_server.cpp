@@ -391,7 +391,9 @@ handleConfig(AsyncWebServerRequest *request) {
   s += "\"timer_start1\":\"" + timer_start1 + "\",";
   s += "\"timer_stop1\":\"" + timer_stop1 + "\",";
   s += "\"timer_start2\":\"" + timer_start2 + "\",";
-  s += "\"timer_stop2\":\"" + timer_stop2 + "\"";
+  s += "\"timer_stop2\":\"" + timer_stop2 + "\",";
+  s += "\"node_name\":\"" + node_name + "\",";
+  s += "\"node_description\":\"" + node_description + "\"";
   s += "}";
 
   response->setCode(200);

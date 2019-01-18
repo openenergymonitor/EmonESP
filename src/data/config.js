@@ -97,6 +97,8 @@ StatusViewModel.prototype.constructor = StatusViewModel;
 
 function ConfigViewModel() {
   BaseViewModel.call(this, {
+    "node_name": "emonESP",
+    "node_description":"WiFi Emoncms Link",
     "ssid": "",
     "pass": "",
     "emoncms_server": "data.openevse.com",
@@ -165,6 +167,7 @@ function LastValuesViewModel() {
 
   // Observable properties
   self.fetching = ko.observable(false);
+  self.lastValues = ko.observable(false);
   self.values = ko.mapping.fromJS([]);
 
   self.update = function (after) {
@@ -174,14 +177,21 @@ function LastValuesViewModel() {
     self.fetching(true);
     $.get(self.remoteUrl, function (data) {
       // Transform the data into something a bit easier to handle as a binding
-      var namevaluepairs = data.split(",");
       var vals = [];
-      for (var z in namevaluepairs) {
-        var namevalue = namevaluepairs[z].split(":");
-        var units = "";
-        if (namevalue[0].indexOf("CT") === 0) units = "W";
-        if (namevalue[0].indexOf("T") === 0) units = String.fromCharCode(176)+"C";
-        vals.push({key: namevalue[0], value: namevalue[1]+units});
+      if (data!="") {
+        var namevaluepairs = data.split(",");
+        if (namevaluepairs.length>0) {
+          for (var z in namevaluepairs) {
+            var namevalue = namevaluepairs[z].split(":");
+            var units = "";
+            if (namevalue[0].indexOf("CT") === 0) units = "W";
+            if (namevalue[0].indexOf("T") === 0) units = String.fromCharCode(176)+"C";
+            vals.push({key: namevalue[0], value: namevalue[1]+units});
+          }
+          self.lastValues(true);
+        }
+      } else {
+        self.lastValues(false);
       }
       ko.mapping.fromJS(vals, self.values);
     }, 'text').always(function () {
@@ -515,6 +525,14 @@ document.getElementById("restart").addEventListener("click", function (e) {
     r.send();
   }
 });
+
+function toggle(id) {
+   var e = document.getElementById(id);
+   if(e.style.display == 'block')
+      e.style.display = 'none';
+   else
+      e.style.display = 'block';
+}
 
 // -----------------------------------------------------------------------
 // Event:Upload Firmware

@@ -18,22 +18,9 @@ body {
     overflow-x: hidden;
 }
 
-@media screen and (min-width: 1024px) {
-
-#left-hand-container {
-    width: 50%;
-    float: left;
+#container {
+    width: 100%;
     margin-bottom: 40px;
-}
-}
-
-@media screen and (min-width: 1024px) {
-
-#right-hand-container {
-    width: 50%;
-    float: right;
-    margin-bottom: 40px;
-}
 }
 
 #one,#two,#three,#four,#five,#six,#seven,#eight,#nine {
@@ -42,22 +29,7 @@ body {
     margin: 5px 5px 5px 5px;
 }
 
-@media screen and (min-width: 1024px) {
-     #one,#two,#three {
-         vertical-align: top;
-         display: inline-block;
-         width: 500px;
-     }
-}
-
-@media screen and (min-width: 1024px) {
-     #four,#five,#six,#seven,#eight {
-        vertical-align: top;
-         display: inline-block;
-         width: 500px;
-         right: 0;
-     }
-}
+.hide {display:none;}
 
 .itembody-wrapper {
     padding: 5px 25px 5px 25px;
@@ -132,10 +104,16 @@ a {
 
 h2 {
     font-size: 20px;
-    background-color: #777777;
-    color: #ffffff;
-    padding: 5px 25px 5px 25px;
+    background-color: #82afcc;
+    color: #fff;
+    padding: 10px 15px 10px 15px;
     margin: 0;
+    cursor:pointer;
+    font-weight:normal;
+}
+
+h2:hover {
+    background-color: #98c4e1;
 }
 
 button {
@@ -171,7 +149,7 @@ button {
 }
 
 .box h1 span {
-    color: #0699fa;
+    color: #82afcc;
 }
 
 .box h3 {
@@ -181,7 +159,7 @@ button {
     font-size: 19px;
     text-align: center;
     color: #b6b6b6;
-    margin: -12px 0 0 0;
+    margin: -6px 0 0 0;
 }
 
 /*----------------*/

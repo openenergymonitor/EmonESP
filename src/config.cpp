@@ -35,6 +35,7 @@ String node_type = "";
 int node_id = 0;
 String node_name = "";
 String node_describe = "";
+String node_description = "";
 String node_status = "";
 
 // Wifi Network Strings

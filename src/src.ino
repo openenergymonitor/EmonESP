@@ -61,8 +61,9 @@ void setup() {
   // ---------------------------------------------------------
   // Hard-coded initial config for node_name and node_describe
   // ---------------------------------------------------------
-  node_type = "huzzah";
-  node_id = 2;
+  node_type = "smartplug";
+  node_description = "Sonoff S20 Smartplug";
+  node_id = 5;
   
   node_name = node_type + String(node_id);
   node_status = "emon/"+node_name+"/status";
@@ -166,7 +167,7 @@ void loop()
       // ON
       if (node_type=="smartplug") {
         digitalWrite(12,HIGH);
-        digitalWrite(16,HIGH); 
+        digitalWrite(16,HIGH);
       } else if (node_type=="wifirelay") {
         digitalWrite(5,HIGH);
       } else if (node_type=="huzzah") {
@@ -176,7 +177,7 @@ void loop()
       // OFF
       if (node_type=="smartplug") {
         digitalWrite(12,LOW);
-        digitalWrite(16,LOW); 
+        digitalWrite(16,LOW);
       } else if (node_type=="wifirelay") {
         digitalWrite(5,LOW);
       } else if (node_type=="huzzah") {

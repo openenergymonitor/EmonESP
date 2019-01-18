@@ -18,18 +18,18 @@
 <body>
   <div id="page">
     <div class="box">
-      <h1>emon<span>ESP</span></h1>
-      <h3>WiFi Emoncms Link</h3>
+      <h1 data-bind="text: config.node_name">emonESP</h1>
+      <h3 data-bind="text: config.node_description">WiFi Emoncms Link</h3>
     </div>
 
     <div class="loading" data-bind="visible: !initialised()">
       Loading, please wait...
     </div>
 
-    <div id="left-hand-container" data-bind="visible: initialised" style="display: none">
+    <div id="container" data-bind="visible: initialised" style="display: none">
       <div id="one">
-        <h2>1. WiFi Network</h2>
-        <div class="itembody-wrapper">
+        <h2 onclick="toggle('wifi');"><span>+</span> WiFi Network</h2>
+        <div id="wifi" data-bind="visible: !status.isWifiClient()" class="itembody-wrapper" style="display:none">
           <p><b>Mode:</b> <span id="mode" data-bind="text: status.fullMode"></span></p>
 
           <div id="client-view" data-bind="visible: status.isWifiClient">
@@ -80,9 +80,52 @@
         </div>
       </div>
       <!--//////////////////////////////////////////////////////////////////////////////////-->
+      <div id="four">
+        <h2 onclick="toggle('latest');"><span>+</span> Latest Data</h2>
+        <div id="latest" data-bind="visible: status.isWifiClient() && last.lastValues()" class="itembody-wrapper" style="display:none">
+          <table>
+            <tr>
+              <th>Key</th>
+              <th>Value</th>
+            </tr>
+            <tbody data-bind="foreach: last.values">
+              <tr>
+                <td data-bind="text: key"></td>
+                <td data-bind="text: value"></td>
+              </tr>
+            </tbody>
+          </table><br>
+          <div class="small-text">
+            Input key value pairs received via serial UART (e.g "CT1:3935,CT2:325") or HTTP input API e.g.: <br>
+            <a data-bind="attr: {href: 'http://'+status.ipaddress()+'/input?string=CT1:3935,CT2:325,T0:20.5'}">http://<span data-bind="text: status.ipaddress"></span>/input?string=CT1:3935,CT2:325,T0:20.5</a>
+          </div>
+        </div>
+      </div>
+      <!--//////////////////////////////////////////////////////////////////////////////////-->
+      <div id="nine">
+        <h2 onclick="toggle('control');"><span>+</span> Control</h2>
+        <div id="control" data-bind="visible: status.isWifiClient()" class="itembody-wrapper" style="display:none; text-align:center">
+          <br>
+          <div class="btn-group">
+            <button id="on" data-bind="click: ctrlMode.bind($data,'On'), css: (status.ctrl_mode()=='On'?'green':'')">On</button><button id="off" data-bind="click: ctrlMode.bind($data,'Off'), css: (status.ctrl_mode()=='Off'?'red':'')">Off</button><button id="timer" data-bind="click: ctrlMode.bind($data,'Timer'), css: (status.ctrl_mode()=='Timer'?(status.ctrl_state()==1?'green':'red'):'')">Timer</button>
+          </div>
+          <p><b>Time now:</b> <span data-bind="text: status.time">12:34:56</span></p>
+          <div style=""><b>Period 1</b></div>
+          <div style="display:inline-block; margin:10px">Start: <input type="time" data-bind="textInput: config.f_timer_start1"></div>
+          <div style="display:inline-block; margin:10px">Stop: <input type="time" data-bind="textInput: config.f_timer_stop1"></div>
+          <br><br>
+          <div style=""><b>Period 2</b></div>
+          <div style="display:inline-block; margin:10px">Start: <input type="time" data-bind="textInput: config.f_timer_start2"></div>
+          <div style="display:inline-block; margin:10px">Stop: <input type="time" data-bind="textInput: config.f_timer_stop2"></div>
+          <br><br>
+          <button data-bind="click: saveTimer, text: (saveTimerFetching() ? 'Saving' : (saveTimerSuccess() ? 'Saved' : 'Save')), disable: saveTimerFetching">Save</button>
+          <br><br>
+        </div>
+      </div>
+      <!--//////////////////////////////////////////////////////////////////////////////////-->
       <div id="two">
-        <h2>2. Emoncms</h2>
-        <div class="itembody-wrapper">
+        <h2 onclick="toggle('emoncms');"><span>+</span> Emoncms</h2>
+        <div id="emoncms" class="itembody-wrapper" style="display:none">
           <p>
             <b>Emoncms Server*:</b><br>
             <input type="text" data-bind="textInput: config.emoncms_server"><br/>
@@ -122,8 +165,8 @@
       </div>
       <!--//////////////////////////////////////////////////////////////////////////////////-->
       <div id="three">
-        <h2>3. MQTT</h2>
-        <div class="itembody-wrapper">
+        <h2 onclick="toggle('mqtt');"><span>+</span> MQTT</h2>
+        <div id="mqtt" class="itembody-wrapper" style="display:none">
           <p><b>MQTT Server*:</b><br>
             <input data-bind="textInput: config.mqtt_server" type="text"><br/>
             <span class="small-text">e.g 'emonpi', 'test.mosquitto.org' or '192.168.1.4'</span><br>
@@ -155,34 +198,10 @@
           </p>
         </div>
       </div>
-    </div>
-    <!--//////////////////////////////////////////////////////////////////////////////////-->
-    <div id="right-hand-container" data-bind="visible: initialised" style="display: none">
-      <div id="four">
-        <h2>4. Latest Data</h2>
-        <div class="itembody-wrapper">
-          <table>
-            <tr>
-              <th>Key</th>
-              <th>Value</th>
-            </tr>
-            <tbody data-bind="foreach: last.values">
-              <tr>
-                <td data-bind="text: key"></td>
-                <td data-bind="text: value"></td>
-              </tr>
-            </tbody>
-          </table><br>
-        </div>
-        <div class="small-text">
-          Input key value pairs received via serial UART (e.g "CT1:3935,CT2:325") or HTTP input API e.g.: <br>
-          <a data-bind="attr: {href: 'http://'+status.ipaddress()+'/input?string=CT1:3935,CT2:325,T0:20.5'}">http://<span data-bind="text: status.ipaddress"></span>/input?string=CT1:3935,CT2:325,T0:20.5</a>
-        </div>
-      </div>
       <!--//////////////////////////////////////////////////////////////////////////////////-->
       <div id="five">
-        <h2>5. Admin</h2>
-        <div class="itembody-wrapper">
+        <h2 onclick="toggle('admin');"><span>+</span> Admin</h2>
+        <div id="admin" class="itembody-wrapper" style="display:none">
           <p>
             <b>Username:</b><br>
             <input type="text" value="admin" data-bind="textInput: config.www_username">
@@ -197,8 +216,8 @@
       </div>
       <!--//////////////////////////////////////////////////////////////////////////////////-->
       <div id="six">
-        <h2>6. Firmware</h2>
-        <div class="itembody-wrapper">
+        <h2 onclick="toggle('firmware');"><span>+</span> Firmware</h2>
+        <div id="firmware" class="itembody-wrapper" style="display:none">
           <div id="firmware" style="display:none">
             <table>
               <tr>
@@ -223,8 +242,8 @@
       </div>
       <!--//////////////////////////////////////////////////////////////////////////////////-->
       <div id="seven">
-        <h2>7. System</h2>
-        <div class="itembody-wrapper">
+        <h2 onclick="toggle('system');"><span>+</span> System</h2>
+        <div id="system" class="itembody-wrapper" style="display:none">
           <p><b>Free RAM:</b> <span data-bind="text: scaleString(status.free_heap(), 1024, 0) + 'K'"></span></p>
           <p><b>Flash Size:</b> <span data-bind="text: scaleString(config.espflash(), 1024, 0) + 'K'"></span></p>
           <p><b>Version:</b> <a href="https://github.com/openenergymonitor/EmonESP/releases">v<span data-bind="text: config.version"></span></a></p>
@@ -234,8 +253,8 @@
       </div>
       <!--//////////////////////////////////////////////////////////////////////////////////-->
       <div id="eight">
-        <h2>8. Logs</h2>
-        <div class="itembody-wrapper scrollable-logs">
+        <h2 onclick="toggle('logs');"><span>+</span> Logs</h2>
+        <div id="logs" class="itembody-wrapper scrollable-logs" style="display:none">
           <table>
             <tr>
               <th>Timestamp</th>
@@ -251,29 +270,9 @@
         </div>
       </div>
       <!--//////////////////////////////////////////////////////////////////////////////////-->
-      <div id="nine">
-        <h2>9. Control</h2>
-        <div class="itembody-wrapper">
-          <br>
-          <div class="btn-group">
-            <button id="on" data-bind="click: ctrlMode.bind($data,'On'), css: (status.ctrl_mode()=='On'?'green':'')">On</button><button id="off" data-bind="click: ctrlMode.bind($data,'Off'), css: (status.ctrl_mode()=='Off'?'red':'')">Off</button><button id="timer" data-bind="click: ctrlMode.bind($data,'Timer'), css: (status.ctrl_mode()=='Timer'?(status.ctrl_state()==1?'green':'red'):'')">Timer</button>
-          </div>
-          <p><b>Time now:</b> <span data-bind="text: status.time">12:34:56</span></p>
-          <div style="display:inline-block"><b>Period 1:</b></div>
-          <div style="display:inline-block; margin-left:20px">Start: <input type="time" data-bind="textInput: config.f_timer_start1"></div>
-          <div style="display:inline-block; margin-left:20px">Stop: <input type="time" data-bind="textInput: config.f_timer_stop1"></div>
-          <br><br>
-          <div style="display:inline-block"><b>Period 2:</b></div>
-          <div style="display:inline-block; margin-left:20px">Start: <input type="time" data-bind="textInput: config.f_timer_start2"></div>
-          <div style="display:inline-block; margin-left:20px">Stop: <input type="time" data-bind="textInput: config.f_timer_stop2"></div>
-          <br><br>
-          <button data-bind="click: saveTimer, text: (saveTimerFetching() ? 'Saving' : (saveTimerSuccess() ? 'Saved' : 'Save')), disable: saveTimerFetching">Save</button>
-          <br><br>
-        </div>
-      </div>
-      <!--//////////////////////////////////////////////////////////////////////////////////-->
     </div>
   </div>
+  <div style="clear:both"></div>
   <div id="footer-small-scrn">
     Powered by <a href="http://openenergymonitor.org"><span>Open</span>EnergyMonitor.org</a>
   </div>
