@@ -61,10 +61,12 @@ String mqtt_pass = "";
 String mqtt_feed_prefix = "";
 
 // Timer Settings 
-String timer_start1 = "";
-String timer_stop1 = "";
-String timer_start2 = "";
-String timer_stop2 = "";
+int timer_start1 = 0;
+int timer_stop1 = 0;
+int timer_start2 = 0;
+int timer_stop2 = 0;
+
+int voltage_output = 0;
 
 extern String ctrl_mode = "Timer";
 extern bool ctrl_update = 0;
@@ -84,11 +86,12 @@ extern bool ctrl_state = 0;
 #define EEPROM_MQTT_FEED_PREFIX_SIZE  10
 #define EEPROM_WWW_USER_SIZE      16
 #define EEPROM_WWW_PASS_SIZE      16
+#define EEPROM_TIMER_START1_SIZE  2
+#define EEPROM_TIMER_STOP1_SIZE   2
+#define EEPROM_TIMER_START2_SIZE  2
+#define EEPROM_TIMER_STOP2_SIZE   2
+#define EEPROM_VOLTAGE_OUTPUT_SIZE 2
 #define EEPROM_SIZE 512
-#define EEPROM_TIMER_START1_SIZE  4
-#define EEPROM_TIMER_STOP1_SIZE   4
-#define EEPROM_TIMER_START2_SIZE  4
-#define EEPROM_TIMER_STOP2_SIZE   4
 
 
 #define EEPROM_ESID_START         0
@@ -129,6 +132,9 @@ extern bool ctrl_state = 0;
 #define EEPROM_TIMER_STOP2_START  EEPROM_TIMER_START2_END
 #define EEPROM_TIMER_STOP2_END    (EEPROM_TIMER_STOP2_START + EEPROM_TIMER_STOP2_SIZE)
 
+#define EEPROM_VOLTAGE_OUTPUT_START  EEPROM_TIMER_STOP2_END
+#define EEPROM_VOLTAGE_OUTPUT_END    (EEPROM_VOLTAGE_OUTPUT_START + EEPROM_VOLTAGE_OUTPUT_SIZE)
+
 // -------------------------------------------------------------------
 // Reset EEPROM, wipes all settings
 // -------------------------------------------------------------------
@@ -157,6 +163,28 @@ void EEPROM_write_string(int start, int count, String val) {
       EEPROM.write(start+i, 0);
     }
   }
+}
+
+void EEPROM_read_int(int start, int & val) {
+  byte high = EEPROM.read(start);
+  byte low = EEPROM.read(start+1);
+  val=word(high,low);
+
+  DEBUG.println(high);
+  DEBUG.println(low);
+  DEBUG.println("read int:");
+  DEBUG.println(val);
+}
+
+void EEPROM_write_int(int start, int val) {
+  EEPROM.write(start,highByte(val));
+  EEPROM.write(start+1,lowByte(val));
+  
+  DEBUG.println("write int:");
+  DEBUG.println(val);
+  DEBUG.println(highByte(val));
+  DEBUG.println(lowByte(val));
+
 }
 
 // -------------------------------------------------------------------
@@ -194,10 +222,12 @@ void config_load_settings()
   EEPROM_read_string(EEPROM_WWW_PASS_START, EEPROM_WWW_PASS_SIZE, www_password);
 
   // Read timer settings
-  EEPROM_read_string(EEPROM_TIMER_START1_START, EEPROM_TIMER_START1_SIZE, timer_start1);
-  EEPROM_read_string(EEPROM_TIMER_STOP1_START, EEPROM_TIMER_STOP1_SIZE, timer_stop1);
-  EEPROM_read_string(EEPROM_TIMER_START2_START, EEPROM_TIMER_START2_SIZE, timer_start2);
-  EEPROM_read_string(EEPROM_TIMER_STOP2_START, EEPROM_TIMER_STOP2_SIZE, timer_stop2);
+  EEPROM_read_int(EEPROM_TIMER_START1_START, timer_start1);
+  EEPROM_read_int(EEPROM_TIMER_STOP1_START, timer_stop1);
+  EEPROM_read_int(EEPROM_TIMER_START2_START, timer_start2);
+  EEPROM_read_int(EEPROM_TIMER_STOP2_START, timer_stop2);
+
+  EEPROM_read_int(EEPROM_VOLTAGE_OUTPUT_START, voltage_output);
 }
 
 void config_save_emoncms(String server, String path, String node, String apikey, String fingerprint)
@@ -273,19 +303,31 @@ void config_save_admin(String user, String pass)
   EEPROM.commit();
 }
 
-void config_save_timer(String start1, String stop1, String start2, String stop2)
+void config_save_timer(int start1, int stop1, int start2, int stop2, int qvoltage_output)
 {
   timer_start1 = start1;
   timer_stop1 = stop1;
   timer_start2 = start2;
   timer_stop2 = stop2;
+  EEPROM_write_int(EEPROM_TIMER_START1_START, start1);
+  EEPROM_write_int(EEPROM_TIMER_STOP1_START, stop1);
+  EEPROM_write_int(EEPROM_TIMER_START2_START, start2);
+  EEPROM_write_int(EEPROM_TIMER_STOP2_START, stop2);
 
-  EEPROM_write_string(EEPROM_TIMER_START1_START, EEPROM_TIMER_START1_SIZE, start1);
-  EEPROM_write_string(EEPROM_TIMER_STOP1_START, EEPROM_TIMER_STOP1_SIZE, stop1);
-  EEPROM_write_string(EEPROM_TIMER_START2_START, EEPROM_TIMER_START2_SIZE, start2);
-  EEPROM_write_string(EEPROM_TIMER_STOP2_START, EEPROM_TIMER_STOP2_SIZE, stop2);
-
+  voltage_output = qvoltage_output;
+  EEPROM_write_int(EEPROM_VOLTAGE_OUTPUT_START, voltage_output);
   EEPROM.commit();
+}
+
+
+void config_save_voltage_output(int qvoltage_output, int save_to_eeprom)
+{
+  voltage_output = qvoltage_output;
+  
+  if (save_to_eeprom) {
+    EEPROM_write_int(EEPROM_VOLTAGE_OUTPUT_START, voltage_output);
+    EEPROM.commit();
+  }
 }
 
 void config_save_wifi(String qsid, String qpass)

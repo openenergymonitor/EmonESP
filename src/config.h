@@ -67,10 +67,12 @@ extern String mqtt_pass;
 extern String mqtt_feed_prefix;
 
 // Timer Settings 
-extern String timer_start1;
-extern String timer_stop1;
-extern String timer_start2;
-extern String timer_stop2;
+extern int timer_start1;
+extern int timer_stop1;
+extern int timer_start2;
+extern int timer_stop2;
+
+extern int voltage_output;
 
 extern String ctrl_mode;
 extern bool ctrl_update;
@@ -100,8 +102,8 @@ extern void config_save_admin(String user, String pass);
 // -------------------------------------------------------------------
 // Save the admin/web interface details
 // -------------------------------------------------------------------
-extern void config_save_timer(String start1, String stop1, String start2, String stop2);
-
+extern void config_save_timer(int start1, int stop1, int start2, int stop2, int voltage_output);
+extern void config_save_voltage_output(int qvoltage_output, int save_to_eeprom);
 // -------------------------------------------------------------------
 // Save the Wifi details
 // -------------------------------------------------------------------

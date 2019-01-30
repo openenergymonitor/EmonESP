@@ -61,9 +61,9 @@ void setup() {
   // ---------------------------------------------------------
   // Hard-coded initial config for node_name and node_describe
   // ---------------------------------------------------------
-  node_type = "smartplug";
-  node_description = "Sonoff S20 Smartplug";
-  node_id = 5;
+  node_type = "espwifi";
+  node_description = "Generic ESP8266";
+  node_id = 2;
   
   node_name = node_type + String(node_id);
   node_status = "emon/"+node_name+"/status";
@@ -80,9 +80,13 @@ void setup() {
     led_flash(3000,100);    
   } else if (node_type=="wifirelay") {
     pinMode(5, OUTPUT);
-  } else if (node_type=="huzzah") {
+  } else if (node_type=="espwifi") {
     pinMode(2,OUTPUT);
     digitalWrite(2,HIGH);
+  } else if (node_type=="hpmon") {
+    pinMode(5,OUTPUT);
+    digitalWrite(5,LOW);
+    pinMode(4,OUTPUT);
   }
 
   // Initialise the WiFi
@@ -149,14 +153,10 @@ void loop()
     ctrl_state = 0; // default off
 
     // 1. Timer
-    int start1 = timer_start1.toInt();
-    int stop1 = timer_stop1.toInt();
-    int start2 = timer_start2.toInt();
-    int stop2 = timer_stop2.toInt();
     int timenow = timeClient.getHours()*100+timeClient.getMinutes();
     
-    if (timenow>=start1 && timenow<stop1) ctrl_state = 1;
-    if (timenow>=start2 && timenow<stop2) ctrl_state = 1;
+    if (timenow>=timer_start1 && timenow<timer_stop1) ctrl_state = 1;
+    if (timenow>=timer_start2 && timenow<timer_stop2) ctrl_state = 1;
 
     // 2. On/Off
     if (ctrl_mode=="On") ctrl_state = 1;
@@ -170,8 +170,10 @@ void loop()
         digitalWrite(16,HIGH);
       } else if (node_type=="wifirelay") {
         digitalWrite(5,HIGH);
-      } else if (node_type=="huzzah") {
+      } else if (node_type=="espwifi") {
         digitalWrite(2,LOW);
+      } else if (node_type=="hpmon") {
+        digitalWrite(5,HIGH);
       }
     } else {
       // OFF
@@ -180,10 +182,18 @@ void loop()
         digitalWrite(16,LOW);
       } else if (node_type=="wifirelay") {
         digitalWrite(5,LOW);
-      } else if (node_type=="huzzah") {
+      } else if (node_type=="espwifi") {
         digitalWrite(2,HIGH);
+      } else if (node_type=="hpmon") {
+        digitalWrite(5,LOW);
       }
-    }   
+    }
+
+    if (node_type=="hpmon") {
+      analogWrite(4,voltage_output);  
+      // DEBUG.print("voltage_output: "); 
+      // DEBUG.println(voltage_output);
+    }
   }
   // --------------------------------------------------------------
   

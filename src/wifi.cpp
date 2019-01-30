@@ -185,6 +185,7 @@ void wifi_setup() {
 void wifi_loop() {
 
   // Factory reset on GPIO0.
+  /*
   while (digitalRead(0) == LOW) {
     delay(factoryreset_holdtime);
     if (digitalRead(0) == LOW) {
@@ -194,7 +195,7 @@ void wifi_loop() {
       Serial.println("Factory reset complete! Resetting...");
       ESP.reset();
     }
-  }
+  }*/
   // end factory reset.
 
   dnsServer.processNextRequest(); // Captive portal DNS re-dierct

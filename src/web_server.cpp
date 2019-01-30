@@ -273,14 +273,44 @@ handleSaveTimer(AsyncWebServerRequest *request) {
     return;
   }
 
-  String qtimer_start1 = request->arg("timer_start1");
-  String qtimer_stop1 = request->arg("timer_stop1");
-  String qtimer_start2 = request->arg("timer_start2");
-  String qtimer_stop2 = request->arg("timer_stop2");
-  config_save_timer(qtimer_start1, qtimer_stop1, qtimer_start2, qtimer_stop2);
+  String tmp = request->arg("timer_start1");
+  int qtimer_start1 = tmp.toInt();
+  tmp = request->arg("timer_stop1");
+  int qtimer_stop1 = tmp.toInt();
+  tmp = request->arg("timer_start2");
+  int qtimer_start2 = tmp.toInt();
+  tmp = request->arg("timer_stop2");
+  int qtimer_stop2 = tmp.toInt();
+  tmp = request->arg("voltage_output");
+  int qvoltage_output = tmp.toInt();
+  
+  config_save_timer(qtimer_start1, qtimer_stop1, qtimer_start2, qtimer_stop2, qvoltage_output);
 
   response->setCode(200);
   response->print("saved");
+  request->send(response);
+}
+
+void
+handleSetVout(AsyncWebServerRequest *request) {
+  AsyncResponseStream *response;
+  if(false == requestPreProcess(request, response, "text/plain")) {
+    return;
+  }
+  String tmp = request->arg("val");
+  int vout = tmp.toInt();
+
+  tmp = request->arg("save");
+  int qsave = tmp.toInt();
+
+  int save = 0;
+  if (qsave==1) save = 1;
+  
+  config_save_voltage_output(vout,save);
+
+  response->setCode(200);
+  if (save) response->print("saved");
+  else response->print("ok");
   request->send(response);
 }
 
@@ -388,10 +418,11 @@ handleConfig(AsyncWebServerRequest *request) {
   //s += "\"mqtt_pass\":\""+mqtt_pass+"\","; security risk: DONT RETURN PASSWORDS
   s += "\"www_username\":\"" + www_username + "\",";
   //s += "\"www_password\":\""+www_password+"\","; security risk: DONT RETURN PASSWORDS
-  s += "\"timer_start1\":\"" + timer_start1 + "\",";
-  s += "\"timer_stop1\":\"" + timer_stop1 + "\",";
-  s += "\"timer_start2\":\"" + timer_start2 + "\",";
-  s += "\"timer_stop2\":\"" + timer_stop2 + "\",";
+  s += "\"timer_start1\":\"" + String(timer_start1) + "\",";
+  s += "\"timer_stop1\":\"" + String(timer_stop1) + "\",";
+  s += "\"timer_start2\":\"" + String(timer_start2) + "\",";
+  s += "\"timer_stop2\":\"" + String(timer_stop2) + "\",";
+  s += "\"voltage_output\":\"" + String(voltage_output) + "\",";
   s += "\"node_name\":\"" + node_name + "\",";
   s += "\"node_description\":\"" + node_description + "\"";
   s += "}";
@@ -698,6 +729,8 @@ web_server_setup()
   server.on("/emoncms/describe", handleDescribe);
   server.on("/time", handleTime);
   server.on("/ctrlmode", handleCtrlMode);
+  server.on("/vout", handleSetVout);
+
 
 
   server.onNotFound(handleNotFound);

@@ -23,6 +23,7 @@ function scaleString(string, scale, precision) {
 }
 
 function addcolon(t) {
+    if (t.length==3) t = "0"+t
     return t.substr(0,2)+":"+t.substr(2,4);
 }
 
@@ -119,6 +120,7 @@ function ConfigViewModel() {
     "timer_stop1":"",
     "timer_start2":"",
     "timer_stop2":"",
+    "voltage_output":"",
   }, baseEndpoint + '/config');
   
   this.f_timer_start1 = ko.pureComputed({
@@ -367,7 +369,8 @@ function EmonEspViewModel() {
       timer_start1: self.config.timer_start1(), 
       timer_stop1: self.config.timer_stop1(), 
       timer_start2: self.config.timer_start2(), 
-      timer_stop2: self.config.timer_stop2() 
+      timer_stop2: self.config.timer_stop2(),
+      voltage_output: self.config.voltage_output() 
     }, function (data) {
       self.saveTimerSuccess(true);
       setTimeout(function(){
