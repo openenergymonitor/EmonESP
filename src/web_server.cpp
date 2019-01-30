@@ -314,6 +314,30 @@ handleSetVout(AsyncWebServerRequest *request) {
   request->send(response);
 }
 
+void
+handleSetFlowT(AsyncWebServerRequest *request) {
+  AsyncResponseStream *response;
+  if(false == requestPreProcess(request, response, "text/plain")) {
+    return;
+  }
+  String tmp = request->arg("val");
+  float flow = tmp.toFloat();
+  int vout = (int) (flow - 7.14)/0.0371;
+
+  tmp = request->arg("save");
+  int qsave = tmp.toInt();
+
+  int save = 0;
+  if (qsave==1) save = 1;
+  
+  config_save_voltage_output(vout,save);
+
+  response->setCode(200);
+  if (save) response->print("saved");
+  else response->print("ok");
+  request->send(response);
+}
+
 // -------------------------------------------------------------------
 // Last values on atmega serial
 // url: /lastvalues
@@ -730,6 +754,7 @@ web_server_setup()
   server.on("/time", handleTime);
   server.on("/ctrlmode", handleCtrlMode);
   server.on("/vout", handleSetVout);
+  server.on("/flow", handleSetFlowT);
 
 
 

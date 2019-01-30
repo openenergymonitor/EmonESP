@@ -61,9 +61,9 @@ void setup() {
   // ---------------------------------------------------------
   // Hard-coded initial config for node_name and node_describe
   // ---------------------------------------------------------
-  node_type = "espwifi";
-  node_description = "Generic ESP8266";
-  node_id = 2;
+  node_type = "hpmon";
+  node_description = "Heatpump Monitor";
+  node_id = 5;
   
   node_name = node_type + String(node_id);
   node_status = "emon/"+node_name+"/status";

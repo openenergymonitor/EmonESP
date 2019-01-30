@@ -159,6 +159,16 @@ function ConfigViewModel() {
       },
       owner: this
   });
+  this.flowT = ko.pureComputed({
+      read: function () {
+          return (this.voltage_output()*0.0371)+7.14;
+      },
+      write: function (value) {
+          this.voltage_output((value-7.14)/0.0371);
+      },
+      owner: this
+  });
+  
 }
 ConfigViewModel.prototype = Object.create(BaseViewModel.prototype);
 ConfigViewModel.prototype.constructor = ConfigViewModel;
