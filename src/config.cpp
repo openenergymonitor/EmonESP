@@ -169,22 +169,11 @@ void EEPROM_read_int(int start, int & val) {
   byte high = EEPROM.read(start);
   byte low = EEPROM.read(start+1);
   val=word(high,low);
-
-  DEBUG.println(high);
-  DEBUG.println(low);
-  DEBUG.println("read int:");
-  DEBUG.println(val);
 }
 
 void EEPROM_write_int(int start, int val) {
   EEPROM.write(start,highByte(val));
   EEPROM.write(start+1,lowByte(val));
-  
-  DEBUG.println("write int:");
-  DEBUG.println(val);
-  DEBUG.println(highByte(val));
-  DEBUG.println(lowByte(val));
-
 }
 
 // -------------------------------------------------------------------

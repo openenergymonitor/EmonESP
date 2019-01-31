@@ -37,6 +37,7 @@ PubSubClient mqttclient(espClient);   // Create client for MQTT
 long lastMqttReconnectAttempt = 0;
 int clientTimeout = 0;
 int i = 0;
+String topic_timer = mqtt_topic+"/"+node_name+"/timer";
 
 // -------------------------------------------------------------------
 // MQTT Control callback for WIFI Relay and Sonoff smartplug
@@ -59,6 +60,8 @@ void mqtt_callback(char* topic, byte* payload, unsigned int length) {
       DEBUG.println("STATE:0");
       ctrl_mode = "Off";
     }
+  } else if (strcmp(topic,topic_timer.c_str())==0) {
+    // Process timer command here
   }
 }
 

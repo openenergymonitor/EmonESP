@@ -448,7 +448,8 @@ handleConfig(AsyncWebServerRequest *request) {
   s += "\"timer_stop2\":\"" + String(timer_stop2) + "\",";
   s += "\"voltage_output\":\"" + String(voltage_output) + "\",";
   s += "\"node_name\":\"" + node_name + "\",";
-  s += "\"node_description\":\"" + node_description + "\"";
+  s += "\"node_description\":\"" + node_description + "\",";
+  s += "\"node_type\":\"" + node_type + "\"";
   s += "}";
 
   response->setCode(200);

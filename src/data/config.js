@@ -100,6 +100,7 @@ function ConfigViewModel() {
   BaseViewModel.call(this, {
     "node_name": "emonESP",
     "node_description":"WiFi Emoncms Link",
+    "node_type": "",
     "ssid": "",
     "pass": "",
     "emoncms_server": "data.openevse.com",

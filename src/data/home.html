@@ -104,7 +104,7 @@
       <!--//////////////////////////////////////////////////////////////////////////////////-->
       <div id="nine">
         <h2 onclick="toggle('control');"><span>+</span> Control</h2>
-        <div id="control" data-bind="visible: status.isWifiClient()" class="itembody-wrapper" style="display:none; text-align:center">
+        <div id="control" data-bind="visible: status.isWifiClient() && (config.node_type()=='hpmon' || config.node_type()=='smartplug')" class="itembody-wrapper" style="display:none; text-align:center">
           <br>
           <div class="btn-group">
             <button id="on" data-bind="click: ctrlMode.bind($data,'On'), css: (status.ctrl_mode()=='On'?'green':'')">On</button><button id="off" data-bind="click: ctrlMode.bind($data,'Off'), css: (status.ctrl_mode()=='Off'?'red':'')">Off</button><button id="timer" data-bind="click: ctrlMode.bind($data,'Timer'), css: (status.ctrl_mode()=='Timer'?(status.ctrl_state()==1?'green':'red'):'')">Timer</button>
@@ -118,7 +118,7 @@
           <div style="display:inline-block; margin:10px">Start: <input type="time" data-bind="textInput: config.f_timer_start2"></div>
           <div style="display:inline-block; margin:10px">Stop: <input type="time" data-bind="textInput: config.f_timer_stop2"></div>
           <br><br>
-          <p>
+          <p data-bind="visible: config.node_type()=='hpmon'">
           Flow temperature: <input type="text" data-bind="textInput: config.flowT">
           </p>
           <button data-bind="click: saveTimer, text: (saveTimerFetching() ? 'Saving' : (saveTimerSuccess() ? 'Saved' : 'Save')), disable: saveTimerFetching">Save</button>

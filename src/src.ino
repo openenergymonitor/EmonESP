@@ -38,6 +38,10 @@
 WiFiUDP ntpUDP;
 NTPClient timeClient(ntpUDP,"europe.pool.ntp.org",0,60000);
 unsigned long last_ctrl_update = 0;
+unsigned long last_pushbtn_check = 0;
+bool pushbtn_action = 0;
+bool pushbtn_state = 0;
+bool last_pushbtn_state = 0;
 
 // -------------------------------------------------------------------
 // SETUP
@@ -61,9 +65,9 @@ void setup() {
   // ---------------------------------------------------------
   // Hard-coded initial config for node_name and node_describe
   // ---------------------------------------------------------
-  node_type = "hpmon";
-  node_description = "Heatpump Monitor";
-  node_id = 5;
+  node_type = "smartplug";
+  node_description = "Smart Plug";
+  node_id = 1;
   
   node_name = node_type + String(node_id);
   node_status = "emon/"+node_name+"/status";
@@ -196,6 +200,18 @@ void loop()
     }
   }
   // --------------------------------------------------------------
+  if ((millis()-last_pushbtn_check)>100) {
+    last_pushbtn_check = millis();
+
+    last_pushbtn_state = pushbtn_state;
+    pushbtn_state = !digitalRead(0);
+    
+    if (pushbtn_state && last_pushbtn_state && !pushbtn_action) {
+      pushbtn_action = 1;
+      if (ctrl_mode=="On") ctrl_mode = "Off"; else ctrl_mode = "On";
+    }
+    if (!pushbtn_state && !last_pushbtn_state) pushbtn_action = 0;
+  }
   
 } // end loop
 
