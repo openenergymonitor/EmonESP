@@ -42,7 +42,6 @@ extern int node_id;
 extern String node_name;
 extern String node_describe;
 extern String node_description;
-extern String node_status;
 
 // Wifi Network Strings
 extern String esid;

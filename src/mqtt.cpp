@@ -37,31 +37,67 @@ PubSubClient mqttclient(espClient);   // Create client for MQTT
 long lastMqttReconnectAttempt = 0;
 int clientTimeout = 0;
 int i = 0;
-String topic_timer = mqtt_topic+"/"+node_name+"/timer";
+
 
 // -------------------------------------------------------------------
 // MQTT Control callback for WIFI Relay and Sonoff smartplug
 // -------------------------------------------------------------------
 void mqtt_callback(char* topic, byte* payload, unsigned int length) {
-  DEBUG.print("Message arrived [");
-  DEBUG.print(topic);
-  DEBUG.print("] ");
-  for (int i=0;i<length;i++) {
-    DEBUG.print((char)payload[i]);
-  }
-  DEBUG.println();
+  
+  String topicstr = String(topic);
+  String payloadstr = String((char *)payload);
+  payloadstr = payloadstr.substring(0,length);
+  
+  DEBUG.println("Message arrived topic:["+topicstr+"] payload: ["+payloadstr+"]");
 
-  if (strcmp(topic,node_status.c_str())==0) {
-    char state = (char) payload[0];
-    if (state=='1') {
-      DEBUG.println("STATE:1");
+  // --------------------------------------------------------------------------
+  // State 
+  // --------------------------------------------------------------------------
+  if (topicstr.compareTo("emon/"+node_name+"/status")==0) {
+    DEBUG.print("Status: ");
+    if (payloadstr.compareTo("2")==0) {
+      ctrl_mode = "Timer";
+    } else if (payloadstr.compareTo("1")==0) {
       ctrl_mode = "On";
+    } else if (payloadstr.compareTo("0")==0) {
+      ctrl_mode = "Off";
+    } else if (payloadstr.compareTo("Timer")==0) {
+      ctrl_mode = "Timer";
+    } else if (payloadstr.compareTo("On")==0) {
+      ctrl_mode = "On";
+    } else if (payloadstr.compareTo("Off")==0) {
+      ctrl_mode = "Off";
     } else {
-      DEBUG.println("STATE:0");
       ctrl_mode = "Off";
     }
-  } else if (strcmp(topic,topic_timer.c_str())==0) {
-    // Process timer command here
+    DEBUG.println(ctrl_mode);
+  // --------------------------------------------------------------------------
+  // Timer  
+  // --------------------------------------------------------------------------
+  } else if (topicstr.compareTo("emon/"+node_name+"/timer")==0) {
+    DEBUG.print("Timer: ");
+      if (payloadstr.length()==9) {
+      String tstart = payloadstr.substring(0,4);
+      String tstop = payloadstr.substring(5,9);
+      timer_start1 = tstart.toInt();
+      timer_stop1 = tstop.toInt();
+      DEBUG.println(tstart+" "+tstop);
+    }
+  // --------------------------------------------------------------------------
+  // Vout  
+  // --------------------------------------------------------------------------
+  } else if (topicstr.compareTo("emon/"+node_name+"/vout")==0) {
+    DEBUG.print("Vout: ");
+    voltage_output = payloadstr.toInt();
+    DEBUG.println(voltage_output);
+  // --------------------------------------------------------------------------
+  // FlowT  
+  // --------------------------------------------------------------------------
+  } else if (topicstr.compareTo("emon/"+node_name+"/flowT")==0) {
+    DEBUG.print("FlowT: ");
+    float flow = payloadstr.toFloat();
+    voltage_output = (int) (flow - 7.14)/0.0371;
+    DEBUG.println(String(flow)+" vout:"+String(voltage_output));
   }
 }
 

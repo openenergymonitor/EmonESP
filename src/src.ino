@@ -69,9 +69,7 @@ void setup() {
   node_description = "Smart Plug";
   node_id = 1;
   
-  node_name = node_type + String(node_id);
-  node_status = "emon/"+node_name+"/status";
-  
+  node_name = node_type + String(node_id);  
   node_describe = "describe:"+node_type;
   // ---------------------------------------------------------
 
