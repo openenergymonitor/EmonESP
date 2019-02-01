@@ -76,12 +76,23 @@ void mqtt_callback(char* topic, byte* payload, unsigned int length) {
   // --------------------------------------------------------------------------
   } else if (topicstr.compareTo("emon/"+node_name+"/timer")==0) {
     DEBUG.print("Timer: ");
-      if (payloadstr.length()==9) {
+    if (payloadstr.length()==9) {
       String tstart = payloadstr.substring(0,4);
       String tstop = payloadstr.substring(5,9);
       timer_start1 = tstart.toInt();
       timer_stop1 = tstop.toInt();
       DEBUG.println(tstart+" "+tstop);
+    }
+    if (payloadstr.length()==19) {
+      String tstart1 = payloadstr.substring(0,4);
+      String tstop1 = payloadstr.substring(5,9);
+      timer_start1 = tstart1.toInt();
+      timer_stop1 = tstop1.toInt();
+      String tstart2 = payloadstr.substring(10,14);
+      String tstop2 = payloadstr.substring(15,19);
+      timer_start2 = tstart2.toInt();
+      timer_stop2 = tstop2.toInt();
+      DEBUG.println(tstart1+":"+tstop1+" "+tstart2+":"+tstop2);
     }
   // --------------------------------------------------------------------------
   // Vout  
