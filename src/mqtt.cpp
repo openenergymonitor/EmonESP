@@ -24,6 +24,7 @@
  */
 
 #include "emonesp.h"
+#include "wifi.h"
 #include "mqtt.h"
 #include "config.h"
 
@@ -53,7 +54,7 @@ void mqtt_callback(char* topic, byte* payload, unsigned int length) {
   // --------------------------------------------------------------------------
   // State 
   // --------------------------------------------------------------------------
-  if (topicstr.compareTo("emon/"+node_name+"/status")==0) {
+  if (topicstr.compareTo("emon/"+node_name+"/in/ctrlmode")==0) {
     DEBUG.print("Status: ");
     if (payloadstr.compareTo("2")==0) {
       ctrl_mode = "Timer";
@@ -74,7 +75,7 @@ void mqtt_callback(char* topic, byte* payload, unsigned int length) {
   // --------------------------------------------------------------------------
   // Timer  
   // --------------------------------------------------------------------------
-  } else if (topicstr.compareTo("emon/"+node_name+"/timer")==0) {
+  } else if (topicstr.compareTo("emon/"+node_name+"/in/timer")==0) {
     DEBUG.print("Timer: ");
     if (payloadstr.length()==9) {
       String tstart = payloadstr.substring(0,4);
@@ -97,18 +98,32 @@ void mqtt_callback(char* topic, byte* payload, unsigned int length) {
   // --------------------------------------------------------------------------
   // Vout  
   // --------------------------------------------------------------------------
-  } else if (topicstr.compareTo("emon/"+node_name+"/vout")==0) {
+  } else if (topicstr.compareTo("emon/"+node_name+"/in/vout")==0) {
     DEBUG.print("Vout: ");
     voltage_output = payloadstr.toInt();
     DEBUG.println(voltage_output);
   // --------------------------------------------------------------------------
   // FlowT  
   // --------------------------------------------------------------------------
-  } else if (topicstr.compareTo("emon/"+node_name+"/flowT")==0) {
+  } else if (topicstr.compareTo("emon/"+node_name+"/in/flowT")==0) {
     DEBUG.print("FlowT: ");
     float flow = payloadstr.toFloat();
     voltage_output = (int) (flow - 7.14)/0.0371;
     DEBUG.println(String(flow)+" vout:"+String(voltage_output));
+  // --------------------------------------------------------------------------
+  // Return device state
+  // --------------------------------------------------------------------------
+  } else if (topicstr.compareTo("emon/"+node_name+"/in/state")==0) {
+    DEBUG.println("State: ");
+
+    String s = "{";
+    s += "\"ip\":\""+ipaddress+"\",";
+    // s += "\"time\":\"" + String(getTime()) + "\",";
+    s += "\"ctrlmode\":\"" + String(ctrl_mode) + "\",";
+    s += "\"timer\":\"" + String(timer_start1)+" "+String(timer_stop1)+" "+String(timer_start2)+" "+String(timer_stop2) + "\",";
+    s += "\"vout\":\"" + String(voltage_output) + "\"";
+    s += "}";
+    mqtt_publish("out/state",s);
   }
 }
 
@@ -124,9 +139,9 @@ boolean mqtt_connect()
   String strID = String(ESP.getChipId());
   if (mqttclient.connect(strID.c_str(), mqtt_user.c_str(), mqtt_pass.c_str())) {  // Attempt to connect
     DEBUG.println("MQTT connected");
-    mqtt_publish(node_describe);
+    mqtt_publish_keyval(node_describe);
     
-    String subscribe_topic = mqtt_topic + "/" + node_name + "/" + mqtt_feed_prefix + "#";
+    String subscribe_topic = mqtt_topic + "/" + node_name + "/in/#";
     mqttclient.subscribe(subscribe_topic.c_str());
     
   } else {
@@ -139,12 +154,21 @@ boolean mqtt_connect()
 
 // -------------------------------------------------------------------
 // Publish to MQTT
+// -------------------------------------------------------------------
+void mqtt_publish(String topic_p2, String data)
+{
+    String topic = mqtt_topic + "/" + node_name + "/" + topic_p2;
+    mqttclient.publish(topic.c_str(), data.c_str());
+}
+
+// -------------------------------------------------------------------
+// Publish to MQTT
 // Split up data string into sub topics: e.g
 // data = CT1:3935,CT2:325,T1:12.5,T2:16.9,T3:11.2,T4:34.7
 // base topic = emon/emonesp
 // MQTT Publish: emon/emonesp/CT1 > 3935 etc..
 // -------------------------------------------------------------------
-void mqtt_publish(String data)
+void mqtt_publish_keyval(String data)
 {
   String mqtt_data = "";
   String topic = mqtt_topic + "/" + node_name + "/" + mqtt_feed_prefix;
@@ -170,7 +194,7 @@ void mqtt_publish(String data)
     }
     // send data via mqtt
     //delay(100);
-    DEBUG.printf("%s = %s\r\n", topic.c_str(), mqtt_data.c_str());
+    //DEBUG.printf("%s = %s\r\n", topic.c_str(), mqtt_data.c_str());
     mqttclient.publish(topic.c_str(), mqtt_data.c_str());
     topic = mqtt_topic + "/" + node_name + "/" + mqtt_feed_prefix;
     mqtt_data="";

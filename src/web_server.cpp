@@ -285,6 +285,7 @@ handleSaveTimer(AsyncWebServerRequest *request) {
   int qvoltage_output = tmp.toInt();
   
   config_save_timer(qtimer_start1, qtimer_stop1, qtimer_start2, qtimer_stop2, qvoltage_output);
+  if (mqtt_server!=0) mqtt_publish("out/timer",String(qtimer_start1)+" "+String(qtimer_stop1)+" "+String(qtimer_start2)+" "+String(qtimer_stop2)+" "+String(qvoltage_output));
 
   response->setCode(200);
   response->print("saved");
@@ -307,7 +308,8 @@ handleSetVout(AsyncWebServerRequest *request) {
   if (qsave==1) save = 1;
   
   config_save_voltage_output(vout,save);
-
+  if (mqtt_server!=0) mqtt_publish("out/vout",String(vout));
+  
   response->setCode(200);
   if (save) response->print("saved");
   else response->print("ok");
@@ -331,7 +333,8 @@ handleSetFlowT(AsyncWebServerRequest *request) {
   if (qsave==1) save = 1;
   
   config_save_voltage_output(vout,save);
-
+  if (mqtt_server!=0) mqtt_publish("out/vout",String(vout));
+  
   response->setCode(200);
   if (save) response->print("saved");
   else response->print("ok");
@@ -655,6 +658,8 @@ void handleCtrlMode(AsyncWebServerRequest *request) {
   if (qmode=="On") ctrl_mode = "On";
   if (qmode=="Off") ctrl_mode = "Off";
   if (qmode=="Timer") ctrl_mode = "Timer";
+
+  if (mqtt_server!=0) mqtt_publish("out/ctrlmode",String(ctrl_mode));
 
   response->setCode(200);
   response->print(qmode);

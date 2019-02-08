@@ -65,9 +65,9 @@ void setup() {
   // ---------------------------------------------------------
   // Hard-coded initial config for node_name and node_describe
   // ---------------------------------------------------------
-  node_type = "smartplug";
-  node_description = "Smart Plug";
-  node_id = 1;
+  node_type = "hpmon";
+  node_description = "Heatpump Monitor";
+  node_id = 5;
   
   node_name = node_type + String(node_id);  
   node_describe = "describe:"+node_type;
@@ -139,7 +139,7 @@ void loop()
     {
       mqtt_loop();
       if(gotInput) {
-        mqtt_publish(input);
+        mqtt_publish_keyval(input);
       }
     }
   }
@@ -207,6 +207,8 @@ void loop()
     if (pushbtn_state && last_pushbtn_state && !pushbtn_action) {
       pushbtn_action = 1;
       if (ctrl_mode=="On") ctrl_mode = "Off"; else ctrl_mode = "On";
+      if (mqtt_server!=0) mqtt_publish("out/ctrlmode",String(ctrl_mode));
+
     }
     if (!pushbtn_state && !last_pushbtn_state) pushbtn_action = 0;
   }
