@@ -36,7 +36,7 @@
 
 // for ATM90E32 board
 #include <SPI.h>
-#include <ATM90E32_SPI.h>
+#include <ATM90E32.h>
 
 /***** CALIBRATION SETTINGS *****/
 unsigned short LineGain = 7481; //0x1D39 
@@ -44,41 +44,31 @@ unsigned short VoltageGain = 32428; //0x7EAC - default value is for a 12v AC Tra
 unsigned short CurrentGainCT1 = 46539; //0xB5CB - 
 unsigned short CurrentGainCT2 = 46539; //0xB5CB - 
 
-#ifdef ESP8266
+#if defined ESP8266
 const int CS_pin = 16;
 /*
   D5/14 - CLK
   D6/12 - MISO
   D7/13 - MOSI
 */
-#endif
-
-#ifdef ESP32
+#elif defined ESP32
 const int CS_pin = 5;
 /*
   18 - CLK
   19 - MISO
   23 - MOSI
 */
-#endif
 
-#ifdef ARDUINO_ESP8266_WEMOS_D1MINI  // WeMos mini and D1 R2
+#elif defined ARDUINO_ESP8266_WEMOS_D1MINI  // WeMos mini and D1 R2
 const int CS_pin = D8; // WEMOS SS pin
-#endif
 
-#ifdef ARDUINO_ESP8266_ESP12  // Adafruit Huzzah
+#elif defined ARDUINO_ESP8266_ESP12  // Adafruit Huzzah
 const int CS_pin = 15; // HUZZAH SS pins ( 0 or 15)
-#endif
 
-#ifdef ARDUINO_ARCH_SAMD //M0 board
-const int CS_pin = 10; // M0 SS pin
-#endif 
+#elif defined ARDUINO_ARCH_SAMD || defined __AVR_ATmega32U4__ //M0 board || 32u4 SS pin
+const int CS_pin = 10; 
 
-#ifdef __AVR_ATmega32U4__ //32u4 board
-const int CS_pin = 10; // 32u4 SS pin
-#endif 
-
-#if !(defined ARDUINO_ESP8266_WEMOS_D1MINI || defined ARDUINO_ESP8266_ESP12 || defined ARDUINO_ARCH_SAMD || defined __AVR_ATmega32U4__ || defined ESP32 || defined ESP8266)
+#else
 const int CS_pin = SS; // Use default SS pin for unknown Arduino
 #endif
 
@@ -97,7 +87,6 @@ void setup() {
 
   DEBUG.println();
   DEBUG.print("EmonESP ");
-  //DEBUG.println(ESP.getChipId());
   DEBUG.println("Firmware: " + currentfirmware);
 
   // Read saved settings from the config
