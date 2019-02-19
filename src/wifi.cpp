@@ -262,9 +262,8 @@ void wifi_restart() {
   String softAP_ssid_ID =
     String(softAP_ssid) + "_" + String((uint32_t)ESP.getEfuseMac());
 #else
-
   String softAP_ssid_ID =
-    String(softAP_ssid) + "_" + String((uint32_t)ESP.getEfuseMac());
+    String(softAP_ssid) + "_" + String(ESP.getChipId());
 #endif
   WiFi.softAP(softAP_ssid_ID.c_str(), softAP_password);
 
