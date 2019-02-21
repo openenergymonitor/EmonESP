@@ -39,11 +39,16 @@
 extern void mqtt_loop();
 
 // -------------------------------------------------------------------
+// Generic Publish to MQTT
+// -------------------------------------------------------------------
+extern void mqtt_publish(String topic, String data);
+
+// -------------------------------------------------------------------
 // Publish values to MQTT
 //
 // data: a comma seperated list of name:value pairs to send
 // -------------------------------------------------------------------
-extern void mqtt_publish(String data);
+extern void mqtt_publish_keyval(String data);
 
 // -------------------------------------------------------------------
 // Restart the MQTT connection

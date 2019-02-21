@@ -36,6 +36,8 @@
 #include "emoncms.h"
 #include "ota.h"
 #include "debug.h"
+#include <NTPClient.h>
+
 
 AsyncWebServer server(80);          //Create class for Web server
 
@@ -259,6 +261,86 @@ handleSaveAdmin(AsyncWebServerRequest *request) {
   request->send(response);
 }
 
+
+// -------------------------------------------------------------------
+// Save timer
+// url: /savetimer
+// -------------------------------------------------------------------
+void
+handleSaveTimer(AsyncWebServerRequest *request) {
+  AsyncResponseStream *response;
+  if(false == requestPreProcess(request, response, "text/plain")) {
+    return;
+  }
+
+  String tmp = request->arg("timer_start1");
+  int qtimer_start1 = tmp.toInt();
+  tmp = request->arg("timer_stop1");
+  int qtimer_stop1 = tmp.toInt();
+  tmp = request->arg("timer_start2");
+  int qtimer_start2 = tmp.toInt();
+  tmp = request->arg("timer_stop2");
+  int qtimer_stop2 = tmp.toInt();
+  tmp = request->arg("voltage_output");
+  int qvoltage_output = tmp.toInt();
+  
+  config_save_timer(qtimer_start1, qtimer_stop1, qtimer_start2, qtimer_stop2, qvoltage_output);
+  if (mqtt_server!=0) mqtt_publish("out/timer",String(qtimer_start1)+" "+String(qtimer_stop1)+" "+String(qtimer_start2)+" "+String(qtimer_stop2)+" "+String(qvoltage_output));
+
+  response->setCode(200);
+  response->print("saved");
+  request->send(response);
+}
+
+void
+handleSetVout(AsyncWebServerRequest *request) {
+  AsyncResponseStream *response;
+  if(false == requestPreProcess(request, response, "text/plain")) {
+    return;
+  }
+  String tmp = request->arg("val");
+  int vout = tmp.toInt();
+
+  tmp = request->arg("save");
+  int qsave = tmp.toInt();
+
+  int save = 0;
+  if (qsave==1) save = 1;
+  
+  config_save_voltage_output(vout,save);
+  if (mqtt_server!=0) mqtt_publish("out/vout",String(vout));
+  
+  response->setCode(200);
+  if (save) response->print("saved");
+  else response->print("ok");
+  request->send(response);
+}
+
+void
+handleSetFlowT(AsyncWebServerRequest *request) {
+  AsyncResponseStream *response;
+  if(false == requestPreProcess(request, response, "text/plain")) {
+    return;
+  }
+  String tmp = request->arg("val");
+  float flow = tmp.toFloat();
+  int vout = (int) (flow - 7.14)/0.0371;
+
+  tmp = request->arg("save");
+  int qsave = tmp.toInt();
+
+  int save = 0;
+  if (qsave==1) save = 1;
+  
+  config_save_voltage_output(vout,save);
+  if (mqtt_server!=0) mqtt_publish("out/vout",String(vout));
+  
+  response->setCode(200);
+  if (save) response->print("saved");
+  else response->print("ok");
+  request->send(response);
+}
+
 // -------------------------------------------------------------------
 // Last values on atmega serial
 // url: /lastvalues
@@ -305,7 +387,10 @@ handleStatus(AsyncWebServerRequest *request) {
 
   s += "\"mqtt_connected\":\""+String(mqtt_connected())+"\",";
 
-  s += "\"free_heap\":\"" + String(ESP.getFreeHeap()) + "\"";
+  s += "\"free_heap\":\"" + String(ESP.getFreeHeap()) + "\",";
+  s += "\"time\":\"" + String(getTime()) + "\",";
+  s += "\"ctrl_mode\":\"" + String(ctrl_mode) + "\",";
+  s += "\"ctrl_state\":\"" + String(ctrl_state) + "\"";
 
 #ifdef ENABLE_LEGACY_API
   s += ",\"version\":\"" + currentfirmware + "\"";
@@ -358,8 +443,16 @@ handleConfig(AsyncWebServerRequest *request) {
   s += "\"mqtt_feed_prefix\":\"" + mqtt_feed_prefix + "\",";
   s += "\"mqtt_user\":\"" + mqtt_user + "\",";
   //s += "\"mqtt_pass\":\""+mqtt_pass+"\","; security risk: DONT RETURN PASSWORDS
-  s += "\"www_username\":\"" + www_username + "\"";
+  s += "\"www_username\":\"" + www_username + "\",";
   //s += "\"www_password\":\""+www_password+"\","; security risk: DONT RETURN PASSWORDS
+  s += "\"timer_start1\":\"" + String(timer_start1) + "\",";
+  s += "\"timer_stop1\":\"" + String(timer_stop1) + "\",";
+  s += "\"timer_start2\":\"" + String(timer_start2) + "\",";
+  s += "\"timer_stop2\":\"" + String(timer_stop2) + "\",";
+  s += "\"voltage_output\":\"" + String(voltage_output) + "\",";
+  s += "\"node_name\":\"" + node_name + "\",";
+  s += "\"node_description\":\"" + node_description + "\",";
+  s += "\"node_type\":\"" + node_type + "\"";
   s += "}";
 
   response->setCode(200);
@@ -545,6 +638,34 @@ handleUpdateUpload(AsyncWebServerRequest *request, String filename, size_t index
   }
 }
 
+void handleDescribe(AsyncWebServerRequest *request) {
+  AsyncWebServerResponse *response = request->beginResponse(200, "text/plain", "smartplug");
+  response->addHeader("Access-Control-Allow-Origin", "*");  
+  request->send(response);
+}
+
+void handleTime(AsyncWebServerRequest *request) {
+  AsyncWebServerResponse *response = request->beginResponse(200, "text/plain",getTime());
+  request->send(response);
+}
+
+void handleCtrlMode(AsyncWebServerRequest *request) {
+  AsyncResponseStream *response;
+  if(false == requestPreProcess(request, response, "text/plain")) {
+    return;
+  }
+  String qmode = request->arg("mode");
+  if (qmode=="On") ctrl_mode = "On";
+  if (qmode=="Off") ctrl_mode = "Off";
+  if (qmode=="Timer") ctrl_mode = "Timer";
+
+  if (mqtt_server!=0) mqtt_publish("out/ctrlmode",String(ctrl_mode));
+
+  response->setCode(200);
+  response->print(qmode);
+  request->send(response);
+}
+
 
 void handleNotFound(AsyncWebServerRequest *request)
 {
@@ -619,6 +740,7 @@ web_server_setup()
   server.on("/saveemoncms", handleSaveEmoncms);
   server.on("/savemqtt", handleSaveMqtt);
   server.on("/saveadmin", handleSaveAdmin);
+  server.on("/savetimer", handleSaveTimer);
 
   server.on("/reset", handleRst);
   server.on("/restart", handleRestart);
@@ -634,6 +756,13 @@ web_server_setup()
 
   server.on("/firmware", handleUpdateCheck);
   server.on("/update", handleUpdate);
+  server.on("/emoncms/describe", handleDescribe);
+  server.on("/time", handleTime);
+  server.on("/ctrlmode", handleCtrlMode);
+  server.on("/vout", handleSetVout);
+  server.on("/flow", handleSetFlowT);
+
+
 
   server.onNotFound(handleNotFound);
   server.begin();

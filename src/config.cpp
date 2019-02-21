@@ -29,6 +29,14 @@
 #include <Arduino.h>
 #include <EEPROM.h>                   // Save config settings
 
+int LEDpin = 13;
+
+String node_type = "";
+int node_id = 0;
+String node_name = "";
+String node_describe = "";
+String node_description = "";
+
 // Wifi Network Strings
 String esid = "";
 String epass = "";
@@ -51,6 +59,18 @@ String mqtt_user = "";
 String mqtt_pass = "";
 String mqtt_feed_prefix = "";
 
+// Timer Settings 
+int timer_start1 = 0;
+int timer_stop1 = 0;
+int timer_start2 = 0;
+int timer_stop2 = 0;
+
+int voltage_output = 0;
+
+extern String ctrl_mode = "Timer";
+extern bool ctrl_update = 0;
+extern bool ctrl_state = 0;
+
 #define EEPROM_ESID_SIZE          32
 #define EEPROM_EPASS_SIZE         64
 #define EEPROM_EMON_API_KEY_SIZE  32
@@ -65,7 +85,13 @@ String mqtt_feed_prefix = "";
 #define EEPROM_MQTT_FEED_PREFIX_SIZE  10
 #define EEPROM_WWW_USER_SIZE      16
 #define EEPROM_WWW_PASS_SIZE      16
+#define EEPROM_TIMER_START1_SIZE  2
+#define EEPROM_TIMER_STOP1_SIZE   2
+#define EEPROM_TIMER_START2_SIZE  2
+#define EEPROM_TIMER_STOP2_SIZE   2
+#define EEPROM_VOLTAGE_OUTPUT_SIZE 2
 #define EEPROM_SIZE 512
+
 
 #define EEPROM_ESID_START         0
 #define EEPROM_ESID_END           (EEPROM_ESID_START + EEPROM_ESID_SIZE)
@@ -96,6 +122,18 @@ String mqtt_feed_prefix = "";
 #define EEPROM_EMON_PATH_START    EEPROM_WWW_PASS_END
 #define EEPROM_EMON_PATH_END      (EEPROM_EMON_PATH_START + EEPROM_EMON_PATH_SIZE)
 
+#define EEPROM_TIMER_START1_START EEPROM_EMON_PATH_END
+#define EEPROM_TIMER_START1_END   (EEPROM_TIMER_START1_START + EEPROM_TIMER_START1_SIZE)
+#define EEPROM_TIMER_STOP1_START  EEPROM_TIMER_START1_END
+#define EEPROM_TIMER_STOP1_END    (EEPROM_TIMER_STOP1_START + EEPROM_TIMER_STOP1_SIZE)
+#define EEPROM_TIMER_START2_START EEPROM_TIMER_STOP1_END
+#define EEPROM_TIMER_START2_END   (EEPROM_TIMER_START2_START + EEPROM_TIMER_START2_SIZE)
+#define EEPROM_TIMER_STOP2_START  EEPROM_TIMER_START2_END
+#define EEPROM_TIMER_STOP2_END    (EEPROM_TIMER_STOP2_START + EEPROM_TIMER_STOP2_SIZE)
+
+#define EEPROM_VOLTAGE_OUTPUT_START  EEPROM_TIMER_STOP2_END
+#define EEPROM_VOLTAGE_OUTPUT_END    (EEPROM_VOLTAGE_OUTPUT_START + EEPROM_VOLTAGE_OUTPUT_SIZE)
+
 // -------------------------------------------------------------------
 // Reset EEPROM, wipes all settings
 // -------------------------------------------------------------------
@@ -124,6 +162,17 @@ void EEPROM_write_string(int start, int count, String val) {
       EEPROM.write(start+i, 0);
     }
   }
+}
+
+void EEPROM_read_int(int start, int & val) {
+  byte high = EEPROM.read(start);
+  byte low = EEPROM.read(start+1);
+  val=word(high,low);
+}
+
+void EEPROM_write_int(int start, int val) {
+  EEPROM.write(start,highByte(val));
+  EEPROM.write(start+1,lowByte(val));
 }
 
 // -------------------------------------------------------------------
@@ -159,6 +208,14 @@ void config_load_settings()
   // Web server credentials
   EEPROM_read_string(EEPROM_WWW_USER_START, EEPROM_WWW_USER_SIZE, www_username);
   EEPROM_read_string(EEPROM_WWW_PASS_START, EEPROM_WWW_PASS_SIZE, www_password);
+
+  // Read timer settings
+  EEPROM_read_int(EEPROM_TIMER_START1_START, timer_start1);
+  EEPROM_read_int(EEPROM_TIMER_STOP1_START, timer_stop1);
+  EEPROM_read_int(EEPROM_TIMER_START2_START, timer_start2);
+  EEPROM_read_int(EEPROM_TIMER_STOP2_START, timer_stop2);
+
+  EEPROM_read_int(EEPROM_VOLTAGE_OUTPUT_START, voltage_output);
 }
 
 void config_save_emoncms(String server, String path, String node, String apikey, String fingerprint)
@@ -213,6 +270,16 @@ void config_save_mqtt(String server, String topic, String prefix, String user, S
   EEPROM.commit();
 }
 
+void config_save_mqtt_server(String server)
+{
+  mqtt_server = server;
+
+  // Save MQTT server max 45 characters
+  EEPROM_write_string(EEPROM_MQTT_SERVER_START, EEPROM_MQTT_SERVER_SIZE, mqtt_server);
+
+  EEPROM.commit();
+}
+
 void config_save_admin(String user, String pass)
 {
   www_username = user;
@@ -222,6 +289,33 @@ void config_save_admin(String user, String pass)
   EEPROM_write_string(EEPROM_WWW_PASS_START, EEPROM_WWW_PASS_SIZE, pass);
 
   EEPROM.commit();
+}
+
+void config_save_timer(int start1, int stop1, int start2, int stop2, int qvoltage_output)
+{
+  timer_start1 = start1;
+  timer_stop1 = stop1;
+  timer_start2 = start2;
+  timer_stop2 = stop2;
+  EEPROM_write_int(EEPROM_TIMER_START1_START, start1);
+  EEPROM_write_int(EEPROM_TIMER_STOP1_START, stop1);
+  EEPROM_write_int(EEPROM_TIMER_START2_START, start2);
+  EEPROM_write_int(EEPROM_TIMER_STOP2_START, stop2);
+
+  voltage_output = qvoltage_output;
+  EEPROM_write_int(EEPROM_VOLTAGE_OUTPUT_START, voltage_output);
+  EEPROM.commit();
+}
+
+
+void config_save_voltage_output(int qvoltage_output, int save_to_eeprom)
+{
+  voltage_output = qvoltage_output;
+  
+  if (save_to_eeprom) {
+    EEPROM_write_int(EEPROM_VOLTAGE_OUTPUT_START, voltage_output);
+    EEPROM.commit();
+  }
 }
 
 void config_save_wifi(String qsid, String qpass)

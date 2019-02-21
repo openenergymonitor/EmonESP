@@ -36,13 +36,10 @@ DNSServer dnsServer;                  // Create class DNS server, captive portal
 const byte DNS_PORT = 53;
 
 // Access Point SSID, password & IP address. SSID will be softAP_ssid + chipID to make SSID unique
-const char *softAP_ssid = "emonESP";
+// const char *softAP_ssid = "emonESP";
 const char* softAP_password = "";
 IPAddress apIP(192, 168, 4, 1);
 IPAddress netMsk(255, 255, 255, 0);
-
-// hostname for mDNS. Should work at least on windows. Try http://emonesp.local
-const char *esp_hostname = "emonesp";
 
 // Wifi Network Strings
 String connected_network = "";
@@ -51,23 +48,6 @@ String ipaddress = "";
 
 unsigned long Timer;
 String st, rssi;
-
-#ifdef WIFI_LED
-#ifndef WIFI_LED_ON_STATE
-#define WIFI_LED_ON_STATE LOW
-#endif
-
-#ifndef WIFI_LED_AP_TIME
-#define WIFI_LED_AP_TIME 1000
-#endif
-
-#ifndef WIFI_LED_STA_CONNECTING_TIME
-#define WIFI_LED_STA_CONNECTING_TIME 500
-#endif
-
-int wifiLedState = !WIFI_LED_ON_STATE;
-unsigned long wifiLedTimeOut = millis();
-#endif
 
 // -------------------------------------------------------------------
 int wifi_mode = WIFI_MODE_STA;
@@ -101,9 +81,8 @@ startAP() {
 
   WiFi.softAPConfig(apIP, apIP, netMsk);
   // Create Unique SSID e.g "emonESP_XXXXXX"
-  String softAP_ssid_ID =
-    String(softAP_ssid) + "_" + String(ESP.getChipId());;
-  WiFi.softAP(softAP_ssid_ID.c_str(), softAP_password);
+  // String softAP_ssid_ID = String(softAP_ssid) + "_" + String(node_id);
+  WiFi.softAP(node_name.c_str(), softAP_password);
 
   // Setup the DNS server redirecting all the domains to the apIP
   dnsServer.setErrorReplyCode(DNSReplyCode::NoError);
@@ -123,74 +102,66 @@ startAP() {
 void
 startClient() {
   DEBUG.print("Connecting to SSID: ");
-  DEBUG.println(esid.c_str());
-  // DEBUG.print(" epass:");
-  // DEBUG.println(epass.c_str());
-  WiFi.hostname(esp_hostname);
-  WiFi.begin(esid.c_str(), epass.c_str());
+  DEBUG.print(esid.c_str());
+  DEBUG.print(" PSK:");
+  DEBUG.println(epass.c_str());
+  
+  WiFi.hostname(node_name.c_str());
 
-  delay(50);
+  //WiFi.mode(WIFI_STA);
+  digitalWrite(LEDpin,LOW);
+  WiFi.begin(esid.c_str(),epass.c_str());
 
   int t = 0;
   int attempt = 0;
+  unsigned long start_connect = millis();
   while (WiFi.status() != WL_CONNECTED) {
-#ifdef WIFI_LED
-    wifiLedState = !wifiLedState;
-    digitalWrite(WIFI_LED, wifiLedState);
-#endif
 
-    delay(500);
-    t++;
-    // push and hold boot button after power on to skip stright to AP mode
-    if (t >= 20
-#if !defined(WIFI_LED) || 0 != WIFI_LED
-        || digitalRead(0) == LOW
-#endif
-       ) {
-      DEBUG.println(" ");
-      DEBUG.println("Try Again...");
+    delay(200);
+    digitalWrite(LEDpin,HIGH); delay(20); digitalWrite(LEDpin,LOW);
+
+    // Timeout
+    if ((millis()-start_connect)>30000) {
       delay(2000);
-      WiFi.disconnect();
-      WiFi.begin(esid.c_str(), epass.c_str());
-      t = 0;
-      attempt++;
-      if (attempt >= 5 || digitalRead(0) == LOW) {
-        startAP();
-        // AP mode with SSID in EEPROM, connection will retry in 5 minutes
-        wifi_mode = WIFI_MODE_AP_STA_RETRY;
-        break;
-      }
+      digitalWrite(LEDpin,HIGH);
+      ESP.reset(); // ESP.restart(); ?
+    }
+
+    if (digitalRead(0) == LOW) {
+      startAP();
+      wifi_mode = WIFI_MODE_AP_ONLY;
+      break;
     }
   }
 
   if (wifi_mode == WIFI_MODE_STA || wifi_mode == WIFI_MODE_AP_AND_STA) {
-#ifdef WIFI_LED
-    wifiLedState = WIFI_LED_ON_STATE;
-    digitalWrite(WIFI_LED, wifiLedState);
-#endif
 
     IPAddress myAddress = WiFi.localIP();
     char tmpStr[40];
-    sprintf(tmpStr, "%d.%d.%d.%d", myAddress[0], myAddress[1], myAddress[2],
-            myAddress[3]);
+    sprintf(tmpStr, "%d.%d.%d.%d", myAddress[0], myAddress[1], myAddress[2],myAddress[3]);
     DEBUG.print("Connected, IP: ");
     DEBUG.println(tmpStr);
     // Copy the connected network and ipaddress to global strings for use in status request
     connected_network = esid;
     ipaddress = tmpStr;
+
+    for (int f=0; f<10; f++) {
+        digitalWrite(LEDpin,HIGH); 
+        delay(80); 
+        digitalWrite(LEDpin,LOW); 
+        delay(20);
+    }
+    digitalWrite(LEDpin,HIGH); 
+  } else {
+    DEBUG.print("startClient wifi_mode is not STA??");
   }
 }
 
-void
-wifi_setup() {
-#ifdef WIFI_LED
-  pinMode(WIFI_LED, OUTPUT);
-  digitalWrite(WIFI_LED, wifiLedState);
-#endif
+void wifi_setup() {
 
-  WiFi.disconnect();
+  // WiFi.disconnect();
   // 1) If no network configured start up access point
-  if (esid == 0 || esid == "") {
+  if (esid == 0 || esid == "" || digitalRead(0) == LOW) {
     startAP();
     wifi_mode = WIFI_MODE_AP_ONLY; // AP mode with no SSID in EEPROM
   }
@@ -202,8 +173,8 @@ wifi_setup() {
   }
 
   // Start hostname broadcast in STA mode
-  if ((wifi_mode == WIFI_MODE_STA || wifi_mode == WIFI_MODE_AP_AND_STA)) {
-    if (MDNS.begin(esp_hostname)) {
+  if ((wifi_mode==WIFI_MODE_STA || wifi_mode==WIFI_MODE_AP_AND_STA)){
+    if (MDNS.begin(node_name.c_str())) {
       MDNS.addService("http", "tcp", 80);
     }
   }
@@ -211,17 +182,10 @@ wifi_setup() {
   Timer = millis();
 }
 
-void
-wifi_loop() {
-#ifdef WIFI_LED
-  if (wifi_mode == WIFI_MODE_AP_ONLY && millis() > wifiLedTimeOut) {
-    wifiLedState = !wifiLedState;
-    digitalWrite(WIFI_LED, wifiLedState);
-    wifiLedTimeOut = millis() + WIFI_LED_AP_TIME;
-  }
-#endif
+void wifi_loop() {
 
   // Factory reset on GPIO0.
+  /*
   while (digitalRead(0) == LOW) {
     delay(factoryreset_holdtime);
     if (digitalRead(0) == LOW) {
@@ -231,7 +195,7 @@ wifi_loop() {
       Serial.println("Factory reset complete! Resetting...");
       ESP.reset();
     }
-  }
+  }*/
   // end factory reset.
 
   dnsServer.processNextRequest(); // Captive portal DNS re-dierct
@@ -245,16 +209,14 @@ wifi_loop() {
   }
 }
 
-void
-wifi_restart() {
+void wifi_restart() {
   // Startup in STA + AP mode
   WiFi.mode(WIFI_AP_STA);
   WiFi.softAPConfig(apIP, apIP, netMsk);
 
   // Create Unique SSID e.g "emonESP_XXXXXX"
-  String softAP_ssid_ID =
-    String(softAP_ssid) + "_" + String(ESP.getChipId());;
-  WiFi.softAP(softAP_ssid_ID.c_str(), softAP_password);
+  // String softAP_ssid_ID = String(softAP_ssid) + "_" + String(ESP.getChipId());;
+  WiFi.softAP(node_name.c_str(), softAP_password);
 
   // Setup the DNS server redirecting all the domains to the apIP
   dnsServer.setErrorReplyCode(DNSReplyCode::NoError);

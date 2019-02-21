@@ -22,25 +22,13 @@
  * Free Software Foundation, Inc., 59 Temple Place - Suite 330,
  * Boston, MA 02111-1307, USA.
  */
+ 
+#ifndef _EMONESP_AUTOAUTH_H
+#define _EMONESP_AUTOAUTH_H
 
-#ifndef _EMONESP_INPUT_H
-#define _EMONESP_INPUT_H
+void auth_request();
+void auth_setup();
+void auth_loop();
 
-#include <Arduino.h>
+#endif
 
-// -------------------------------------------------------------------
-// Support for reading input
-// -------------------------------------------------------------------
-
-extern String last_datastr;
-extern String input_string;
-
-// -------------------------------------------------------------------
-// Read input sent via the web_server or serial.
-//
-// data: if true is returned data will be updated with the new line of
-//       input
-// -------------------------------------------------------------------
-extern boolean input_get(String& data);
-
-#endif // _EMONESP_INPUT_H

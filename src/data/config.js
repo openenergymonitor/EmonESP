@@ -1,7 +1,10 @@
 // Work out the endpoint to use, for dev you can change to point at a remote ESP
 // and run the HTML/JS from file, no need to upload to the ESP to test
 
-var baseHost = window.location.hostname;
+// development folder
+var development = "";
+
+var baseHost = window.location.hostname+development;
 //var baseHost = 'emonesp.local';
 //var baseHost = '192.168.4.1';
 //var baseHost = '172.16.0.52';
@@ -17,6 +20,11 @@ var ipaddress = "";
 function scaleString(string, scale, precision) {
   var tmpval = parseInt(string) / scale;
   return tmpval.toFixed(precision);
+}
+
+function addcolon(t) {
+    if (t.length==3) t = "0"+t
+    return t.substr(0,2)+":"+t.substr(2,4);
 }
 
 function BaseViewModel(defaults, remoteUrl, mappings) {
@@ -59,7 +67,10 @@ function StatusViewModel() {
     "packets_success": "",
     "emoncms_connected": "",
     "mqtt_connected": "",
-    "free_heap": ""
+    "free_heap": "",
+    "time":"",
+    "ctrl_mode":"off",
+    "ctrl_state":0
   }, baseEndpoint + '/status');
 
   // Some devired values
@@ -87,6 +98,9 @@ StatusViewModel.prototype.constructor = StatusViewModel;
 
 function ConfigViewModel() {
   BaseViewModel.call(this, {
+    "node_name": "emonESP",
+    "node_description":"WiFi Emoncms Link",
+    "node_type": "",
     "ssid": "",
     "pass": "",
     "emoncms_server": "data.openevse.com",
@@ -102,8 +116,60 @@ function ConfigViewModel() {
     "www_username": "",
     "www_password": "",
     "espflash": "",
-    "version": "0.0.0"
+    "version": "0.0.0",
+    "timer_start1":"",
+    "timer_stop1":"",
+    "timer_start2":"",
+    "timer_stop2":"",
+    "voltage_output":"",
   }, baseEndpoint + '/config');
+  
+  this.f_timer_start1 = ko.pureComputed({
+      read: function () {
+          return addcolon(this.timer_start1());
+      },
+      write: function (value) {
+          this.timer_start1(value.replace(":",""));
+      },
+      owner: this
+  });
+  this.f_timer_stop1 = ko.pureComputed({
+      read: function () {
+          return addcolon(this.timer_stop1());
+      },
+      write: function (value) {
+          this.timer_stop1(value.replace(":",""));
+      },
+      owner: this
+  });
+  this.f_timer_start2 = ko.pureComputed({
+      read: function () {
+          return addcolon(this.timer_start2());
+      },
+      write: function (value) {
+          this.timer_start2(value.replace(":",""));
+      },
+      owner: this
+  });
+  this.f_timer_stop2 = ko.pureComputed({
+      read: function () {
+          return addcolon(this.timer_stop2());
+      },
+      write: function (value) {
+          this.timer_stop2(value.replace(":",""));
+      },
+      owner: this
+  });
+  this.flowT = ko.pureComputed({
+      read: function () {
+          return (this.voltage_output()*0.0371)+7.14;
+      },
+      write: function (value) {
+          this.voltage_output((value-7.14)/0.0371);
+      },
+      owner: this
+  });
+  
 }
 ConfigViewModel.prototype = Object.create(BaseViewModel.prototype);
 ConfigViewModel.prototype.constructor = ConfigViewModel;
@@ -114,6 +180,7 @@ function LastValuesViewModel() {
 
   // Observable properties
   self.fetching = ko.observable(false);
+  self.lastValues = ko.observable(false);
   self.values = ko.mapping.fromJS([]);
 
   self.update = function (after) {
@@ -123,14 +190,21 @@ function LastValuesViewModel() {
     self.fetching(true);
     $.get(self.remoteUrl, function (data) {
       // Transform the data into something a bit easier to handle as a binding
-      var namevaluepairs = data.split(",");
       var vals = [];
-      for (var z in namevaluepairs) {
-        var namevalue = namevaluepairs[z].split(":");
-        var units = "";
-        if (namevalue[0].indexOf("CT") === 0) units = "W";
-        if (namevalue[0].indexOf("T") === 0) units = String.fromCharCode(176)+"C";
-        vals.push({key: namevalue[0], value: namevalue[1]+units});
+      if (data!="") {
+        var namevaluepairs = data.split(",");
+        if (namevaluepairs.length>0) {
+          for (var z in namevaluepairs) {
+            var namevalue = namevaluepairs[z].split(":");
+            var units = "";
+            if (namevalue[0].indexOf("CT") === 0) units = "W";
+            if (namevalue[0].indexOf("T") === 0) units = String.fromCharCode(176)+"C";
+            vals.push({key: namevalue[0], value: namevalue[1]+units});
+          }
+          self.lastValues(true);
+        }
+      } else {
+        self.lastValues(false);
       }
       ko.mapping.fromJS(vals, self.values);
     }, 'text').always(function () {
@@ -188,13 +262,13 @@ function EmonEspViewModel() {
 
   self.initialised = ko.observable(false);
   self.updating = ko.observable(false);
-
+    
   var updateTimer = null;
   var updateTime = 1 * 1000;
 
   var logUpdateTimer = null;
-  var logUpdateTime = 100;
-
+  var logUpdateTime = 500;
+    
   // Upgrade URL
   self.upgradeUrl = ko.observable('about:blank');
 
@@ -225,7 +299,7 @@ function EmonEspViewModel() {
     if (self.updating()) {
       return;
     }
-    self.updating(true);
+    self.updating(true);    
     if (null !== updateTimer) {
       clearTimeout(updateTimer);
       updateTimer = null;
@@ -291,6 +365,49 @@ function EmonEspViewModel() {
       alert("Failed to save Admin config");
     }).always(function () {
       self.saveAdminFetching(false);
+    });
+  };
+  
+  // -----------------------------------------------------------------------
+  // Event: Timer save
+  // -----------------------------------------------------------------------
+  self.saveTimerFetching = ko.observable(false);
+  self.saveTimerSuccess = ko.observable(false);
+  self.saveTimer = function () {
+    self.saveTimerFetching(true);
+    self.saveTimerSuccess(false);
+    $.post(baseEndpoint + "/savetimer", { 
+      timer_start1: self.config.timer_start1(), 
+      timer_stop1: self.config.timer_stop1(), 
+      timer_start2: self.config.timer_start2(), 
+      timer_stop2: self.config.timer_stop2(),
+      voltage_output: self.config.voltage_output() 
+    }, function (data) {
+      self.saveTimerSuccess(true);
+      setTimeout(function(){
+          self.saveTimerSuccess(false);
+      },5000);
+    }).fail(function () {
+      alert("Failed to save Timer config");
+    }).always(function () {
+      self.saveTimerFetching(false);
+    });
+  };
+  
+  // -----------------------------------------------------------------------
+  // Event: Switch On, Off, Timer
+  // -----------------------------------------------------------------------  
+  //self.btn_off = ko.observable(false);
+  //self.btn_timer = ko.observable(false);
+  
+  self.ctrlMode = function (mode) {
+    var last = self.status.ctrl_mode();
+    self.status.ctrl_mode(mode);
+    $.post(baseEndpoint + "/ctrlmode?mode="+mode,{}, function (data) {
+      // success
+    }).fail(function () {
+      self.status.ctrl_mode(last);
+      alert("Failed to switch "+mode);
     });
   };
 
@@ -422,6 +539,14 @@ document.getElementById("restart").addEventListener("click", function (e) {
     r.send();
   }
 });
+
+function toggle(id) {
+   var e = document.getElementById(id);
+   if(e.style.display == 'block')
+      e.style.display = 'none';
+   else
+      e.style.display = 'block';
+}
 
 // -----------------------------------------------------------------------
 // Event:Upload Firmware

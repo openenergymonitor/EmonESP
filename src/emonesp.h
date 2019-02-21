@@ -26,6 +26,8 @@
 #ifndef _EMONESP_H
 #define _EMONESP_H
 
+#include "Arduino.h"
+
 // -------------------------------------------------------------------
 // General support code used by all modules
 // -------------------------------------------------------------------
@@ -39,5 +41,6 @@
 #define DEBUG Serial
 #endif
 
+String getTime();
 
 #endif // _EMONESP_H
