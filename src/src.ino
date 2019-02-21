@@ -77,13 +77,6 @@ void loop()
   String input = "";
   boolean gotInput = input_get(input);
 
-  while (digitalRead(0) == LOW) {
-    delay(10000);
-    if (digitalRead(0) == LOW) {
-      config_reset();
-    } 
-  }
-  
   if (wifi_mode == WIFI_MODE_STA || wifi_mode == WIFI_MODE_AP_AND_STA)
   {
     if(emoncms_apikey != 0 && gotInput) {
@@ -98,4 +91,3 @@ void loop()
     }
   }
 } // end loop
-
