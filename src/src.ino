@@ -39,11 +39,13 @@
 #include <ATM90E32.h>
 
 /***** CALIBRATION SETTINGS *****/
-unsigned short LineGain = 7481; //0x1D39 
-unsigned short VoltageGain = 32428; //0x7EAC - default value is for a 12v AC Transformer
-unsigned short CurrentGainCT1 = 46539; //0xB5CB - 
-unsigned short CurrentGainCT2 = 46539; //0xB5CB - 
-
+unsigned short LineGain = 0; //7481 - 0x1D39 
+unsigned short VoltageGain = 41820; //9v AC transformer. 
+                                    //32428 - 12v AC Transformer
+unsigned short CurrentGainCT1 = 25498;  //SCT-013-000 100A/50mA
+                                        //46539 - Magnalab 100A
+unsigned short CurrentGainCT2 = 25498;  //SCT-013-000 100A/50mA
+                                        //46539 - Magnalab 100A
 #if defined ESP8266
 const int CS_pin = 16;
 /*
