@@ -30,7 +30,7 @@
 #include <ESP8266mDNS.h>              // Resolve URL for update server etc.
 #include <DNSServer.h>                // Required for captive portal
 
-int button_interval_one = 100; // milliseconds for screen to illuminate.
+int button_interval_one = 100; // milliseconds for action, test.
 int button_interval_two = (5 * 1000); // 5 seconds hold down AP mode.
 int button_interval_three = (10 * 1000); // 10 seconds hold down GPIO0 for factory reset.
 int timebuttonpressed;
