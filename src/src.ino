@@ -23,6 +23,8 @@
  * Boston, MA 02111-1307, USA.
  */
 
+String currentfirmware = "2.3.1";
+
 #include "emonesp.h"
 #include "config.h"
 #include "wifi.h"

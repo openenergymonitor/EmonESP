@@ -48,9 +48,9 @@ unsigned long systemRestartTime = 0;
 unsigned long systemRebootTime = 0;
 
 // Get running firmware version from build tag environment variable
-#define TEXTIFY(A) #A
-#define ESCAPEQUOTE(A) TEXTIFY(A)
-String currentfirmware = ESCAPEQUOTE(BUILD_TAG);
+//#define TEXTIFY(A) #A
+//#define ESCAPEQUOTE(A) TEXTIFY(A)
+//String currentfirmware = ESCAPEQUOTE(BUILD_TAG);
 
 // -------------------------------------------------------------------
 // Helper function to perform the standard operations on a request
