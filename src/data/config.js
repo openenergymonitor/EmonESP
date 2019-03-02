@@ -427,6 +427,14 @@ document.getElementById("restart").addEventListener("click", function (e) {
 // -----------------------------------------------------------------------
 // Event:Upload Firmware
 // -----------------------------------------------------------------------
-//document.getElementById("upload").addEventListener("click", function(e) {
+document.getElementById("submit").addEventListener("click", function(e) {
+  if (confirm("Flashing takes a minute.\nOnly flash with compatible .bin file.")) {
+  }
+  else {
+  e.preventDefault();
+  }
+});
+
+//}
+//innerHTML = "Updating. Refresh this page in a minute.";
 //  window.location.href='/upload'
-//});
