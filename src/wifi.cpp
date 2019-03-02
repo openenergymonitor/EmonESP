@@ -274,21 +274,7 @@ wifi_loop() {
     }
   }
   // end GPIO0 button.
-
-  /*
-    while (digitalRead(0) == LOW) {
-    delay(factoryreset_holdtime);
-    if (digitalRead(0) == LOW) {
-      Serial.println("Commencing factory reset.");
-      config_reset();
-      ESP.eraseConfig();
-      Serial.println("Factory reset complete! Resetting...");
-      ESP.reset();
-    }
-    }
-    // end factory reset.
-
-  */
+  
 
   dnsServer.processNextRequest(); // Captive portal DNS re-dierct
 

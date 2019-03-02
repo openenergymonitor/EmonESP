@@ -422,10 +422,3 @@ document.getElementById("restart").addEventListener("click", function (e) {
     r.send();
   }
 });
-
-// -----------------------------------------------------------------------
-// Event:Upload Firmware
-// -----------------------------------------------------------------------
-//document.getElementById("upload").addEventListener("click", function(e) {
-//  window.location.href='/upload'
-//});
