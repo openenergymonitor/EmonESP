@@ -29,6 +29,7 @@
 #include <ESP8266WiFi.h>              // Connect to Wifi
 #include <ESP8266mDNS.h>              // Resolve URL for update server etc.
 #include <DNSServer.h>                // Required for captive portal
+#include "FSWebServerLib.h"
 
 int button_interval_one = 100; // milliseconds for action, test.
 int button_interval_two = (5 * 1000); // 5 seconds hold down AP mode.

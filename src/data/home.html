@@ -199,29 +199,12 @@
       <div id="six">
         <h2>6. Firmware</h2>
         <div class="itembody-wrapper">
-          <div id="firmware" style="display:none">
-            <table>
-              <tr>
-                <th>Running</th>
-                <th>Latest</th>
-              </tr>
-              <tbody id="firmware-version">
-                <tr>
-                  <td data-bind="text: status.version"></td>
-                  <td></td>
-                </tr>
-              </tbody>
-            </table><br>
-            <a href="https://github.com/openenergymonitor/EmonESP/releases">
-              View changelog</a><br>
-          </div><br>
-          <H3>Choose .ino.bin file</H3>
-    <form id="uploadform" enctype="multipart/form-data" method="post" action="/upload">
-       <input id="fileupload" name="inobinfile" type="file" />
-       <input type="submit" value="submit" id="submit" />
-    </form>
-    <br>
-    <br>
+          <H3>Choose .bin file</H3>
+            <form id="uploadform" enctype="multipart/form-data" method="post" action="/upload">
+              <input id="fileupload" name="inobinfile" type="file" />
+              <br><br>
+              <button type="submit" value="submit" id="submit">Upload</button>
+            </form><br>
 <!--
           <button id="updatecheck">Check for Updates</button>
           <button id="update" style="display:none">Apply Update</button>
@@ -234,9 +217,13 @@
       <div id="seven">
         <h2>7. System</h2>
         <div class="itembody-wrapper">
+
           <p><b>Free RAM:</b> <span data-bind="text: scaleString(status.free_heap(), 1024, 0) + 'K'"></span></p>
           <p><b>Flash Size:</b> <span data-bind="text: scaleString(config.espflash(), 1024, 0) + 'K'"></span></p>
-          <p><b>Version:</b> <a href="https://github.com/openenergymonitor/EmonESP/releases">v<span data-bind="text: config.version"></span></a></p>
+          <p><b>Version:</b> <a>v</a><span data-bind="text: config.version"></span> <a></a> <a href="https://github.com/openenergymonitor/EmonESP/releases"> changelog</a></p>
+          <br>
+          <a href="edit.html"> <button id="fsedit">FS Editor</button></a>
+          <br>
           <button id="restart">Restart</button>
           <button id="reset">Factory Reset</button>
         </div>

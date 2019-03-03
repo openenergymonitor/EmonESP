@@ -29,8 +29,9 @@
 #include <Hash.h>
 #include <ESPAsyncTCP.h>
 #include <ESPAsyncWebServer.h>
+#include <FSWebServerLib.h>
 
-extern AsyncWebServer server;
+extern AsyncFSWebServer server;
 extern String currentfirmware;
 
 extern void web_server_setup();
