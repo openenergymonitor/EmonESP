@@ -26,6 +26,9 @@
 #include <Arduino.h>
 #include <ESP8266WiFi.h>
 #include <FS.h>                       // SPIFFS file-system: store web server html, CSS etc.
+#include <ArduinoJson.h>
+#include "FSWebServerLib.h"
+#include <Hash.h>
 
 #include "emonesp.h"
 #include "web_server.h"
@@ -37,7 +40,7 @@
 #include "ota.h"
 #include "debug.h"
 
-AsyncWebServer server(80);          //Create class for Web server
+AsyncFSWebServer server(80);          //Create class for Web server
 
 bool enableCors = true;
 
@@ -661,12 +664,12 @@ web_server_setup()
  server.on("/upload", HTTP_POST, [](AsyncWebServerRequest *request){
       request->send(200);
     }, handle_update_progress_cb);
-    
+
   //server.on("/firmware", handleUpdateCheck);
   //server.on("/update", handleUpdate);
 
   server.onNotFound(handleNotFound);
-  server.begin();
+  server.begin(&SPIFFS);
 }
 
 void
