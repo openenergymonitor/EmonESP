@@ -164,7 +164,7 @@ startClient() {
       attempt++;
       if (attempt >= 5 || digitalRead(0) == LOW) {
         startAP();
-        // AP mode with SSID in EEPROM, connection will retry in 5 minutes
+        // AP mode with SSID, connection will retry in 5 minutes
         wifi_mode = WIFI_MODE_AP_STA_RETRY;
         break;
       }
@@ -200,7 +200,7 @@ wifi_setup() {
   // 1) If no network configured start up access point
   if (esid == 0 || esid == "") {
     startAP();
-    wifi_mode = WIFI_MODE_AP_ONLY; // AP mode with no SSID in EEPROM
+    wifi_mode = WIFI_MODE_AP_ONLY; // AP mode with no SSID
   }
   // 2) else try and connect to the configured network
   else {

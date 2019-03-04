@@ -31,7 +31,6 @@
 // -------------------------------------------------------------------
 // Load and save the EmonESP config.
 //
-// This initial implementation saves the config to the EEPROM area of flash
 // -------------------------------------------------------------------
 
 // Global config varables
