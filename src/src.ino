@@ -34,12 +34,12 @@
 #include "emoncms.h"
 #include "mqtt.h"
 
-// for ATM90E32 board
+// for ATM90E32 energy meter
 #include <SPI.h>
 #include <ATM90E32.h>
 
 /***** CALIBRATION SETTINGS *****/
-unsigned short LineGain = 0; //7481 - 0x1D39 
+unsigned short LineGain = 7481; //7481 - 0x1D39 
 unsigned short VoltageGain = 41820; //9v AC transformer. 
                                     //32428 - 12v AC Transformer
 unsigned short CurrentGainCT1 = 25498;  //SCT-013-000 100A/50mA
