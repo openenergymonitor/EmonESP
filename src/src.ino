@@ -33,6 +33,7 @@ String currentfirmware = "2.3.4";
 #include "input.h"
 #include "emoncms.h"
 #include "mqtt.h"
+#include "FSWebServerLib.h"
 
 // -------------------------------------------------------------------
 // SETUP
@@ -59,7 +60,7 @@ void setup() {
   // Initialise the WiFi
   wifi_setup();
 
-  // Start the OTA update systems
+  // Start the OTA update systemsgi
   ota_setup();
 
   DEBUG.println("Server started");
