@@ -132,7 +132,7 @@ void mqtt_callback(char* topic, byte* payload, unsigned int length) {
 // -------------------------------------------------------------------
 boolean mqtt_connect()
 {
-  mqttclient.setServer(mqtt_server.c_str(), 1883);
+  mqttclient.setServer(mqtt_server.c_str(), mqtt_port);
   mqttclient.setCallback(mqtt_callback);
   
   DEBUG.println("MQTT Connecting...");

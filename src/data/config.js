@@ -109,6 +109,7 @@ function ConfigViewModel() {
     "emoncms_node": "",
     "emoncms_fingerprint": "",
     "mqtt_server": "",
+    "mqtt_port": "",
     "mqtt_topic": "",
     "mqtt_feed_prefix": "",
     "mqtt_user": "",
@@ -452,6 +453,7 @@ function EmonEspViewModel() {
   self.saveMqtt = function () {
     var mqtt = {
       server: self.config.mqtt_server(),
+      port: self.config.mqtt_port(),
       topic: self.config.mqtt_topic(),
       prefix: self.config.mqtt_feed_prefix(),
       user: self.config.mqtt_user(),

@@ -54,6 +54,7 @@ String emoncms_fingerprint = "";
 
 // MQTT Settings
 String mqtt_server = "";
+int mqtt_port = 1883;
 String mqtt_topic = "";
 String mqtt_user = "";
 String mqtt_pass = "";
@@ -78,6 +79,7 @@ extern bool ctrl_state = 0;
 #define EEPROM_EMON_PATH_SIZE     16
 #define EEPROM_EMON_NODE_SIZE     32
 #define EEPROM_MQTT_SERVER_SIZE   45
+#define EEPROM_MQTT_PORT_SIZE     2
 #define EEPROM_MQTT_TOPIC_SIZE    32
 #define EEPROM_MQTT_USER_SIZE     32
 #define EEPROM_MQTT_PASS_SIZE     64
@@ -90,7 +92,9 @@ extern bool ctrl_state = 0;
 #define EEPROM_TIMER_START2_SIZE  2
 #define EEPROM_TIMER_STOP2_SIZE   2
 #define EEPROM_VOLTAGE_OUTPUT_SIZE 2
+// TOTAL SIZE:                    508
 #define EEPROM_SIZE 512
+
 
 
 #define EEPROM_ESID_START         0
@@ -105,7 +109,9 @@ extern bool ctrl_state = 0;
 #define EEPROM_EMON_NODE_END      (EEPROM_EMON_NODE_START + EEPROM_EMON_NODE_SIZE)
 #define EEPROM_MQTT_SERVER_START  EEPROM_EMON_NODE_END
 #define EEPROM_MQTT_SERVER_END    (EEPROM_MQTT_SERVER_START + EEPROM_MQTT_SERVER_SIZE)
-#define EEPROM_MQTT_TOPIC_START   EEPROM_MQTT_SERVER_END
+#define EEPROM_MQTT_PORT_START    EEPROM_MQTT_SERVER_END
+#define EEPROM_MQTT_PORT_END      (EEPROM_MQTT_PORT_START + EEPROM_MQTT_PORT_SIZE)
+#define EEPROM_MQTT_TOPIC_START   EEPROM_MQTT_PORT_END
 #define EEPROM_MQTT_TOPIC_END     (EEPROM_MQTT_TOPIC_START + EEPROM_MQTT_TOPIC_SIZE)
 #define EEPROM_MQTT_USER_START    EEPROM_MQTT_TOPIC_END
 #define EEPROM_MQTT_USER_END      (EEPROM_MQTT_USER_START + EEPROM_MQTT_USER_SIZE)
@@ -200,6 +206,9 @@ void config_load_settings()
 
   // MQTT settings
   EEPROM_read_string(EEPROM_MQTT_SERVER_START, EEPROM_MQTT_SERVER_SIZE, mqtt_server);
+  EEPROM_read_int(EEPROM_MQTT_PORT_START, mqtt_port);
+  if (mqtt_port==0) mqtt_port = 1883; // apply a default port
+  
   EEPROM_read_string(EEPROM_MQTT_TOPIC_START, EEPROM_MQTT_TOPIC_SIZE, mqtt_topic);
   EEPROM_read_string(EEPROM_MQTT_FEED_PREFIX_START, EEPROM_MQTT_FEED_PREFIX_SIZE, mqtt_feed_prefix);
   EEPROM_read_string(EEPROM_MQTT_USER_START, EEPROM_MQTT_USER_SIZE, mqtt_user);
@@ -244,10 +253,11 @@ void config_save_emoncms(String server, String path, String node, String apikey,
   EEPROM.commit();
 }
 
-void config_save_mqtt(String server, String topic, String prefix, String user, String pass)
+void config_save_mqtt(String server, int port, String topic, String prefix, String user, String pass)
 {
   mqtt_server = server;
   mqtt_topic = topic;
+  mqtt_port = port;
   mqtt_feed_prefix = prefix;
   mqtt_user = user;
   mqtt_pass = pass;
@@ -255,6 +265,9 @@ void config_save_mqtt(String server, String topic, String prefix, String user, S
   // Save MQTT server max 45 characters
   EEPROM_write_string(EEPROM_MQTT_SERVER_START, EEPROM_MQTT_SERVER_SIZE, mqtt_server);
 
+  // Save MQTT port
+  EEPROM_write_int(EEPROM_MQTT_PORT_START, mqtt_port);
+  
   // Save MQTT topic max 32 characters
   EEPROM_write_string(EEPROM_MQTT_TOPIC_START, EEPROM_MQTT_TOPIC_SIZE, mqtt_topic);
 

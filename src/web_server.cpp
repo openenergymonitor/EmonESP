@@ -221,15 +221,18 @@ handleSaveMqtt(AsyncWebServerRequest *request) {
     return;
   }
 
+  String portstr = request->arg("port");
+  int port = portstr.toInt();
+
   config_save_mqtt(request->arg("server"),
+                   port,
                    request->arg("topic"),
                    request->arg("prefix"),
                    request->arg("user"),
                    request->arg("pass"));
 
   char tmpStr[200];
-  snprintf(tmpStr, sizeof(tmpStr), "Saved: %s %s %s %s %s", mqtt_server.c_str(),
-           mqtt_topic.c_str(), mqtt_feed_prefix.c_str(), mqtt_user.c_str(), mqtt_pass.c_str());
+  snprintf(tmpStr, sizeof(tmpStr), "Saved: %s %s %s %s %s %s", mqtt_server.c_str(), portstr.c_str(), mqtt_topic.c_str(), mqtt_feed_prefix.c_str(), mqtt_user.c_str(), mqtt_pass.c_str());
   DBUGLN(tmpStr);
 
   response->setCode(200);
@@ -402,6 +405,7 @@ handleStatus(AsyncWebServerRequest *request) {
   //s += ",\"emoncms_apikey\":\""+emoncms_apikey+"\""; security risk: DONT RETURN APIKEY
   s += ",\"emoncms_fingerprint\":\"" + emoncms_fingerprint + "\"";
   s += ",\"mqtt_server\":\"" + mqtt_server + "\"";
+  s += ",\"mqtt_port\":\"" + String(mqtt_port) + "\"";
   s += ",\"mqtt_topic\":\"" + mqtt_topic + "\"";
   s += ",\"mqtt_user\":\"" + mqtt_user + "\"";
   //s += ",\"mqtt_pass\":\""+mqtt_pass+"\""; security risk: DONT RETURN PASSWORDS
@@ -439,6 +443,7 @@ handleConfig(AsyncWebServerRequest *request) {
   // s += "\"emoncms_apikey\":\""+emoncms_apikey+"\","; security risk: DONT RETURN APIKEY
   s += "\"emoncms_fingerprint\":\"" + emoncms_fingerprint + "\",";
   s += "\"mqtt_server\":\"" + mqtt_server + "\",";
+  s += "\"mqtt_port\":\"" + String(mqtt_port) + "\",";
   s += "\"mqtt_topic\":\"" + mqtt_topic + "\",";
   s += "\"mqtt_feed_prefix\":\"" + mqtt_feed_prefix + "\",";
   s += "\"mqtt_user\":\"" + mqtt_user + "\",";
