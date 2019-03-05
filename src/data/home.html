@@ -225,26 +225,12 @@
       <div id="six">
         <h2 onclick="toggle('firmware');"><span>+</span> Firmware</h2>
         <div id="firmware" class="itembody-wrapper" style="display:none">
-          <div id="firmware" style="display:none">
-            <table>
-              <tr>
-                <th>Running</th>
-                <th>Latest</th>
-              </tr>
-              <tbody id="firmware-version">
-                <tr>
-                  <td data-bind="text: status.version"></td>
-                  <td></td>
-                </tr>
-              </tbody>
-            </table><br>
-            <a href="https://github.com/openenergymonitor/EmonESP/releases">
-              View changelog</a><br>
-          </div><br>
-          <!-- <button id="updatecheck">Check for Updates</button> -->
-          <!-- <button id="update" style="display:none">Apply
-          Update</button><p><span id="update-info"></span>-->
-          </p><button id="upload">Upload</button>
+          <H3>Choose .bin file</H3>
+            <form id="uploadform" enctype="multipart/form-data" method="post" action="/upload">
+              <input id="fileupload" name="inobinfile" type="file" />
+              <br><br>
+              <button type="submit" value="submit" id="submit">Upload</button>
+            </form><br>
         </div>
       </div>
       <!--//////////////////////////////////////////////////////////////////////////////////-->
