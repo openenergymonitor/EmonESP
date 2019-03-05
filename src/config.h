@@ -60,6 +60,7 @@ extern String emoncms_fingerprint;
 
 // MQTT Settings
 extern String mqtt_server;
+extern int mqtt_port;
 extern String mqtt_topic;
 extern String mqtt_user;
 extern String mqtt_pass;
@@ -90,7 +91,7 @@ extern void config_save_emoncms(String server, String path, String node, String 
 // -------------------------------------------------------------------
 // Save the MQTT broker details
 // -------------------------------------------------------------------
-extern void config_save_mqtt(String server, String topic, String prefix, String user, String pass);
+extern void config_save_mqtt(String server, int port, String topic, String prefix, String user, String pass);
 extern void config_save_mqtt_server(String server);
 
 // -------------------------------------------------------------------

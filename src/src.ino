@@ -67,7 +67,7 @@ void setup() {
   // ---------------------------------------------------------
   node_type = "smartplug";
   node_description = "SmartPlug";
-  node_id = 1;
+  node_id = ESP.getChipId()/5120;
   
   node_name = node_type + String(node_id);  
   node_describe = "describe:"+node_type;

@@ -47,6 +47,7 @@ void auth_request() {
     String mqtt_username = "";
     String mqtt_password = "";
     String mqtt_basetopic = "";
+    String mqtt_portnum = "";
     int stringpart = 0;
     
     // This needs to be done with an encrypted request otherwise credentials are shared as plain text
@@ -60,12 +61,19 @@ void auth_request() {
                 if (stringpart==0) mqtt_username += c;
                 if (stringpart==1) mqtt_password += c;
                 if (stringpart==2) mqtt_basetopic += c;
+                if (stringpart==3) mqtt_portnum += c;
             }
         }
         // Only save if we received 3 setting parts (0,1,2)
         if (stringpart==2) {
             mqtt_auth_transfer_flag = 2;
-            config_save_mqtt(mqtt_server.c_str(),mqtt_basetopic,"",mqtt_username,mqtt_password);
+            config_save_mqtt(mqtt_server.c_str(),mqtt_port,mqtt_basetopic,"",mqtt_username,mqtt_password);
+            DEBUG.println("MQTT Settings:"); DEBUG.println(result);
+        }
+        
+        if (stringpart==3) {
+            mqtt_auth_transfer_flag = 2;
+            config_save_mqtt(mqtt_server.c_str(),mqtt_portnum.toInt(),mqtt_basetopic,"",mqtt_username,mqtt_password);
             DEBUG.println("MQTT Settings:"); DEBUG.println(result);
         }
     }
