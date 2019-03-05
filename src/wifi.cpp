@@ -30,7 +30,7 @@
 #include <ESP8266mDNS.h>              // Resolve URL for update server etc.
 #include <DNSServer.h>                // Required for captive portal
 
-
+#ifdef RELEASE
 int button_interval_one = 100; // milliseconds for action, test.
 int button_interval_two = (5 * 1000); // 5 seconds hold down AP mode.
 int button_interval_three = (10 * 1000); // 10 seconds hold down GPIO0 for factory reset.
@@ -39,7 +39,7 @@ bool buttonflag = false;
 bool button_interval_one_passed = false;
 bool button_interval_two_passed = false;
 bool button_interval_three_passed = false;
-
+#endif
 
 DNSServer dnsServer;                  // Create class DNS server, captive portal re-direct
 const byte DNS_PORT = 53;
@@ -192,7 +192,7 @@ void wifi_setup() {
 }
 
 void wifi_loop() {
-
+#ifdef RELEASE
   // GPIO0 button, set AP mode and factory reset.
   if (buttonflag == true && digitalRead(0) == HIGH) {
     Serial.println("Button released.");
@@ -238,7 +238,7 @@ void wifi_loop() {
     }
   }
 // end GPIO0 button.
-
+#endif
 
   dnsServer.processNextRequest(); // Captive portal DNS re-dierct
 
