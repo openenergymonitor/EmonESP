@@ -35,6 +35,8 @@
 #include "autoauth.h"
 #include <NTPClient.h>
 
+//#define RELEASE  // comment in, gpio0 button enable.
+
 WiFiUDP ntpUDP;
 NTPClient timeClient(ntpUDP,"europe.pool.ntp.org",0,60000);
 unsigned long last_ctrl_update = 0;
@@ -65,15 +67,15 @@ void setup() {
   // ---------------------------------------------------------
   // Hard-coded initial config for node_name and node_describe
   // ---------------------------------------------------------
-  node_type = "smartplug";
-  node_description = "SmartPlug";
+  node_type = "espwifi";
+  node_description = "espwifi";
   node_id = ESP.getChipId()/5120;
   
   node_name = node_type + String(node_id);  
   node_describe = "describe:"+node_type;
   // ---------------------------------------------------------
 
-  pinMode(LEDpin, OUTPUT);
+  pinMode(LEDpin, OUTPUT);  
 
   if (node_type=="smartplug") {
     pinMode(12, OUTPUT);
@@ -198,7 +200,7 @@ void loop()
     }
   }
   // --------------------------------------------------------------
-  if ((millis()-last_pushbtn_check)>100) {
+  /*if ((millis()-last_pushbtn_check)>100) {
     last_pushbtn_check = millis();
 
     last_pushbtn_state = pushbtn_state;
@@ -212,10 +214,9 @@ void loop()
     }
     if (!pushbtn_state && !last_pushbtn_state) pushbtn_action = 0;
   }
-  
+  */
 } // end loop
 
 String getTime() {
     return timeClient.getFormattedTime();
 }
-

@@ -124,7 +124,7 @@ function ConfigViewModel() {
     "timer_stop2":"",
     "voltage_output":"",
   }, baseEndpoint + '/config');
-  
+
   this.f_timer_start1 = ko.pureComputed({
       read: function () {
           return addcolon(this.timer_start1());
@@ -170,7 +170,7 @@ function ConfigViewModel() {
       },
       owner: this
   });
-  
+
 }
 ConfigViewModel.prototype = Object.create(BaseViewModel.prototype);
 ConfigViewModel.prototype.constructor = ConfigViewModel;
@@ -263,13 +263,13 @@ function EmonEspViewModel() {
 
   self.initialised = ko.observable(false);
   self.updating = ko.observable(false);
-    
+
   var updateTimer = null;
   var updateTime = 1 * 1000;
 
   var logUpdateTimer = null;
   var logUpdateTime = 500;
-    
+
   // Upgrade URL
   self.upgradeUrl = ko.observable('about:blank');
 
@@ -300,7 +300,7 @@ function EmonEspViewModel() {
     if (self.updating()) {
       return;
     }
-    self.updating(true);    
+    self.updating(true);
     if (null !== updateTimer) {
       clearTimeout(updateTimer);
       updateTimer = null;
@@ -368,7 +368,7 @@ function EmonEspViewModel() {
       self.saveAdminFetching(false);
     });
   };
-  
+
   // -----------------------------------------------------------------------
   // Event: Timer save
   // -----------------------------------------------------------------------
@@ -377,12 +377,12 @@ function EmonEspViewModel() {
   self.saveTimer = function () {
     self.saveTimerFetching(true);
     self.saveTimerSuccess(false);
-    $.post(baseEndpoint + "/savetimer", { 
-      timer_start1: self.config.timer_start1(), 
-      timer_stop1: self.config.timer_stop1(), 
-      timer_start2: self.config.timer_start2(), 
+    $.post(baseEndpoint + "/savetimer", {
+      timer_start1: self.config.timer_start1(),
+      timer_stop1: self.config.timer_stop1(),
+      timer_start2: self.config.timer_start2(),
       timer_stop2: self.config.timer_stop2(),
-      voltage_output: self.config.voltage_output() 
+      voltage_output: self.config.voltage_output()
     }, function (data) {
       self.saveTimerSuccess(true);
       setTimeout(function(){
@@ -394,13 +394,13 @@ function EmonEspViewModel() {
       self.saveTimerFetching(false);
     });
   };
-  
+
   // -----------------------------------------------------------------------
   // Event: Switch On, Off, Timer
-  // -----------------------------------------------------------------------  
+  // -----------------------------------------------------------------------
   //self.btn_off = ko.observable(false);
   //self.btn_timer = ko.observable(false);
-  
+
   self.ctrlMode = function (mode) {
     var last = self.status.ctrl_mode();
     self.status.ctrl_mode(mode);
@@ -554,5 +554,15 @@ function toggle(id) {
 // Event:Upload Firmware
 // -----------------------------------------------------------------------
 //document.getElementById("upload").addEventListener("click", function(e) {
+document.getElementById("submit").addEventListener("click", function(e) {
+  if (confirm("Flashing takes a minute.\nOnly flash with compatible .bin file.")) {
+  }
+  else {
+  e.preventDefault();
+  }
+});
+
+//}
+//innerHTML = "Updating. Refresh this page in a minute.";
 //  window.location.href='/upload'
 //});

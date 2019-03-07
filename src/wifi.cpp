@@ -30,7 +30,16 @@
 #include <ESP8266mDNS.h>              // Resolve URL for update server etc.
 #include <DNSServer.h>                // Required for captive portal
 
-int factoryreset_holdtime = (10 * 1000); //10 seconds hold down GPIO0 for factory reset.
+#ifdef RELEASE
+int button_interval_one = 100; // milliseconds for action, test.
+int button_interval_two = (5 * 1000); // 5 seconds hold down AP mode.
+int button_interval_three = (10 * 1000); // 10 seconds hold down GPIO0 for factory reset.
+int timebuttonpressed;
+bool buttonflag = false;
+bool button_interval_one_passed = false;
+bool button_interval_two_passed = false;
+bool button_interval_three_passed = false;
+#endif
 
 DNSServer dnsServer;                  // Create class DNS server, captive portal re-direct
 const byte DNS_PORT = 53;
@@ -183,20 +192,53 @@ void wifi_setup() {
 }
 
 void wifi_loop() {
+#ifdef RELEASE
+  // GPIO0 button, set AP mode and factory reset.
+  if (buttonflag == true && digitalRead(0) == HIGH) {
+    Serial.println("Button released.");
+    button_interval_one_passed = false;
+    button_interval_two_passed = false;
+    button_interval_three_passed = false;
+    delay(10);
+  }
 
-  // Factory reset on GPIO0.
-  /*
-  while (digitalRead(0) == LOW) {
-    delay(factoryreset_holdtime);
-    if (digitalRead(0) == LOW) {
+  bool button = !digitalRead(0);
+
+  if (button == false) {
+    timebuttonpressed = 0;
+    buttonflag = false;
+  }
+  else if (button == true && timebuttonpressed == 0) {
+    timebuttonpressed = millis();
+    Serial.println("Button Pressed...");
+    Serial.println("5 seconds until AP mode");
+    Serial.println("10 seconds until Factory Reset.");
+    delay(10);
+    buttonflag = true;
+  }
+  else if (button == true && timebuttonpressed > 0) {
+    if (timebuttonpressed + button_interval_one <= millis() && button_interval_one_passed == false) {
+      Serial.println("testing first interval.");
+      button_interval_one_passed = true;
+    }
+    if (timebuttonpressed + button_interval_two <= millis() && button_interval_two_passed == false) {
+      Serial.println("AP mode starting..");
+      wifi_mode = WIFI_MODE_AP_ONLY;
+      startAP();
+      button_interval_two_passed = true;
+    }
+    if (timebuttonpressed + button_interval_three <= millis()) {
       Serial.println("Commencing factory reset.");
+      delay(500);
       config_reset();
       ESP.eraseConfig();
       Serial.println("Factory reset complete! Resetting...");
+      delay(500);
       ESP.reset();
     }
-  }*/
-  // end factory reset.
+  }
+// end GPIO0 button.
+#endif
 
   dnsServer.processNextRequest(); // Captive portal DNS re-dierct
 
