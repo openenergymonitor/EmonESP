@@ -23,6 +23,10 @@
  * Boston, MA 02111-1307, USA.
  */
 
+/* 
+Find pushbutton code and #define for activating the code in wifi.cpp
+*/
+
 #include "emonesp.h"
 #include "config.h"
 #include "wifi.h"
@@ -34,8 +38,6 @@
 #include "http.h"
 #include "autoauth.h"
 #include <NTPClient.h>
-
-//#define RELEASE  // comment in, gpio0 button enable.
 
 WiFiUDP ntpUDP;
 NTPClient timeClient(ntpUDP,"europe.pool.ntp.org",0,60000);
@@ -200,7 +202,8 @@ void loop()
     }
   }
   // --------------------------------------------------------------
-  /*if ((millis()-last_pushbtn_check)>100) {
+  /*
+   if ((millis()-last_pushbtn_check)>100) {
     last_pushbtn_check = millis();
 
     last_pushbtn_state = pushbtn_state;

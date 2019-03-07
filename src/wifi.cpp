@@ -23,6 +23,8 @@
    Boston, MA 02111-1307, USA.
 */
 
+#define RELEASE  // comment in, gpio0 button enable.
+
 #include "emonesp.h"
 #include "wifi.h"
 #include "config.h"
@@ -192,6 +194,7 @@ void wifi_setup() {
 }
 
 void wifi_loop() {
+
 #ifdef RELEASE
   // GPIO0 button, set AP mode and factory reset.
   if (buttonflag == true && digitalRead(0) == HIGH) {
