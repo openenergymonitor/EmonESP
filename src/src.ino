@@ -47,6 +47,8 @@ bool pushbtn_action = 0;
 bool pushbtn_state = 0;
 bool last_pushbtn_state = 0;
 
+void led_flash(int, int);
+
 // -------------------------------------------------------------------
 // SETUP
 // -------------------------------------------------------------------
@@ -69,8 +71,8 @@ void setup() {
   // ---------------------------------------------------------
   // Hard-coded initial config for node_name and node_describe
   // ---------------------------------------------------------
-  node_type = "espwifi";
-  node_description = "espwifi";
+  node_type = "smartplug";
+  node_description = "smartplugya";
   node_id = ESP.getChipId()/5120;
   
   node_name = node_type + String(node_id);  
