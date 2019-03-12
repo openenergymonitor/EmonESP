@@ -286,7 +286,7 @@ handleSaveTimer(AsyncWebServerRequest *request) {
   int qtimer_stop2 = tmp.toInt();
   tmp = request->arg("voltage_output");
   int qvoltage_output = tmp.toInt();
-  
+
   config_save_timer(qtimer_start1, qtimer_stop1, qtimer_start2, qtimer_stop2, qvoltage_output);
   if (mqtt_server!=0) mqtt_publish("out/timer",String(qtimer_start1)+" "+String(qtimer_stop1)+" "+String(qtimer_start2)+" "+String(qtimer_stop2)+" "+String(qvoltage_output));
 
@@ -309,10 +309,10 @@ handleSetVout(AsyncWebServerRequest *request) {
 
   int save = 0;
   if (qsave==1) save = 1;
-  
+
   config_save_voltage_output(vout,save);
   if (mqtt_server!=0) mqtt_publish("out/vout",String(vout));
-  
+
   response->setCode(200);
   if (save) response->print("saved");
   else response->print("ok");
@@ -334,10 +334,10 @@ handleSetFlowT(AsyncWebServerRequest *request) {
 
   int save = 0;
   if (qsave==1) save = 1;
-  
+
   config_save_voltage_output(vout,save);
   if (mqtt_server!=0) mqtt_publish("out/vout",String(vout));
-  
+
   response->setCode(200);
   if (save) response->print("saved");
   else response->print("ok");
@@ -529,6 +529,7 @@ handleInput(AsyncWebServerRequest *request) {
 // Check for updates and display current version
 // url: /firmware
 // -------------------------------------------------------------------
+/*
 void handleUpdateCheck(AsyncWebServerRequest *request) {
   AsyncResponseStream *response;
   if(false == requestPreProcess(request, response)) {
@@ -550,11 +551,38 @@ void handleUpdateCheck(AsyncWebServerRequest *request) {
   response->print(s);
   request->send(response);
 }
-
+*/
 // -------------------------------------------------------------------
 // Update firmware
 // url: /update
 // -------------------------------------------------------------------
+static void handle_update_progress_cb(AsyncWebServerRequest *request, String filename, size_t index, uint8_t *data, size_t len, bool final) {
+  uint32_t free_space = (ESP.getFreeSketchSpace() - 0x1000) & 0xFFFFF000;
+  if (!index) {
+    Serial.println("Update");
+    Update.runAsync(true);
+    if (!Update.begin(free_space)) {
+      Update.printError(Serial);
+    }
+  }
+
+  if (Update.write(data, len) != len) {
+    Update.printError(Serial);
+  }
+
+  if (final) {
+    if (!Update.end(true)) {
+      Update.printError(Serial);
+    } else {
+      // restartNow = true;//Set flag so main loop can issue restart call
+      Serial.println("Update complete");
+      delay(1000);
+      ESP.reset();
+    }
+  }
+}
+
+/*
 void handleUpdate(AsyncWebServerRequest *request) {
   // BUG/HACK/TODO: This will block, should be done in the loop call
 
@@ -592,11 +620,12 @@ void handleUpdate(AsyncWebServerRequest *request) {
 
   DBUGLN(str);
 }
-
+*/
 // -------------------------------------------------------------------
 // Update firmware
 // url: /update
 // -------------------------------------------------------------------
+/*
 void
 handleUpdateGet(AsyncWebServerRequest *request) {
   request->send(200, "text/html", "<form method='POST' action='/update' enctype='multipart/form-data'><input type='file' name='update'><input type='submit' value='Update'></form>");
@@ -642,10 +671,10 @@ handleUpdateUpload(AsyncWebServerRequest *request, String filename, size_t index
     }
   }
 }
-
+*/
 void handleDescribe(AsyncWebServerRequest *request) {
   AsyncWebServerResponse *response = request->beginResponse(200, "text/plain", "smartplug");
-  response->addHeader("Access-Control-Allow-Origin", "*");  
+  response->addHeader("Access-Control-Allow-Origin", "*");
   request->send(response);
 }
 
@@ -756,11 +785,14 @@ web_server_setup()
   server.on("/lastvalues", handleLastValues);
 
   // Simple Firmware Update Form
-  server.on("/upload", HTTP_GET, handleUpdateGet);
-  server.on("/upload", HTTP_POST, handleUpdatePost, handleUpdateUpload);
+  server.on("/upload", HTTP_POST, [](AsyncWebServerRequest * request) {
+    request->send(200);
+}, handle_update_progress_cb);
+  //server.on("/upload", HTTP_GET, handleUpdateGet);
+  //server.on("/upload", HTTP_POST, handleUpdatePost, handleUpdateUpload);
 
-  server.on("/firmware", handleUpdateCheck);
-  server.on("/update", handleUpdate);
+  //server.on("/firmware", handleUpdateCheck);
+//  server.on("/update", handleUpdate);
   server.on("/emoncms/describe", handleDescribe);
   server.on("/time", handleTime);
   server.on("/ctrlmode", handleCtrlMode);

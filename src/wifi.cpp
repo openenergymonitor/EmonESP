@@ -23,6 +23,8 @@
    Boston, MA 02111-1307, USA.
 */
 
+
+
 #include "emonesp.h"
 #include "wifi.h"
 #include "config.h"
@@ -30,7 +32,6 @@
 #include <ESP8266mDNS.h>              // Resolve URL for update server etc.
 #include <DNSServer.h>                // Required for captive portal
 
-int factoryreset_holdtime = (10 * 1000); //10 seconds hold down GPIO0 for factory reset.
 
 DNSServer dnsServer;                  // Create class DNS server, captive portal re-direct
 const byte DNS_PORT = 53;
@@ -51,7 +52,6 @@ String st, rssi;
 
 // -------------------------------------------------------------------
 int wifi_mode = WIFI_MODE_STA;
-
 
 // -------------------------------------------------------------------
 // Start Access Point
@@ -183,20 +183,6 @@ void wifi_setup() {
 }
 
 void wifi_loop() {
-
-  // Factory reset on GPIO0.
-  /*
-  while (digitalRead(0) == LOW) {
-    delay(factoryreset_holdtime);
-    if (digitalRead(0) == LOW) {
-      Serial.println("Commencing factory reset.");
-      config_reset();
-      ESP.eraseConfig();
-      Serial.println("Factory reset complete! Resetting...");
-      ESP.reset();
-    }
-  }*/
-  // end factory reset.
 
   dnsServer.processNextRequest(); // Captive portal DNS re-dierct
 

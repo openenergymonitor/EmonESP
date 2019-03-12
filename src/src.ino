@@ -23,6 +23,10 @@
  * Boston, MA 02111-1307, USA.
  */
 
+/*
+Find pushbutton code and #define for activating the code in wifi.cpp
+*/
+
 #include "emonesp.h"
 #include "config.h"
 #include "wifi.h"
@@ -42,6 +46,8 @@ unsigned long last_pushbtn_check = 0;
 bool pushbtn_action = 0;
 bool pushbtn_state = 0;
 bool last_pushbtn_state = 0;
+
+void led_flash(int, int);
 
 // -------------------------------------------------------------------
 // SETUP
@@ -66,10 +72,10 @@ void setup() {
   // Hard-coded initial config for node_name and node_describe
   // ---------------------------------------------------------
   node_type = "smartplug";
-  node_description = "SmartPlug";
+  node_description = "smartplugya";
   node_id = ESP.getChipId()/5120;
-  
-  node_name = node_type + String(node_id);  
+
+  node_name = node_type + String(node_id);
   node_describe = "describe:"+node_type;
   // ---------------------------------------------------------
 
@@ -79,7 +85,7 @@ void setup() {
     pinMode(12, OUTPUT);
     pinMode(13, OUTPUT);
     pinMode(16, OUTPUT);
-    led_flash(3000,100);    
+    led_flash(3000,100);
   } else if (node_type=="wifirelay") {
     pinMode(5, OUTPUT);
   } else if (node_type=="espwifi") {
@@ -109,7 +115,7 @@ void setup() {
 
   // Time
   timeClient.begin();
-  
+
   delay(100);
 } // end setup
 
@@ -156,7 +162,7 @@ void loop()
 
     // 1. Timer
     int timenow = timeClient.getHours()*100+timeClient.getMinutes();
-    
+
     if (timenow>=timer_start1 && timenow<timer_stop1) ctrl_state = 1;
     if (timenow>=timer_start2 && timenow<timer_stop2) ctrl_state = 1;
 
@@ -192,18 +198,19 @@ void loop()
     }
 
     if (node_type=="hpmon") {
-      analogWrite(4,voltage_output);  
-      // DEBUG.print("voltage_output: "); 
+      analogWrite(4,voltage_output);
+      // DEBUG.print("voltage_output: ");
       // DEBUG.println(voltage_output);
     }
   }
   // --------------------------------------------------------------
-  if ((millis()-last_pushbtn_check)>100) {
+  /*
+   if ((millis()-last_pushbtn_check)>100) {
     last_pushbtn_check = millis();
 
     last_pushbtn_state = pushbtn_state;
     pushbtn_state = !digitalRead(0);
-    
+
     if (pushbtn_state && last_pushbtn_state && !pushbtn_action) {
       pushbtn_action = 1;
       if (ctrl_mode=="On") ctrl_mode = "Off"; else ctrl_mode = "On";
@@ -212,10 +219,11 @@ void loop()
     }
     if (!pushbtn_state && !last_pushbtn_state) pushbtn_action = 0;
   }
-  
+  */
+//  DEBUG.println("fallen gate.");
+
 } // end loop
 
 String getTime() {
     return timeClient.getFormattedTime();
 }
-
