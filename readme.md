@@ -339,13 +339,14 @@ or click the green ‘Clone or download’ button at the top of this page.
 
 #### 4. Compile and Upload
 
-- Select `Tools > Board > Generic ESP8266 Module`.
 - Open src/src.ino in the Arduino IDE from this cloned or downloaded repo.
+- Select 'Tools > Board > Generic ESP8266 Module'.
+- Select 'Tools > Flash Size: > 4M (1M SPIFFS)'
 - Put ESP into bootloader mode/
    - On Heatpump monitor use jumper to pull `GPIO0` low then reset then connect power (simulates reset)
    - On other ESP boards (Adafruit HUZZAH) press and hold `GPIO0` button then press Reset, LED should light dimly to indicate bootloader mode.
 - **Upload main sketch:** Compile and Upload as normal using Arduino IDE [CTRL + u]
-- Reset into bootloader mode again.
+- Reset into bootloader mode again (optional if next step doesn't work consistently).
 - **Upload 'data' folder**: Upload data folder (home.html web page etc) using `tools > ESP8266 Sketch Data Upload tool`.
 - If compiling fails because PubSubClient.h library (or any other libraries) cannot be found. Open the Library Manager again (Sketch > Include Library > Library Manager) and search for 'PubSubClient', install.
 ***
