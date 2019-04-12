@@ -61,13 +61,18 @@ void setup() {
 
   // Read saved settings from the config
   config_load_settings();
+  timeClient.setTimeOffset(time_offset);
 
   // ---------------------------------------------------------
   // Hard-coded initial config for node_name and node_describe
   // ---------------------------------------------------------
   node_type = "smartplug";
   node_description = "SmartPlug";
-  node_id = ESP.getChipId()/5120;
+  
+  unsigned long chip_id = ESP.getChipId();
+  int chip_tmp = chip_id / 10000;
+  chip_tmp = chip_tmp * 10000;
+  node_id = (chip_id - chip_tmp);
   
   node_name = node_type + String(node_id);  
   node_describe = "describe:"+node_type;

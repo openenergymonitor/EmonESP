@@ -121,7 +121,7 @@
           <p data-bind="visible: config.node_type()=='hpmon'">
           Flow temperature: <input type="text" data-bind="textInput: config.flowT">
           </p>
-          <p>Time offset: <input type="text" data-bind="textInput: config.time_offset"></p>
+          <p>Time offset (seconds): <input type="text" data-bind="textInput: config.time_offset" style="width:80px"></p>
           <button data-bind="click: saveTimer, text: (saveTimerFetching() ? 'Saving' : (saveTimerSuccess() ? 'Saved' : 'Save')), disable: saveTimerFetching">Save</button>
           <br><br>
         </div>
