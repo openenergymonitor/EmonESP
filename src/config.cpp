@@ -325,6 +325,7 @@ void config_save_timer(int start1, int stop1, int start2, int stop2, int qvoltag
   EEPROM_write_int(EEPROM_VOLTAGE_OUTPUT_START, voltage_output);
   
   time_offset = qtime_offset;
+  setTimeOffset();
   EEPROM_write_int(EEPROM_TIME_OFFSET_START, time_offset);
   
   EEPROM.commit();
