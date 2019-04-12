@@ -71,6 +71,7 @@ extern int timer_start1;
 extern int timer_stop1;
 extern int timer_start2;
 extern int timer_stop2;
+extern int time_offset;
 
 extern int voltage_output;
 

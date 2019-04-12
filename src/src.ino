@@ -36,7 +36,7 @@
 #include <NTPClient.h>
 
 WiFiUDP ntpUDP;
-NTPClient timeClient(ntpUDP,"europe.pool.ntp.org",0,60000);
+NTPClient timeClient(ntpUDP,"europe.pool.ntp.org",3600,60000);
 unsigned long last_ctrl_update = 0;
 unsigned long last_pushbtn_check = 0;
 bool pushbtn_action = 0;
