@@ -39,7 +39,7 @@
 #include <NTPClient.h>
 
 
-AsyncWebServer server(80);          //Create class for Web server
+AsyncWebServer server(80);          // Create class for Web server
 
 bool enableCors = true;
 

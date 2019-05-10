@@ -109,7 +109,6 @@ extern void config_save_voltage_output(int qvoltage_output, int save_to_eeprom);
 // -------------------------------------------------------------------
 extern void config_save_wifi(String qsid, String qpass);
 
-
 // -------------------------------------------------------------------
 // Reset the config back to defaults
 // -------------------------------------------------------------------

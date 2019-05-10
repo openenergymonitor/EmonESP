@@ -58,4 +58,5 @@ extern void wifi_restart();
 extern void wifi_scan();
 extern void wifi_disconnect();
 
+extern void startAP();
 #endif // _EMONESP_WIFI_H

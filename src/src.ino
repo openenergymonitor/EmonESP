@@ -38,6 +38,7 @@ Find pushbutton code and #define for activating the code in wifi.cpp
 #include "http.h"
 #include "autoauth.h"
 #include <NTPClient.h>
+#include "gpio0.h"
 
 WiFiUDP ntpUDP;
 NTPClient timeClient(ntpUDP,"europe.pool.ntp.org",0,60000);
@@ -53,7 +54,7 @@ void led_flash(int, int);
 // SETUP
 // -------------------------------------------------------------------
 void setup() {
-  delay(2000);
+  delay(1000);
 
   Serial.begin(115200);
 #ifdef DEBUG_SERIAL1
@@ -131,7 +132,7 @@ void loop()
   ota_loop();
   web_server_loop();
   wifi_loop();
-  timeClient.update();
+  timeClient.update(); // how often does this have to happen?
 
   String input = "";
   boolean gotInput = input_get(input);
@@ -204,9 +205,11 @@ void loop()
     }
   }
   // --------------------------------------------------------------
-  /*
+
    if ((millis()-last_pushbtn_check)>100) {
     last_pushbtn_check = millis();
+
+    gpio0_loop();
 
     last_pushbtn_state = pushbtn_state;
     pushbtn_state = !digitalRead(0);
@@ -219,8 +222,6 @@ void loop()
     }
     if (!pushbtn_state && !last_pushbtn_state) pushbtn_action = 0;
   }
-  */
-//  DEBUG.println("fallen gate.");
 
 } // end loop
 

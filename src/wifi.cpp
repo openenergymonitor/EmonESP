@@ -23,8 +23,6 @@
    Boston, MA 02111-1307, USA.
 */
 
-
-
 #include "emonesp.h"
 #include "wifi.h"
 #include "config.h"
@@ -32,15 +30,17 @@
 #include <ESP8266mDNS.h>              // Resolve URL for update server etc.
 #include <DNSServer.h>                // Required for captive portal
 
-
 DNSServer dnsServer;                  // Create class DNS server, captive portal re-direct
 const byte DNS_PORT = 53;
 
 // Access Point SSID, password & IP address. SSID will be softAP_ssid + chipID to make SSID unique
-// const char *softAP_ssid = "emonESP";
+//const char *softAP_ssid = "emonESP";
 const char* softAP_password = "";
 IPAddress apIP(192, 168, 4, 1);
 IPAddress netMsk(255, 255, 255, 0);
+
+// hostname for mDNS. Try "emonesp.local"
+//const char *esp_hostname = "emonesp";
 
 // Wifi Network Strings
 String connected_network = "";
@@ -105,7 +105,7 @@ startClient() {
   DEBUG.print(esid.c_str());
   DEBUG.print(" PSK:");
   DEBUG.println(epass.c_str());
-  
+
   WiFi.hostname(node_name.c_str());
 
   //WiFi.mode(WIFI_STA);
@@ -146,12 +146,12 @@ startClient() {
     ipaddress = tmpStr;
 
     for (int f=0; f<10; f++) {
-        digitalWrite(LEDpin,HIGH); 
-        delay(80); 
-        digitalWrite(LEDpin,LOW); 
+        digitalWrite(LEDpin,HIGH);
+        delay(80);
+        digitalWrite(LEDpin,LOW);
         delay(20);
     }
-    digitalWrite(LEDpin,HIGH); 
+    digitalWrite(LEDpin,HIGH);
   } else {
     DEBUG.print("startClient wifi_mode is not STA??");
   }
@@ -183,6 +183,16 @@ void wifi_setup() {
 }
 
 void wifi_loop() {
+
+
+#ifdef WIFI_LED
+  if (wifi_mode == WIFI_MODE_AP_ONLY && millis() > wifiLedTimeOut) {
+    wifiLedState = !wifiLedState;
+    digitalWrite(WIFI_LED, wifiLedState);
+    wifiLedTimeOut = millis() + WIFI_LED_AP_TIME;
+  }
+#endif
+
 
   dnsServer.processNextRequest(); // Captive portal DNS re-dierct
 
