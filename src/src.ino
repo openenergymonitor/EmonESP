@@ -42,18 +42,14 @@ Find pushbutton code and #define for activating the code in wifi.cpp
 
 WiFiUDP ntpUDP;
 NTPClient timeClient(ntpUDP,"europe.pool.ntp.org",0,60000);
-unsigned long last_ctrl_update = 0;
-unsigned long last_pushbtn_check = 0;
-bool pushbtn_action = 0;
-bool pushbtn_state = 0;
-bool last_pushbtn_state = 0;
-
-void led_flash(int, int);
+int last_ctrl_update = 0;
+int last_pushbtn_check = 0;
 
 // -------------------------------------------------------------------
 // SETUP
 // -------------------------------------------------------------------
 void setup() {
+  wdt_reset();
   delay(1000);
 
   Serial.begin(115200);
@@ -72,7 +68,7 @@ void setup() {
   // ---------------------------------------------------------
   // Hard-coded initial config for node_name and node_describe
   // ---------------------------------------------------------
-  node_type = "espwifi";
+  node_type = "smartplug";
   node_description = "emonESP";
   node_id = ESP.getChipId()/5120;
 
@@ -120,9 +116,7 @@ void setup() {
   delay(100);
 } // end setup
 
-void led_flash(int ton, int toff) {
-  digitalWrite(LEDpin,LOW); delay(ton); digitalWrite(LEDpin,HIGH); delay(toff);
-}
+
 
 // -------------------------------------------------------------------
 // LOOP
@@ -206,22 +200,7 @@ void loop()
   }
   // --------------------------------------------------------------
 
-   if ((millis()-last_pushbtn_check)>100) {
-    last_pushbtn_check = millis();
-
-    gpio0_loop();
-
-    last_pushbtn_state = pushbtn_state;
-    pushbtn_state = !digitalRead(0);
-
-    if (pushbtn_state && last_pushbtn_state && !pushbtn_action) {
-      pushbtn_action = 1;
-      if (ctrl_mode=="On") ctrl_mode = "Off"; else ctrl_mode = "On";
-      if (mqtt_server!=0) mqtt_publish("out/ctrlmode",String(ctrl_mode));
-
-    }
-    if (!pushbtn_state && !last_pushbtn_state) pushbtn_action = 0;
-  }
+  gpio0_loop();
 
 } // end loop
 

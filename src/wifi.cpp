@@ -124,12 +124,12 @@ startClient() {
     if ((millis()-start_connect)>30000) {
       delay(2000);
       digitalWrite(LEDpin,HIGH);
-      ESP.reset(); // ESP.restart(); ?
+      ESP.restart();
     }
 
     if (digitalRead(0) == LOW) {
-      startAP();
       wifi_mode = WIFI_MODE_AP_ONLY;
+      startAP();
       break;
     }
   }

@@ -27,6 +27,8 @@
 #define _EMONESP_GPIO0_H
 
 
-bool gpio0_loop();
+extern void gpio0_loop();
+
+extern void led_flash(int, int);
 
 #endif // _EMONESP_GPIO0_H

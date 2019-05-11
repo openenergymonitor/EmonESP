@@ -60,7 +60,7 @@ String mqtt_user = "";
 String mqtt_pass = "";
 String mqtt_feed_prefix = "";
 
-// Timer Settings 
+// Timer Settings
 int timer_start1 = 0;
 int timer_stop1 = 0;
 int timer_start2 = 0;
@@ -68,9 +68,9 @@ int timer_stop2 = 0;
 
 int voltage_output = 0;
 
-extern String ctrl_mode = "Timer";
-extern bool ctrl_update = 0;
-extern bool ctrl_state = 0;
+String ctrl_mode = "Timer";
+bool ctrl_update = 0;
+bool ctrl_state = 0;
 
 #define EEPROM_ESID_SIZE          32
 #define EEPROM_EPASS_SIZE         64
@@ -208,7 +208,7 @@ void config_load_settings()
   EEPROM_read_string(EEPROM_MQTT_SERVER_START, EEPROM_MQTT_SERVER_SIZE, mqtt_server);
   EEPROM_read_int(EEPROM_MQTT_PORT_START, mqtt_port);
   if (mqtt_port==0) mqtt_port = 1883; // apply a default port
-  
+
   EEPROM_read_string(EEPROM_MQTT_TOPIC_START, EEPROM_MQTT_TOPIC_SIZE, mqtt_topic);
   EEPROM_read_string(EEPROM_MQTT_FEED_PREFIX_START, EEPROM_MQTT_FEED_PREFIX_SIZE, mqtt_feed_prefix);
   EEPROM_read_string(EEPROM_MQTT_USER_START, EEPROM_MQTT_USER_SIZE, mqtt_user);
@@ -267,7 +267,7 @@ void config_save_mqtt(String server, int port, String topic, String prefix, Stri
 
   // Save MQTT port
   EEPROM_write_int(EEPROM_MQTT_PORT_START, mqtt_port);
-  
+
   // Save MQTT topic max 32 characters
   EEPROM_write_string(EEPROM_MQTT_TOPIC_START, EEPROM_MQTT_TOPIC_SIZE, mqtt_topic);
 
@@ -324,7 +324,7 @@ void config_save_timer(int start1, int stop1, int start2, int stop2, int qvoltag
 void config_save_voltage_output(int qvoltage_output, int save_to_eeprom)
 {
   voltage_output = qvoltage_output;
-  
+
   if (save_to_eeprom) {
     EEPROM_write_int(EEPROM_VOLTAGE_OUTPUT_START, voltage_output);
     EEPROM.commit();

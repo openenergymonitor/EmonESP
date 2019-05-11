@@ -26,69 +26,71 @@
 #include "emonesp.h"
 #include "wifi.h"
 #include "config.h"
+#include "mqtt.h"
 
-int button_interval_one = 100; // milliseconds for action, test.
-int button_interval_two = (5 * 1000); // 5 seconds hold down AP mode.
-int button_interval_three = (10 * 1000); // 10 seconds hold down GPIO0 for factory reset.
+int button_interval_one = 20; // milliseconds for action, test.
+int button_interval_two = (6 * 1000); // seconds hold down AP mode.
+int button_interval_three = (11 * 1000); // seconds hold down GPIO0 for factory reset.
 int timebuttonpressed;
 bool buttonflag = false;
 bool button_interval_one_passed = false;
 bool button_interval_two_passed = false;
 bool button_interval_three_passed = false;
 
-bool gpio0_loop() { // check the button and do an action, or go into AP mode, or factory reset.
+void led_flash(int ton, int toff) {
+  digitalWrite(LEDpin,LOW); delay(ton); digitalWrite(LEDpin,HIGH); delay(toff);
+}
 
-    if (digitalRead(0) == false) {
-      return false;
-    }
+void gpio0_loop() { // check the button and do an action, or go into AP mode, or factory reset.
 
-    if (buttonflag == true && digitalRead(0) == HIGH) {
-      Serial.println("Button released.");
+    if (buttonflag == true && !digitalRead(0) == false) {
+      Serial.println("Button Released.");
       button_interval_one_passed = false;
       button_interval_two_passed = false;
       button_interval_three_passed = false;
       delay(10);
     }
 
-    bool button = !digitalRead(0);
-
-    if (button == false) {
+    if (!digitalRead(0) == false) {
       timebuttonpressed = 0;
       buttonflag = false;
     }
-    else if (button == true && timebuttonpressed == 0) {
+    else if (!digitalRead(0) == true && timebuttonpressed == 0) {
       timebuttonpressed = millis();
-      Serial.println("Button Pressed...");
-      Serial.println("5 seconds until AP mode");
-      Serial.println("10 seconds until Factory Reset.");
-      delay(10);
+      //Serial.println("Button Pressed.");
       buttonflag = true;
     }
-    else if (button == true && timebuttonpressed > 0) {
 
-      if (timebuttonpressed + button_interval_one <= millis() && button_interval_one_passed == false) {
-        Serial.println("Button!");
+    if (buttonflag) {
+
+      if (button_interval_one_passed == false) {
+        led_flash(100, 100);
+        Serial.println("Button interval one!");
+        if (ctrl_mode=="On") ctrl_mode = "Off"; else ctrl_mode = "On";
+        if (mqtt_server!=0) mqtt_publish("out/ctrlmode",String(ctrl_mode));
         button_interval_one_passed = true;
-        return true;
       }
 
       if (timebuttonpressed + button_interval_two <= millis() && button_interval_two_passed == false) {
+        led_flash(300, 300);
+        led_flash(300, 300);
         Serial.println("AP mode starting..");
         wifi_mode = WIFI_MODE_AP_ONLY;
+        ctrl_mode = "OFF";
         startAP();
         button_interval_two_passed = true;
-        return false;
       }
 
       if (timebuttonpressed + button_interval_three <= millis()) {
+        led_flash(800, 800);
         Serial.println("Commencing factory reset.");
         delay(500);
         config_reset();
-        ESP.eraseConfig();
         Serial.println("Factory reset complete! Resetting...");
-        delay(500);
-        ESP.reset();
+        led_flash(800, 800);
+        led_flash(800, 800);
+        led_flash(800, 800);
+        ESP.restart();
       }
-    }
-  // end GPIO0 button.
-}
+    } //buttonflag
+}// end GPIO0 button.
