@@ -93,9 +93,7 @@ const int CS2_addon6 = 26;
    *  VoltageGain1 is used because by default the add-on boards read voltage
    *  from the main source of power
    *  Individual current gains can be changed here if needed
-   *
-   *  uncomment for however many add-on boards you require - each board needs two initializations for each chip */
-  /*
+   */
     ATM90E32 AddOn1_1(CS1_addon1, lineFreq, PGAGain, VoltageGain1, CurrentGainCT1, CurrentGainCT2, CurrentGainCT3);
     ATM90E32 AddOn1_2(CS2_addon1, lineFreq, PGAGain, VoltageGain1, CurrentGainCT4, CurrentGainCT5, CurrentGainCT6);
 
@@ -106,14 +104,13 @@ const int CS2_addon6 = 26;
     ATM90E32 AddOn3_2(CS2_addon3, lineFreq, PGAGain, VoltageGain1, CurrentGainCT4, CurrentGainCT5, CurrentGainCT6);
 
     ATM90E32 AddOn4_1(CS1_addon4, lineFreq, PGAGain, VoltageGain1, CurrentGainCT1, CurrentGainCT2, CurrentGainCT3);
-    ATM90E32 AddOn4_2(CS2_addon4, lineFreq, PGAGain,, VoltageGain1, CurrentGainCT4, CurrentGainCT5, CurrentGainCT6);
+    ATM90E32 AddOn4_2(CS2_addon4, lineFreq, PGAGain, VoltageGain1, CurrentGainCT4, CurrentGainCT5, CurrentGainCT6);
 
     ATM90E32 AddOn5_1(CS1_addon5, lineFreq, PGAGain, VoltageGain1, CurrentGainCT1, CurrentGainCT2, CurrentGainCT3);
     ATM90E32 AddOn5_2(CS2_addon5, lineFreq, PGAGain, VoltageGain1, CurrentGainCT4, CurrentGainCT5, CurrentGainCT6);
     
     ATM90E32 AddOn6_1(CS1_addon6, lineFreq, PGAGain, VoltageGain1, CurrentGainCT1, CurrentGainCT2, CurrentGainCT3);
     ATM90E32 AddOn6_2(CS2_addon6, lineFreq, PGAGain, VoltageGain1, CurrentGainCT4, CurrentGainCT5, CurrentGainCT6);
-*/
 
 // -------------------------------------------------------------------
 // SETUP
