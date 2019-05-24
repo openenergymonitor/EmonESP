@@ -36,7 +36,7 @@
 
 // for ATM90E32 energy meter
 #include <SPI.h>
-#include <ATM90E32_3.h>
+#include <ATM90E32.h>
 
 /* Change to total number of Add-On Boards - Can not be more than 6 */
 const int AddOnBoards = 0;
@@ -45,11 +45,11 @@ const int AddOnBoards = 0;
 unsigned short lineFreq = 5231;         /*5231 for 60 hz 6 channel meter */
                                         /*135 for 50 hz 6 channel meter*/
 unsigned short PGAGain = 21;            /*21 for 100A (2x), 42 for between 100A - 200A (4x)*/
-unsigned short VoltageGain = 41820;     /*9v AC transformer.*/
-                                        /*32428 - 12v AC Transformer*/
-unsigned short CurrentGainCT1 = 25498;  /*SCT-013-000 100A/50mA*/
-                                        /*46539 - Magnalab 100A w/ built in burden resistor*/
-unsigned short CurrentGainCT2 = 25498;
+unsigned short VoltageGain1 = 41820;     /*9v AC transformer.*/
+unsigned short VoltageGain2 = 41820;     /*32428 - 12v AC Transformer*/
+
+unsigned short CurrentGainCT1 = 25498;  /*SCT-013-000 100A/50mA*/  
+unsigned short CurrentGainCT2 = 25498;  /*46539 - Magnalab 100A w/ built in burden resistor*/
 unsigned short CurrentGainCT3 = 25498;
 unsigned short CurrentGainCT4 = 25498;
 unsigned short CurrentGainCT5 = 25498;
@@ -86,7 +86,7 @@ const int CS2_addon6 = 26;
 
   /* Initialize ATM90E32 library for each IC */
   ATM90E32 main1(CS1_main, lineFreq, PGAGain, VoltageGain1, CurrentGainCT1, CurrentGainCT2, CurrentGainCT3); //pass CS pin and calibrations to ATM90E32 library
-  ATM90E32 main2(C2S_main, lineFreq, PGAGain, VoltageGain2, CurrentGainCT4, CurrentGainCT5, CurrentGainCT6); //pass CS pin and calibrations to ATM90E32 library
+  ATM90E32 main2(CS2_main, lineFreq, PGAGain, VoltageGain2, CurrentGainCT4, CurrentGainCT5, CurrentGainCT6); //pass CS pin and calibrations to ATM90E32 library
   
   
   /*  Initialize add-on boards
@@ -258,6 +258,7 @@ void loop()
     Serial.println("I5:" + String(currentCT5) + "A");
     Serial.println("I6:" + String(currentCT6) + "A");
 
+
     /* get current from add-on boards as needed */
     if (AddOnBoards > 0)
     {
@@ -270,10 +271,32 @@ void loop()
       AddOn1_current1 = AddOn1_CT1 + AddOn1_CT2 + AddOn1_CT3;
       AddOn1_current2 = AddOn1_CT4 + AddOn1_CT5 + AddOn1_CT6;
       AddOn1_totalCurrent = AddOn1_current1 + AddOn1_current2;
+
+      Serial.println("I1_1:" + String(AddOn1_CT1) + "A");
+      Serial.println("I1_2:" + String(AddOn1_CT2) + "A");
+      Serial.println("I1_3:" + String(AddOn1_CT3) + "A");
+      Serial.println("I1_4:" + String(AddOn1_CT4) + "A");
+      Serial.println("I1_5:" + String(AddOn1_CT5) + "A");
+      Serial.println("I1_6:" + String(AddOn1_CT6) + "A");
     
       if (AddOnBoards > 1)
       {
-         
+          AddOn2_CT1 = AddOn2_1.GetLineCurrentA();
+          AddOn2_CT2 = AddOn2_1.GetLineCurrentB();
+          AddOn2_CT3 = AddOn2_1.GetLineCurrentC();
+          AddOn2_CT4 = AddOn2_2.GetLineCurrentA();
+          AddOn2_CT5 = AddOn2_2.GetLineCurrentB();
+          AddOn2_CT6 = AddOn2_2.GetLineCurrentC();
+          AddOn2_current1 = AddOn2_CT1 + AddOn2_CT2 + AddOn2_CT3;
+          AddOn2_current2 = AddOn3_CT4 + AddOn2_CT5 + AddOn2_CT6;
+          AddOn2_totalCurrent = AddOn2_current1 + AddOn2_current2;
+      
+          Serial.println("I1_1:" + String(AddOn1_CT1) + "A");
+          Serial.println("I1_2:" + String(AddOn1_CT2) + "A");
+          Serial.println("I1_3:" + String(AddOn1_CT3) + "A");
+          Serial.println("I1_4:" + String(AddOn1_CT4) + "A");
+          Serial.println("I1_5:" + String(AddOn1_CT5) + "A");
+          Serial.println("I1_6:" + String(AddOn1_CT6) + "A");
     
           if (AddOnBoards > 2)
           {
@@ -297,39 +320,6 @@ void loop()
       }
     }
 
-
-    if (AddOnBoards > 0)
-      {
-        Serial.println("I1_1:" + String(AddOn1_CT1) + "A");
-        Serial.println("I1_2:" + String(AddOn1_CT2) + "A");
-        Serial.println("I1_3:" + String(AddOn1_CT3) + "A");
-        Serial.println("I1_4:" + String(AddOn1_CT4) + "A");
-        Serial.println("I1_5:" + String(AddOn1_CT5) + "A");
-        Serial.println("I1_6:" + String(AddOn1_CT6) + "A");
-      }
-      if (AddOnBoards > 1)
-      {
-         
-    
-          if (AddOnBoards > 2)
-          {
-
-    
-              if (AddOnBoards > 3)
-              {
-
-                        
-                  if (AddOnBoards > 4)
-                  {
-
-                      
-                      if (AddOnBoards > 5)
-                      {
-
-                      }
-                  }
-              }
-          }
     
     Serial.println("AP:" + String(totalRealPower));
     Serial.println("PF1:" + String(powerFactor1));
@@ -338,6 +328,7 @@ void loop()
     Serial.println("f" + String(freq) + "Hz");
   
     /* post to emonCMS */
+    /* this can be changed to send whatever data above that you want */
     String postStr = "V1:";
     postStr += String(voltage1);
     postStr += ",V2:";
