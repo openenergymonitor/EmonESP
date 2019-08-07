@@ -290,6 +290,7 @@ handleSaveTimer(AsyncWebServerRequest *request) {
   int qtime_offset = tmp.toInt();
       
   config_save_timer(qtimer_start1, qtimer_stop1, qtimer_start2, qtimer_stop2, qvoltage_output, qtime_offset);
+
   if (mqtt_server!=0) mqtt_publish("out/timer",String(qtimer_start1)+" "+String(qtimer_stop1)+" "+String(qtimer_start2)+" "+String(qtimer_stop2)+" "+String(qvoltage_output));
 
   response->setCode(200);
@@ -311,10 +312,10 @@ handleSetVout(AsyncWebServerRequest *request) {
 
   int save = 0;
   if (qsave==1) save = 1;
-  
+
   config_save_voltage_output(vout,save);
   if (mqtt_server!=0) mqtt_publish("out/vout",String(vout));
-  
+
   response->setCode(200);
   if (save) response->print("saved");
   else response->print("ok");
@@ -336,10 +337,10 @@ handleSetFlowT(AsyncWebServerRequest *request) {
 
   int save = 0;
   if (qsave==1) save = 1;
-  
+
   config_save_voltage_output(vout,save);
   if (mqtt_server!=0) mqtt_publish("out/vout",String(vout));
-  
+
   response->setCode(200);
   if (save) response->print("saved");
   else response->print("ok");
@@ -648,7 +649,7 @@ handleUpdateUpload(AsyncWebServerRequest *request, String filename, size_t index
 
 void handleDescribe(AsyncWebServerRequest *request) {
   AsyncWebServerResponse *response = request->beginResponse(200, "text/plain", "smartplug");
-  response->addHeader("Access-Control-Allow-Origin", "*");  
+  response->addHeader("Access-Control-Allow-Origin", "*");
   request->send(response);
 }
 
@@ -677,6 +678,10 @@ void handleCtrlMode(AsyncWebServerRequest *request) {
 
 void handleNotFound(AsyncWebServerRequest *request)
 {
+  if (wifi_mode) {
+    handleHome(request)
+  }
+  else {
   DBUG("NOT_FOUND: ");
   if(request->method() == HTTP_GET) {
     DBUGF("GET");
@@ -722,6 +727,7 @@ void handleNotFound(AsyncWebServerRequest *request)
   }
 
   request->send(404);
+  }
 }
 
 void

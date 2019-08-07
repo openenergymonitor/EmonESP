@@ -60,3 +60,108 @@ $RECYCLE.BIN/
 *~
 .vscode/browse.vc.db*
 .vscode
+.pio/libdeps/sonoff/PubSubClient_ID89/src/PubSubClient.h
+.pio/libdeps/sonoff/PubSubClient_ID89/src/PubSubClient.cpp
+.pio/libdeps/sonoff/PubSubClient_ID89/README.md
+.pio/libdeps/sonoff/PubSubClient_ID89/LICENSE.txt
+.pio/libdeps/sonoff/PubSubClient_ID89/library.properties
+.pio/libdeps/sonoff/PubSubClient_ID89/library.json
+.pio/libdeps/sonoff/PubSubClient_ID89/keywords.txt
+.pio/libdeps/sonoff/PubSubClient_ID89/examples/mqtt_stream/mqtt_stream.ino
+.pio/libdeps/sonoff/PubSubClient_ID89/examples/mqtt_reconnect_nonblocking/mqtt_reconnect_nonblocking.ino
+.pio/libdeps/sonoff/PubSubClient_ID89/examples/mqtt_publish_in_callback/mqtt_publish_in_callback.ino
+.pio/libdeps/sonoff/PubSubClient_ID89/examples/mqtt_esp8266/mqtt_esp8266.ino
+.pio/libdeps/sonoff/PubSubClient_ID89/examples/mqtt_basic/mqtt_basic.ino
+.pio/libdeps/sonoff/PubSubClient_ID89/examples/mqtt_auth/mqtt_auth.ino
+.pio/libdeps/sonoff/PubSubClient_ID89/CHANGES.txt
+.pio/libdeps/sonoff/PubSubClient_ID89/.travis.yml
+.pio/libdeps/sonoff/PubSubClient_ID89/.library.json
+.pio/libdeps/sonoff/NTPClient_ID551/README.md
+.pio/libdeps/sonoff/NTPClient_ID551/NTPClient.h
+.pio/libdeps/sonoff/NTPClient_ID551/NTPClient.cpp
+.pio/libdeps/sonoff/NTPClient_ID551/library.properties
+.pio/libdeps/sonoff/NTPClient_ID551/library.json
+.pio/libdeps/sonoff/NTPClient_ID551/keywords.txt
+.pio/libdeps/sonoff/NTPClient_ID551/examples/Basic/Basic.ino
+.pio/libdeps/sonoff/NTPClient_ID551/examples/Advanced/Advanced.ino
+.pio/libdeps/sonoff/NTPClient_ID551/CHANGELOG
+.pio/libdeps/sonoff/NTPClient_ID551/.travis.yml
+.pio/libdeps/sonoff/NTPClient_ID551/.library.json
+.pio/libdeps/sonoff/ESPAsyncTCP_ID305/travis/common.sh
+.pio/libdeps/sonoff/ESPAsyncTCP_ID305/ssl/server.key
+.pio/libdeps/sonoff/ESPAsyncTCP_ID305/ssl/server.cer
+.pio/libdeps/sonoff/ESPAsyncTCP_ID305/ssl/gen_server_cert.sh
+.pio/libdeps/sonoff/ESPAsyncTCP_ID305/src/tcp_axtls.h
+.pio/libdeps/sonoff/ESPAsyncTCP_ID305/src/tcp_axtls.c
+.pio/libdeps/sonoff/ESPAsyncTCP_ID305/src/SyncClient.h
+.pio/libdeps/sonoff/ESPAsyncTCP_ID305/src/SyncClient.cpp
+.pio/libdeps/sonoff/ESPAsyncTCP_ID305/src/ESPAsyncTCPbuffer.h
+.pio/libdeps/sonoff/ESPAsyncTCP_ID305/src/ESPAsyncTCPbuffer.cpp
+.pio/libdeps/sonoff/ESPAsyncTCP_ID305/src/ESPAsyncTCP.h
+.pio/libdeps/sonoff/ESPAsyncTCP_ID305/src/ESPAsyncTCP.cpp
+.pio/libdeps/sonoff/ESPAsyncTCP_ID305/src/AsyncPrinter.h
+.pio/libdeps/sonoff/ESPAsyncTCP_ID305/src/AsyncPrinter.cpp
+.pio/libdeps/sonoff/ESPAsyncTCP_ID305/src/async_config.h
+.pio/libdeps/sonoff/ESPAsyncTCP_ID305/README.md
+.pio/libdeps/sonoff/ESPAsyncTCP_ID305/LICENSE.txt
+.pio/libdeps/sonoff/ESPAsyncTCP_ID305/library.properties
+.pio/libdeps/sonoff/ESPAsyncTCP_ID305/library.json
+.pio/libdeps/sonoff/ESPAsyncTCP_ID305/examples/SyncClient/SyncClient.ino
+.pio/libdeps/sonoff/ESPAsyncTCP_ID305/examples/SyncClient/.esp31b.skip
+.pio/libdeps/sonoff/ESPAsyncTCP_ID305/examples/ClientServer/Server/Server.ino
+.pio/libdeps/sonoff/ESPAsyncTCP_ID305/examples/ClientServer/Server/config.h
+.pio/libdeps/sonoff/ESPAsyncTCP_ID305/examples/ClientServer/Client/config.h
+.pio/libdeps/sonoff/ESPAsyncTCP_ID305/examples/ClientServer/Client/Client.ino
+.pio/libdeps/sonoff/ESPAsyncTCP_ID305/.travis.yml
+.pio/libdeps/sonoff/ESPAsyncTCP_ID305/.library.json
+.pio/libdeps/sonoff/ESP Async WebServer_ID306/travis/common.sh
+.pio/libdeps/sonoff/ESP Async WebServer_ID306/src/WebServer.cpp
+.pio/libdeps/sonoff/ESP Async WebServer_ID306/src/WebResponses.cpp
+.pio/libdeps/sonoff/ESP Async WebServer_ID306/src/WebResponseImpl.h
+.pio/libdeps/sonoff/ESP Async WebServer_ID306/src/WebRequest.cpp
+.pio/libdeps/sonoff/ESP Async WebServer_ID306/src/WebHandlers.cpp
+.pio/libdeps/sonoff/ESP Async WebServer_ID306/src/WebHandlerImpl.h
+.pio/libdeps/sonoff/ESP Async WebServer_ID306/src/WebAuthentication.h
+.pio/libdeps/sonoff/ESP Async WebServer_ID306/src/WebAuthentication.cpp
+.pio/libdeps/sonoff/ESP Async WebServer_ID306/src/StringArray.h
+.pio/libdeps/sonoff/ESP Async WebServer_ID306/src/SPIFFSEditor.h
+.pio/libdeps/sonoff/ESP Async WebServer_ID306/src/SPIFFSEditor.cpp
+.pio/libdeps/sonoff/ESP Async WebServer_ID306/src/ESPAsyncWebServer.h
+.pio/libdeps/sonoff/ESP Async WebServer_ID306/src/edit.htm
+.pio/libdeps/sonoff/ESP Async WebServer_ID306/src/AsyncWebSocket.h
+.pio/libdeps/sonoff/ESP Async WebServer_ID306/src/AsyncWebSocket.cpp
+.pio/libdeps/sonoff/ESP Async WebServer_ID306/src/AsyncJson.h
+.pio/libdeps/sonoff/ESP Async WebServer_ID306/src/AsyncEventSource.h
+.pio/libdeps/sonoff/ESP Async WebServer_ID306/src/AsyncEventSource.cpp
+.pio/libdeps/sonoff/ESP Async WebServer_ID306/README.md
+.pio/libdeps/sonoff/ESP Async WebServer_ID306/library.properties
+.pio/libdeps/sonoff/ESP Async WebServer_ID306/library.json
+.pio/libdeps/sonoff/ESP Async WebServer_ID306/keywords.txt
+.pio/libdeps/sonoff/ESP Async WebServer_ID306/examples/ESP_AsyncFSBrowser/ESP_AsyncFSBrowser.ino
+.pio/libdeps/sonoff/ESP Async WebServer_ID306/examples/ESP_AsyncFSBrowser/data/worker-html.js.gz
+.pio/libdeps/sonoff/ESP Async WebServer_ID306/examples/ESP_AsyncFSBrowser/data/mode-javascript.js.gz
+.pio/libdeps/sonoff/ESP Async WebServer_ID306/examples/ESP_AsyncFSBrowser/data/mode-html.js.gz
+.pio/libdeps/sonoff/ESP Async WebServer_ID306/examples/ESP_AsyncFSBrowser/data/mode-css.js.gz
+.pio/libdeps/sonoff/ESP Async WebServer_ID306/examples/ESP_AsyncFSBrowser/data/index.htm
+.pio/libdeps/sonoff/ESP Async WebServer_ID306/examples/ESP_AsyncFSBrowser/data/favicon.ico
+.pio/libdeps/sonoff/ESP Async WebServer_ID306/examples/ESP_AsyncFSBrowser/data/ext-searchbox.js.gz
+.pio/libdeps/sonoff/ESP Async WebServer_ID306/examples/ESP_AsyncFSBrowser/data/ace.js.gz
+.pio/libdeps/sonoff/ESP Async WebServer_ID306/examples/ESP_AsyncFSBrowser/data/.exclude.files
+.pio/libdeps/sonoff/ESP Async WebServer_ID306/examples/ESP_AsyncFSBrowser/.esp31b.skip
+.pio/libdeps/sonoff/ESP Async WebServer_ID306/component.mk
+.pio/libdeps/sonoff/ESP Async WebServer_ID306/.travis.yml
+.pio/libdeps/sonoff/ESP Async WebServer_ID306/.library.json
+.pio/libdeps/sonoff/AsyncTCP_ID1826/travis/common.sh
+.pio/libdeps/sonoff/AsyncTCP_ID1826/travis/build.sh
+.pio/libdeps/sonoff/AsyncTCP_ID1826/travis/build.py
+.pio/libdeps/sonoff/AsyncTCP_ID1826/src/AsyncTCP.h
+.pio/libdeps/sonoff/AsyncTCP_ID1826/src/AsyncTCP.cpp
+.pio/libdeps/sonoff/AsyncTCP_ID1826/README.md
+.pio/libdeps/sonoff/AsyncTCP_ID1826/LICENSE
+.pio/libdeps/sonoff/AsyncTCP_ID1826/library.properties
+.pio/libdeps/sonoff/AsyncTCP_ID1826/library.json
+.pio/libdeps/sonoff/AsyncTCP_ID1826/Kconfig.projbuild
+.pio/libdeps/sonoff/AsyncTCP_ID1826/component.mk
+.pio/libdeps/sonoff/AsyncTCP_ID1826/.travis.yml
+.pio/libdeps/sonoff/AsyncTCP_ID1826/.library.json
+.pio/build/structure.hash
