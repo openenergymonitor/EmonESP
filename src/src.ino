@@ -36,7 +36,7 @@
 #include <NTPClient.h>
 
 WiFiUDP ntpUDP;
-NTPClient timeClient(ntpUDP,"europe.pool.ntp.org",0,60000);
+NTPClient timeClient(ntpUDP,"europe.pool.ntp.org",time_offset,60000);
 unsigned long last_ctrl_update = 0;
 unsigned long last_pushbtn_check = 0;
 bool pushbtn_action = 0;
@@ -61,13 +61,18 @@ void setup() {
 
   // Read saved settings from the config
   config_load_settings();
+  timeClient.setTimeOffset(time_offset);
 
   // ---------------------------------------------------------
   // Hard-coded initial config for node_name and node_describe
   // ---------------------------------------------------------
   node_type = "smartplug";
   node_description = "SmartPlug";
-  node_id = ESP.getChipId()/5120;
+  
+  unsigned long chip_id = ESP.getChipId();
+  int chip_tmp = chip_id / 10000;
+  chip_tmp = chip_tmp * 10000;
+  node_id = (chip_id - chip_tmp);
   
   node_name = node_type + String(node_id);  
   node_describe = "describe:"+node_type;
@@ -217,5 +222,9 @@ void loop()
 
 String getTime() {
     return timeClient.getFormattedTime();
+}
+
+void setTimeOffset() {
+    timeClient.setTimeOffset(time_offset);
 }
 

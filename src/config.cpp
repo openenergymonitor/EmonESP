@@ -71,6 +71,7 @@ int voltage_output = 0;
 extern String ctrl_mode = "Timer";
 extern bool ctrl_update = 0;
 extern bool ctrl_state = 0;
+int time_offset = 0;
 
 #define EEPROM_ESID_SIZE          32
 #define EEPROM_EPASS_SIZE         64
@@ -92,7 +93,8 @@ extern bool ctrl_state = 0;
 #define EEPROM_TIMER_START2_SIZE  2
 #define EEPROM_TIMER_STOP2_SIZE   2
 #define EEPROM_VOLTAGE_OUTPUT_SIZE 2
-// TOTAL SIZE:                    508
+#define EEPROM_TIME_OFFSET_SIZE   2
+// TOTAL SIZE:                    589
 #define EEPROM_SIZE 512
 
 
@@ -140,6 +142,8 @@ extern bool ctrl_state = 0;
 #define EEPROM_VOLTAGE_OUTPUT_START  EEPROM_TIMER_STOP2_END
 #define EEPROM_VOLTAGE_OUTPUT_END    (EEPROM_VOLTAGE_OUTPUT_START + EEPROM_VOLTAGE_OUTPUT_SIZE)
 
+#define EEPROM_TIME_OFFSET_START  EEPROM_VOLTAGE_OUTPUT_END
+#define EEPROM_TIME_OFFSET_END    (EEPROM_TIME_OFFSET_START + EEPROM_TIME_OFFSET_SIZE)
 // -------------------------------------------------------------------
 // Reset EEPROM, wipes all settings
 // -------------------------------------------------------------------
@@ -225,6 +229,8 @@ void config_load_settings()
   EEPROM_read_int(EEPROM_TIMER_STOP2_START, timer_stop2);
 
   EEPROM_read_int(EEPROM_VOLTAGE_OUTPUT_START, voltage_output);
+  
+  EEPROM_read_int(EEPROM_TIME_OFFSET_START, time_offset);
 }
 
 void config_save_emoncms(String server, String path, String node, String apikey, String fingerprint)
@@ -304,7 +310,7 @@ void config_save_admin(String user, String pass)
   EEPROM.commit();
 }
 
-void config_save_timer(int start1, int stop1, int start2, int stop2, int qvoltage_output)
+void config_save_timer(int start1, int stop1, int start2, int stop2, int qvoltage_output, int qtime_offset)
 {
   timer_start1 = start1;
   timer_stop1 = stop1;
@@ -317,6 +323,11 @@ void config_save_timer(int start1, int stop1, int start2, int stop2, int qvoltag
 
   voltage_output = qvoltage_output;
   EEPROM_write_int(EEPROM_VOLTAGE_OUTPUT_START, voltage_output);
+  
+  time_offset = qtime_offset;
+  setTimeOffset();
+  EEPROM_write_int(EEPROM_TIME_OFFSET_START, time_offset);
+  
   EEPROM.commit();
 }
 

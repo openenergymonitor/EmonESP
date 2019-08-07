@@ -123,6 +123,7 @@ function ConfigViewModel() {
     "timer_start2":"",
     "timer_stop2":"",
     "voltage_output":"",
+    "time_offset":""
   }, baseEndpoint + '/config');
   
   this.f_timer_start1 = ko.pureComputed({
@@ -382,7 +383,8 @@ function EmonEspViewModel() {
       timer_stop1: self.config.timer_stop1(), 
       timer_start2: self.config.timer_start2(), 
       timer_stop2: self.config.timer_stop2(),
-      voltage_output: self.config.voltage_output() 
+      voltage_output: self.config.voltage_output(),
+      time_offset: self.config.time_offset()
     }, function (data) {
       self.saveTimerSuccess(true);
       setTimeout(function(){

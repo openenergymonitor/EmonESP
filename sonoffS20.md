@@ -15,14 +15,24 @@ To upload firmware, hold down the push button, reset the power to the plug (unpl
 **Safety: Disconnect the plug from the mains when programming**
 It's advised not to connect to the mains when the case is open from a safety perspective for obvious reasons.
 
-**Firmware modifications:**
+**Firmware:**
 
 Download EmonESP and switch to timer branch:
 
     git clone https://github.com/openenergymonitor/EmonESP.git
     git checkout timer
 
-**Compilation:**
+**Upload pre-compiled binaries**
+
+[https://github.com/openenergymonitor/EmonESP/tree/timer/compiled/esp01_1m](https://github.com/openenergymonitor/EmonESP/tree/timer/compiled/esp01_1m)
+
+**Compilation using PlatformIO:**
+
+    cd EmonESP
+    pio run -t upload
+    pio run -t uploadfs
+
+**Compilation using Arduino:**
 
 Sonoff S20 smart plugs can have either the ESP8266 or **ESP8285** core.
 
@@ -32,6 +42,7 @@ Select in Arduino > Tools:
 - Flash Size "1M (512K SPIFFS)"
 
 Compile and upload both the firmware and the sketch data.
+
 
 ### Setup
 

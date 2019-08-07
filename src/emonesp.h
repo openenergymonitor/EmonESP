@@ -43,4 +43,6 @@
 
 String getTime();
 
+void setTimeOffset();
+
 #endif // _EMONESP_H

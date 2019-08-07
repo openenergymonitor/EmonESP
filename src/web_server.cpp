@@ -286,8 +286,11 @@ handleSaveTimer(AsyncWebServerRequest *request) {
   int qtimer_stop2 = tmp.toInt();
   tmp = request->arg("voltage_output");
   int qvoltage_output = tmp.toInt();
+  tmp = request->arg("time_offset");
+  int qtime_offset = tmp.toInt();
+      
+  config_save_timer(qtimer_start1, qtimer_stop1, qtimer_start2, qtimer_stop2, qvoltage_output, qtime_offset);
 
-  config_save_timer(qtimer_start1, qtimer_stop1, qtimer_start2, qtimer_stop2, qvoltage_output);
   if (mqtt_server!=0) mqtt_publish("out/timer",String(qtimer_start1)+" "+String(qtimer_stop1)+" "+String(qtimer_start2)+" "+String(qtimer_stop2)+" "+String(qvoltage_output));
 
   response->setCode(200);
@@ -455,6 +458,7 @@ handleConfig(AsyncWebServerRequest *request) {
   s += "\"timer_start2\":\"" + String(timer_start2) + "\",";
   s += "\"timer_stop2\":\"" + String(timer_stop2) + "\",";
   s += "\"voltage_output\":\"" + String(voltage_output) + "\",";
+  s += "\"time_offset\":\"" + String(time_offset) + "\",";
   s += "\"node_name\":\"" + node_name + "\",";
   s += "\"node_description\":\"" + node_description + "\",";
   s += "\"node_type\":\"" + node_type + "\"";
