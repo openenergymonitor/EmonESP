@@ -679,7 +679,7 @@ void handleCtrlMode(AsyncWebServerRequest *request) {
 void handleNotFound(AsyncWebServerRequest *request)
 {
   if (wifi_mode) {
-    handleHome(request)
+    handleHome(request);
   }
   else {
   DBUG("NOT_FOUND: ");
