@@ -32,6 +32,7 @@ For applications that only require basic posting of data from one emonTx to a re
     + [Save Emoncms server details](#save-emoncms-server-details)
     + [Save Emoncms MQTT server details](#save-emoncms-mqtt-server-details)
   * [Installation](#installation)
+    + [Option 0: Flash using pre-compiled binaries](#flash-with-precompiled-binaries)
     + [Option 1: Using PlatformIO](#option-1-using-platformio)
       - [1a. Install PlatformIO command line](#1a-install-platformio-command-line)
       - [1b. And / Or use PlatformIO IDE](#1b-and--or-use-platformio-ide)
@@ -199,7 +200,16 @@ Data in string:pairs can be sent to EmonESP via HTTP API. This is useful to emul
 EmonESP uses [ESP8266 Arduino core](https://github.com/esp8266/Arduino)
 
 Firmware can be compiled and uploaded either using PlatfomIO ([see blog post](https://blog.openenergymonitor.org/2016/06/platformio/)) or Arduino IDE.
+Firmware can also be flashed using the pre-compiled binaries using esptool.py.
 
+### Option 1: Using PlatformIO
+
+Find and Install [esptool, python required.](https://github.com/espressif/esptool) 
+Navigate to the 'compiled' folder in this repo and follow the command line instruction.
+
+esptool.py --baud 460800 write_flash 0x0 ./src.ino.bin 0x300000 ./src.spiffs.bin
+
+The file paths in the line above are relative, you might need to substitute them for absolute file paths.
 
 ### Option 1: Using PlatformIO
 
