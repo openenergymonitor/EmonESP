@@ -32,7 +32,7 @@ For applications that only require basic posting of data from one emonTx to a re
     + [Save Emoncms server details](#save-emoncms-server-details)
     + [Save Emoncms MQTT server details](#save-emoncms-mqtt-server-details)
   * [Installation](#installation)
-    + [Option 0: Flash using pre-compiled binaries](#Option 1: Using PlatformIO)
+    + [Option 0: Flash using pre-compiled binaries](#flash-precompiled-binaries)
     + [Option 1: Using PlatformIO](#option-1-using-platformio)
       - [1a. Install PlatformIO command line](#1a-install-platformio-command-line)
       - [1b. And / Or use PlatformIO IDE](#1b-and--or-use-platformio-ide)
