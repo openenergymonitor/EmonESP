@@ -1,0 +1,1 @@
+esptool.py --baud 460800 write_flash 0x0 ./src.ino.bin 0x300000 ./src.spiffs.bin
