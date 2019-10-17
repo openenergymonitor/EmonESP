@@ -27,7 +27,15 @@
 #define _ENERGY_METER
 
 //#define ENABLE_OLED_DISPLAY
-//#define SOLAR_METER
+
+/* If JP9-JP11 are bridged, this means voltage is copied to registers, and power can be read directly from the meter 
+   vs being calculated in software. Other metering values can also be read. */
+//#define JP9_JP11_SET
+//#define ADDON_BOARDS
+#ifdef ADDON_BOARDS
+/* Change to total number of Add-On Boards - Can not be more than 6 */
+#define NUM_OF_ADDON_BOARDS 1
+#endif
 
 /*
     Uncomment to send metering values to EmonCMS, like Fundamental, Harmonic, Reactive, Apparent Power, and Phase Angle
@@ -40,42 +48,41 @@
 */
 
 /*
-   4485 for 60 Hz (North America)
-   389 for 50 hz (rest of the world)
+   5231 for 60 hz 6 channel meter 
+   135 for 50 hz 6 channel meter
 */
-#define LINE_FREQ 4485
+
+#define LINE_FREQ 5231
 
 /*
    0 for 10A (1x)
    21 for 100A (2x)
    42 for between 100A - 200A (4x)
 */
-#define PGA_GAIN 21
+#define PGA_GAIN 0
 
 /*
-   For meter <= v1.3:
+   For meter <= v1.2:
       42080 - 9v AC Transformer - Jameco 112336
       32428 - 12v AC Transformer - Jameco 167151
-   For meter > v1.4:
-      37106 - 9v AC Transformer - Jameco 157041
-      38302 - 9v AC Transformer - Jameco 112336
-      29462 - 12v AC Transformer - Jameco 167151
+   For meter > v1.3:
+      7305 - 9v AC Transformer - Jameco 157041
 */
-#define VOLTAGE_GAIN 37106
+#define VOLTAGE_GAIN 7305
+#define VOLTAGE_GAIN2 7305
 
 /*
-   25498 - SCT-013-000 100A/50mA
-   39473 - SCT-016 120A/40mA
-   46539 - Magnalab 100A
+  30A/1V SCT-013-030: 8650
+  50A/1V SCT-013-050: 15420
+  100A/50ma SCT-013-000: 32498
 */
-#define CURRENT_GAIN_CT1 39473
-#define CURRENT_GAIN_CT2 39473
+#define CURRENT_GAIN_CT1 32498
+#define CURRENT_GAIN_CT2 32498
+#define CURRENT_GAIN_CT3 32498
+#define CURRENT_GAIN_CT4 32498
+#define CURRENT_GAIN_CT5 32498
+#define CURRENT_GAIN_CT6 32498
 
-#ifdef SOLAR_METER
-#define VOLTAGE_GAIN_SOLAR 37106
-#define SOLAR_GAIN_CT1 39473
-#define SOLAR_GAIN_CT2 39473
-#endif
 
 extern void energy_meter_setup();
 extern void energy_meter_loop();

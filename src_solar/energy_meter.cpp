@@ -298,7 +298,7 @@ void energy_meter_loop()
   if (LineFreq == 389) {
     totalSolarWatts = eic_solar.GetTotalActivePower()*2;
   }
-  else (
+  else {
     totalSolarWatts = eic_solar.GetTotalActivePower(); //all math is already done in the total register
   }
   

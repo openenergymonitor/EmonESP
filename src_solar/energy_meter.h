@@ -27,7 +27,8 @@
 #define _ENERGY_METER
 
 //#define ENABLE_OLED_DISPLAY
-//#define SOLAR_METER
+#define SOLAR_METER
+
 
 /*
     Uncomment to send metering values to EmonCMS, like Fundamental, Harmonic, Reactive, Apparent Power, and Phase Angle

@@ -102,13 +102,11 @@ function ConfigViewModel() {
     "www_username": "",
     "www_password": "",
 	"voltage_cal": "",
-	"voltage2_cal": "",
 	"ct1_cal": "",
 	"ct2_cal": "",
-	"ct3_cal": "",
-	"ct4_cal": "",
-	"ct5_cal": "",
-	"ct6_cal": "",
+	"svoltage_cal": "",
+	"sct1_cal": "",
+	"sct2_cal": "",
 	"freq_cal": "",
 	"gain_cal": "", 
     "espflash": "",
@@ -330,15 +328,13 @@ function EmonEspViewModel() {
   self.saveCal = function () {
 	var cal = {
 		voltage: self.config.voltage_cal(), 
-		voltage2: self.config.voltage2_cal(), 
 		ct1: self.config.ct1_cal(), 
 		ct2: self.config.ct2_cal(),
-		ct3: self.config.ct3_cal(), 
-		ct4: self.config.ct4_cal(),
-		ct5: self.config.ct5_cal(), 
-		ct6: self.config.ct6_cal(),
 		freq: self.config.freq_cal(), 
-		gain: self.config.gain_cal()
+		gain: self.config.gain_cal(),
+		svoltage: self.config.svoltage_cal(), 
+		sct1: self.config.sct1_cal(), 
+		sct2: self.config.sct2_cal()
     };
 	if (isNaN(cal.voltage) || isNaN(cal.ct1) || isNaN(cal.ct2) || isNaN(cal.freq) || isNaN(cal.gain)) {
 		alert("Please enter a number for calibration values");

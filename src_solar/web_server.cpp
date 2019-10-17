@@ -312,22 +312,33 @@ void handleSaveCal(AsyncWebServerRequest *request) {
     return;
   }
 
+#ifdef SOLAR_METER
   config_save_cal(request->arg("voltage"),
-                  request->arg("voltage2"),
                   request->arg("ct1"),
                   request->arg("ct2"),
-                  request->arg("ct3"),
-                  request->arg("ct4"),
-                  request->arg("ct5"),
-                  request->arg("ct6"),
+                  request->arg("freq"),
+                  request->arg("gain"),
+                  request->arg("svoltage"),
+                  request->arg("sct1"),
+                  request->arg("sct2"));
+
+  char tmpStr[200];
+  snprintf(tmpStr, sizeof(tmpStr), "Saved: %s %s %s %s %s %s %s %s", voltage_cal.c_str(),
+           ct1_cal.c_str(), ct2_cal.c_str(), freq_cal.c_str(), gain_cal.c_str(),
+           svoltage_cal.c_str(), sct1_cal.c_str(), sct2_cal.c_str());
+  DBUGLN(tmpStr);
+#else
+  config_save_cal(request->arg("voltage"),
+                  request->arg("ct1"),
+                  request->arg("ct2"),
                   request->arg("freq"),
                   request->arg("gain"));
 
   char tmpStr[200];
-  snprintf(tmpStr, sizeof(tmpStr), "Saved: %s %s %s %s %s", voltage_cal.c_str(), voltage2_cal.c_str(),
-           ct1_cal.c_str(), ct2_cal.c_str(), ct3_cal.c_str(), ct4_cal.c_str(), ct5_cal.c_str(), ct6_cal.c_str(), 
-           freq_cal.c_str(), gain_cal.c_str());
+  snprintf(tmpStr, sizeof(tmpStr), "Saved: %s %s %s %s %s", voltage_cal.c_str(),
+           ct1_cal.c_str(), ct2_cal.c_str(), freq_cal.c_str(), gain_cal.c_str());
   DBUGLN(tmpStr);
+#endif
 
   response->setCode(200);
   response->print(tmpStr);
@@ -424,18 +435,17 @@ void handleStatus(AsyncWebServerRequest *request) {
   s += ",\"www_username\":\"" + www_username + "\"";
   //s += ",\"www_password\":\""+www_password+"\""; security risk: DONT RETURN PASSWORDS
   s += "\"voltage_cal\":\"" + voltage_cal + "\"";
-  s += "\"voltage2_cal\":\"" + voltage2_cal + "\"";
   s += "\"ct1_cal\":\"" + ct1_cal + "\"";
   s += "\"ct2_cal\":\"" + ct2_cal + "\"";
-  s += "\"ct3_cal\":\"" + ct3_cal + "\"";
-  s += "\"ct4_cal\":\"" + ct4_cal + "\"";
-  s += "\"ct5_cal\":\"" + ct5_cal + "\"";
-  s += "\"ct6_cal\":\"" + ct6_cal + "\"";
   s += "\"freq_cal\":\"" + freq_cal + "\"";
   s += "\"gain_cal\":\"", + gain_cal + "\"";
-#endif 
+#ifdef #SOLAR_METER
+  s += "\"svoltage_cal\":\"" + svoltage_cal + "\"";
+  s += "\"sct1_cal\":\"" + sct1_cal + "\"";
+  s += "\"sct2_cal\":\"" + sct2_cal + "\"";
+#endif
+#endif
   s += "}";
-
 
   response->setCode(200);
   response->print(s);
@@ -489,15 +499,17 @@ void handleConfig(AsyncWebServerRequest *request) {
   }
   s += "\",";
   s += "\"voltage_cal\":\"" + voltage_cal + "\",";
-  s += "\"voltage2_cal\":\"" + voltage2_cal + "\",";
   s += "\"ct1_cal\":\"" + ct1_cal + "\",";
   s += "\"ct2_cal\":\"" + ct2_cal + "\",";
-  s += "\"ct3_cal\":\"" + ct3_cal + "\",";
-  s += "\"ct4_cal\":\"" + ct4_cal + "\",";
-  s += "\"ct5_cal\":\"" + ct5_cal + "\",";
-  s += "\"ct6_cal\":\"" + ct6_cal + "\",";
   s += "\"freq_cal\":\"" + freq_cal + "\",";
+#ifdef SOLAR_METER
+  s += "\"gain_cal\":\"" + gain_cal + "\","; //comma
+  s += "\"svoltage_cal\":\"" + svoltage_cal + "\",";
+  s += "\"sct1_cal\":\"" + sct1_cal + "\",";
+  s += "\"sct2_cal\":\"" + sct2_cal + "\"";
+#else
   s += "\"gain_cal\":\"" + gain_cal + "\"";
+#endif
   s += "}";
 
   response->setCode(200);

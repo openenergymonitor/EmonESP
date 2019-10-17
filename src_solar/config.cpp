@@ -54,15 +54,15 @@ String mqtt_feed_prefix = "";
 
 // Calibration Settings
 String voltage_cal = "";
-String voltage2_cal = "";
 String ct1_cal = "";
 String ct2_cal = "";
-String ct3_cal = "";
-String ct4_cal = "";
-String ct5_cal = "";
-String ct6_cal = "";
 String freq_cal = "";
 String gain_cal = "";
+#ifdef SOLAR_METER
+String svoltage_cal = "";
+String sct1_cal = "";
+String sct2_cal = "";
+#endif
 
 #define EEPROM_ESID_SIZE          32
 #define EEPROM_EPASS_SIZE         64
@@ -79,15 +79,15 @@ String gain_cal = "";
 #define EEPROM_WWW_USER_SIZE      16
 #define EEPROM_WWW_PASS_SIZE      16
 #define EEPROM_CAL_VOLTAGE_SIZE   6
-#define EEPROM_CAL_VOLTAGE2_SIZE   6
 #define EEPROM_CAL_CT1_SIZE       6
 #define EEPROM_CAL_CT2_SIZE       6
-#define EEPROM_CAL_CT3_SIZE       6
-#define EEPROM_CAL_CT4_SIZE       6
-#define EEPROM_CAL_CT5_SIZE       6
-#define EEPROM_CAL_CT6_SIZE       6
 #define EEPROM_CAL_FREQ_SIZE      6
 #define EEPROM_CAL_GAIN_SIZE      6
+#ifdef SOLAR_METER
+#define EEPROM_CAL_SVOLTAGE_SIZE  6
+#define EEPROM_CAL_SCT1_SIZE      6
+#define EEPROM_CAL_SCT2_SIZE      6
+#endif
 #define EEPROM_SIZE               1024
 
 #define EEPROM_ESID_START         0
@@ -120,25 +120,25 @@ String gain_cal = "";
 #define EEPROM_EMON_PATH_END      (EEPROM_EMON_PATH_START + EEPROM_EMON_PATH_SIZE)
 #define EEPROM_CAL_VOLTAGE_START  EEPROM_EMON_PATH_END
 #define EEPROM_CAL_VOLTAGE_END    (EEPROM_CAL_VOLTAGE_START + EEPROM_CAL_VOLTAGE_SIZE)
-#define EEPROM_CAL_VOLTAGE2_START  EEPROM_CAL_VOLTAGE_END
-#define EEPROM_CAL_VOLTAGE2_END    (EEPROM_CAL_VOLTAGE2_START + EEPROM_CAL_VOLTAGE2_SIZE)
-#define EEPROM_CAL_CT1_START   EEPROM_CAL_VOLTAGE2_END
+#define EEPROM_CAL_CT1_START   EEPROM_CAL_VOLTAGE_END
 #define EEPROM_CAL_CT1_END     (EEPROM_CAL_CT1_START + EEPROM_CAL_CT1_SIZE)
 #define EEPROM_CAL_CT2_START    EEPROM_CAL_CT1_END
 #define EEPROM_CAL_CT2_END      (EEPROM_CAL_CT2_START + EEPROM_CAL_CT2_SIZE)
-#define EEPROM_CAL_CT3_START   EEPROM_CAL_CT2_END
-#define EEPROM_CAL_CT3_END     (EEPROM_CAL_CT3_START + EEPROM_CAL_CT3_SIZE)
-#define EEPROM_CAL_CT4_START    EEPROM_CAL_CT3_END
-#define EEPROM_CAL_CT4_END      (EEPROM_CAL_CT4_START + EEPROM_CAL_CT4_SIZE)
-#define EEPROM_CAL_CT5_START   EEPROM_CAL_CT4_END
-#define EEPROM_CAL_CT5_END     (EEPROM_CAL_CT5_START + EEPROM_CAL_CT5_SIZE)
-#define EEPROM_CAL_CT6_START    EEPROM_CAL_CT5_END
-#define EEPROM_CAL_CT6_END      (EEPROM_CAL_CT6_START + EEPROM_CAL_CT6_SIZE)
-#define EEPROM_CAL_FREQ_START    EEPROM_CAL_CT6_END
+#define EEPROM_CAL_FREQ_START    EEPROM_CAL_CT2_END
 #define EEPROM_CAL_FREQ_END      (EEPROM_CAL_FREQ_START + EEPROM_CAL_FREQ_SIZE)
 #define EEPROM_CAL_GAIN_START    EEPROM_CAL_FREQ_END
 #define EEPROM_CAL_GAIN_END      (EEPROM_CAL_GAIN_START + EEPROM_CAL_GAIN_SIZE)
+#ifdef SOLAR_METER
+#define EEPROM_CAL_SVOLTAGE_START EEPROM_CAL_GAIN_END
+#define EEPROM_CAL_SVOLTAGE_END   (EEPROM_CAL_SVOLTAGE_START + EEPROM_CAL_SVOLTAGE_SIZE)
+#define EEPROM_CAL_SCT1_START     EEPROM_CAL_SVOLTAGE_END
+#define EEPROM_CAL_SCT1_END       (EEPROM_CAL_SCT1_START + EEPROM_CAL_SCT1_SIZE)
+#define EEPROM_CAL_SCT2_START     EEPROM_CAL_SCT1_END
+#define EEPROM_CAL_SCT2_END       (EEPROM_CAL_SCT2_START + EEPROM_CAL_SCT2_SIZE)
+#define EEPROM_CONFIG_END         EEPROM_CAL_SCT2_END
+#else
 #define EEPROM_CONFIG_END         EEPROM_CAL_GAIN_END
+#endif
 
 #if EEPROM_CONFIG_END > EEPROM_SIZE
 #error EEPROM_SIZE too small
@@ -227,16 +227,15 @@ void config_load_settings()
 
   // Calibration settings
   EEPROM_read_string(EEPROM_CAL_VOLTAGE_START, EEPROM_CAL_VOLTAGE_SIZE, voltage_cal);
-  EEPROM_read_string(EEPROM_CAL_VOLTAGE2_START, EEPROM_CAL_VOLTAGE2_SIZE, voltage2_cal);
   EEPROM_read_string(EEPROM_CAL_CT1_START, EEPROM_CAL_CT1_SIZE, ct1_cal);
   EEPROM_read_string(EEPROM_CAL_CT2_START, EEPROM_CAL_CT2_SIZE, ct2_cal);
-  EEPROM_read_string(EEPROM_CAL_CT3_START, EEPROM_CAL_CT3_SIZE, ct3_cal);
-  EEPROM_read_string(EEPROM_CAL_CT4_START, EEPROM_CAL_CT4_SIZE, ct4_cal);
-  EEPROM_read_string(EEPROM_CAL_CT5_START, EEPROM_CAL_CT5_SIZE, ct5_cal);
-  EEPROM_read_string(EEPROM_CAL_CT6_START, EEPROM_CAL_CT6_SIZE, ct6_cal);
   EEPROM_read_string(EEPROM_CAL_FREQ_START, EEPROM_CAL_FREQ_SIZE, freq_cal);
   EEPROM_read_string(EEPROM_CAL_GAIN_START, EEPROM_CAL_GAIN_SIZE, gain_cal);
-
+#ifdef SOLAR_METER
+  EEPROM_read_string(EEPROM_CAL_SVOLTAGE_START, EEPROM_CAL_SVOLTAGE_SIZE, svoltage_cal);
+  EEPROM_read_string(EEPROM_CAL_SCT1_START, EEPROM_CAL_SCT1_SIZE, sct1_cal);
+  EEPROM_read_string(EEPROM_CAL_SCT2_START, EEPROM_CAL_SCT2_SIZE, sct2_cal);
+#endif
 
   // Web server credentials
   EEPROM_read_string(EEPROM_WWW_USER_START, EEPROM_WWW_USER_SIZE, www_username);
@@ -301,35 +300,52 @@ void config_save_mqtt(String server, String topic, String prefix, String user, S
   EEPROM.end();
 }
 
-//for CircuitSetup 6 channel energy meter
-void config_save_cal(String voltage, String voltage2, String ct1, String ct2, String ct3, String ct4, String ct5, String ct6, String freq, String gain)
+//for CircuitSetup energy meter
+#ifdef SOLAR_METER
+void config_save_cal(String voltage, String ct1, String ct2, String freq, String gain, String svoltage, String sct1, String sct2)
 {
   EEPROM.begin(EEPROM_SIZE);
 
   voltage_cal = voltage;
-  voltage2_cal = voltage2;
   ct1_cal = ct1;
   ct2_cal = ct2;
-  ct3_cal = ct3;
-  ct4_cal = ct4;
-  ct5_cal = ct5;
-  ct6_cal = ct6;
+  freq_cal = freq;
+  gain_cal = gain;
+  svoltage_cal = svoltage;
+  sct1_cal = sct1;
+  sct2_cal = sct2;
+
+  EEPROM_write_string(EEPROM_CAL_VOLTAGE_START, EEPROM_CAL_VOLTAGE_SIZE, voltage_cal);
+  EEPROM_write_string(EEPROM_CAL_CT1_START, EEPROM_CAL_CT1_SIZE, ct1_cal);
+  EEPROM_write_string(EEPROM_CAL_CT2_START, EEPROM_CAL_CT2_SIZE, ct2_cal);
+  EEPROM_write_string(EEPROM_CAL_FREQ_START, EEPROM_CAL_FREQ_SIZE, freq_cal);
+  EEPROM_write_string(EEPROM_CAL_GAIN_START, EEPROM_CAL_GAIN_SIZE, gain_cal);
+  EEPROM_write_string(EEPROM_CAL_SVOLTAGE_START, EEPROM_CAL_SVOLTAGE_SIZE, svoltage_cal);
+  EEPROM_write_string(EEPROM_CAL_SCT1_START, EEPROM_CAL_SCT1_SIZE, sct1_cal);
+  EEPROM_write_string(EEPROM_CAL_SCT2_START, EEPROM_CAL_SCT2_SIZE, sct2_cal);
+
+  EEPROM.end();
+}
+#else
+void config_save_cal(String voltage, String ct1, String ct2, String freq, String gain)
+{
+  EEPROM.begin(EEPROM_SIZE);
+
+  voltage_cal = voltage;
+  ct1_cal = ct1;
+  ct2_cal = ct2;
   freq_cal = freq;
   gain_cal = gain;
 
   EEPROM_write_string(EEPROM_CAL_VOLTAGE_START, EEPROM_CAL_VOLTAGE_SIZE, voltage_cal);
-  EEPROM_write_string(EEPROM_CAL_VOLTAGE2_START, EEPROM_CAL_VOLTAGE2_SIZE, voltage2_cal);
   EEPROM_write_string(EEPROM_CAL_CT1_START, EEPROM_CAL_CT1_SIZE, ct1_cal);
   EEPROM_write_string(EEPROM_CAL_CT2_START, EEPROM_CAL_CT2_SIZE, ct2_cal);
-  EEPROM_write_string(EEPROM_CAL_CT3_START, EEPROM_CAL_CT3_SIZE, ct3_cal);
-  EEPROM_write_string(EEPROM_CAL_CT4_START, EEPROM_CAL_CT4_SIZE, ct4_cal);
-  EEPROM_write_string(EEPROM_CAL_CT5_START, EEPROM_CAL_CT5_SIZE, ct5_cal);
-  EEPROM_write_string(EEPROM_CAL_CT6_START, EEPROM_CAL_CT6_SIZE, ct6_cal);
   EEPROM_write_string(EEPROM_CAL_FREQ_START, EEPROM_CAL_FREQ_SIZE, freq_cal);
   EEPROM_write_string(EEPROM_CAL_GAIN_START, EEPROM_CAL_GAIN_SIZE, gain_cal);
 
   EEPROM.end();
 }
+#endif
 
 void config_save_admin(String user, String pass)
 {

@@ -57,5 +57,4 @@ $RECYCLE.BIN/
 .clang_complete
 .gcc-flags.json
 *~
-.vscode/browse.vc.db*
-.vscode
+src_6chan_test/*
