@@ -205,11 +205,11 @@ Firmware can also be flashed using the pre-compiled binaries using esptool.py.
 ### Option 0: Flash using pre-compiled binaries and esptool.py
 
 Find and Install [esptool, python required.](https://github.com/espressif/esptool) 
-Navigate to the 'compiled' folder in this repo and follow the command line instruction.
+Navigate to the Releases section of the github page and get the firmware.bin and spiffs.bin files. Use the command below to flash the ESP.
 
-esptool.py --baud 460800 write_flash 0x0 ./src.ino.bin 0x300000 ./src.spiffs.bin
+esptool.py --baud 460800 write_flash 0x0 ./firmware.bin 0x300000 ./spiffs.bin
 
-The file paths in the line above are relative, you might need to substitute them for absolute file paths.
+The file paths in the line above are relative, the command is run from the directory where the files are contained, you might need to substitute them for absolute file paths. The 460800 baud can be too high for some programmers, 115200 is a failsafe option.
 
 ### Option 1: Using PlatformIO
 
