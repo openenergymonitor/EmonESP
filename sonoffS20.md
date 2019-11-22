@@ -17,14 +17,13 @@ It's advised not to connect to the mains when the case is open from a safety per
 
 **Firmware:**
 
-Download EmonESP and switch to timer branch:
+Download EmonESP:
 
     git clone https://github.com/openenergymonitor/EmonESP.git
-    git checkout timer
 
 **Upload pre-compiled binaries**
 
-[https://github.com/openenergymonitor/EmonESP/tree/timer/compiled/esp01_1m](https://github.com/openenergymonitor/EmonESP/tree/timer/compiled/esp01_1m)
+[https://github.com/openenergymonitor/EmonESP/tree/master/compiled/sonoff](https://github.com/openenergymonitor/EmonESP/tree/master/compiled/sonoff)
 
 **Compilation using PlatformIO:**
 
