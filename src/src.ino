@@ -88,8 +88,9 @@ void setup() {
   } else if (node_type=="wifirelay") {
     pinMode(5, OUTPUT);
   } else if (node_type=="espwifi") {
+    LEDpin = 2;
     pinMode(2,OUTPUT);
-    digitalWrite(2,HIGH);
+    led_flash(3000,100);
   } else if (node_type=="hpmon") {
     pinMode(5,OUTPUT);
     digitalWrite(5,LOW);
