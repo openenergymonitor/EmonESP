@@ -318,7 +318,7 @@ pio run -t upload --upload-port 172.16.0.80
 ```
 ***
 
-### Option 2: Compie Using Arduino IDE
+### Option 2: Compile Using Arduino IDE
 
 An overview of this process is:
 - Install ESP boards using board manager.
