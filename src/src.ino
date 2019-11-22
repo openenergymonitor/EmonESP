@@ -66,8 +66,8 @@ void setup() {
   // ---------------------------------------------------------
   // Hard-coded initial config for node_name and node_describe
   // ---------------------------------------------------------
-  node_type = "smartplug";
-  node_description = "SmartPlug";
+  node_type = "espwifi";
+  node_description = "espwifi";
   
   unsigned long chip_id = ESP.getChipId();
   int chip_tmp = chip_id / 10000;
