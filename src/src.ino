@@ -66,9 +66,31 @@ void setup() {
   // ---------------------------------------------------------
   // Hard-coded initial config for node_name and node_describe
   // ---------------------------------------------------------
+
+
   node_type = "espwifi";
   node_description = "espwifi";
+
+
+  #ifdef SMARTPLUG
+    node_type = "smartplug";
+    node_description = node_type;
+    Serial.println(node_type);
+  #endif
+
+  #ifdef WIFIRELAY
+    node_type = "wifirelay";
+    node_description = node_type;
+    Serial.println(node_type);
+  #endif
   
+
+  #ifdef HPMON
+    node_type = "hpmon";
+    node_description = node_type;
+    Serial.println(node_type);
+  #endif
+
   unsigned long chip_id = ESP.getChipId();
   int chip_tmp = chip_id / 10000;
   chip_tmp = chip_tmp * 10000;
