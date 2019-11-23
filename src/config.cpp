@@ -29,7 +29,9 @@
 #include <Arduino.h>
 #include <EEPROM.h>                   // Save config settings
 
-int LEDpin = 13;
+int LEDpin = 2;
+int LEDpin_inverted = 1;
+int CONTROLpin = 2;
 
 String node_type = "";
 int node_id = 0;
@@ -68,9 +70,9 @@ int timer_stop2 = 0;
 
 int voltage_output = 0;
 
-extern String ctrl_mode = "Timer";
-extern bool ctrl_update = 0;
-extern bool ctrl_state = 0;
+String ctrl_mode = "Off";
+bool ctrl_update = 0;
+bool ctrl_state = 0;
 int time_offset = 0;
 
 #define EEPROM_ESID_SIZE          32

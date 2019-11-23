@@ -63,33 +63,36 @@ void setup() {
   config_load_settings();
   timeClient.setTimeOffset(time_offset);
 
-  // ---------------------------------------------------------
-  // Hard-coded initial config for node_name and node_describe
-  // ---------------------------------------------------------
-
-
-  node_type = "espwifi";
-  node_description = "espwifi";
-
-
+  // EmonEsp is designed for use with the following node types:
+  // Sonoff S20 Smartplug
   #ifdef SMARTPLUG
     node_type = "smartplug";
-    node_description = node_type;
-    Serial.println(node_type);
-  #endif
-
-  #ifdef WIFIRELAY
+    node_description = "Sonoff Smartplug";
+    LEDpin = 13;
+    CONTROLpin = 12; // or/and 16 test!!
+  // Martin Harizanov's ProSmart WIFI Relay
+  #elif WIFIRELAY
     node_type = "wifirelay";
-    node_description = node_type;
-    Serial.println(node_type);
+    node_description = "WiFi Relay";
+    LEDpin = 16;
+    LEDpin_inverted = 0;
+    CONTROLpin = 5;
+  // Heatpump Monitor, used for heating on/off and flow temp control of FTC2B Controller
+  #elif HPMON
+    node_type = "hpmon";
+    node_description = "Heatpump Monitor";
+    LEDpin = 2;
+    CONTROLpin = 5;
+  // Default: ESP12E Huzzah WiFi adapter
+  #else 
+    node_type = "espwifi";
+    node_description = "WiFi Emoncms Link";
+    LEDpin = 2;
+    CONTROLpin = 2;
   #endif
   
-
-  #ifdef HPMON
-    node_type = "hpmon";
-    node_description = node_type;
-    Serial.println(node_type);
-  #endif
+  Serial.print("Node type: ");
+  Serial.println(node_type);
 
   unsigned long chip_id = ESP.getChipId();
   int chip_tmp = chip_id / 10000;
@@ -98,26 +101,18 @@ void setup() {
   
   node_name = node_type + String(node_id);  
   node_describe = "describe:"+node_type;
+
   // ---------------------------------------------------------
-
+  // pin setup
   pinMode(LEDpin, OUTPUT);
-
-  if (node_type=="smartplug") {
-    pinMode(12, OUTPUT);
-    pinMode(13, OUTPUT);
-    pinMode(16, OUTPUT);
-    led_flash(3000,100);    
-  } else if (node_type=="wifirelay") {
-    pinMode(5, OUTPUT);
-  } else if (node_type=="espwifi") {
-    LEDpin = 2;
-    pinMode(2,OUTPUT);
-    led_flash(3000,100);
-  } else if (node_type=="hpmon") {
-    pinMode(5,OUTPUT);
-    digitalWrite(5,LOW);
-    pinMode(4,OUTPUT);
-  }
+  pinMode(CONTROLpin, OUTPUT);
+  digitalWrite(CONTROLpin,LOW);
+  // custom: analog output pin
+  if (node_type=="hpmon") pinMode(4,OUTPUT);
+  // ---------------------------------------------------------
+  
+  // Initial LED on
+  led_flash(3000,100);
 
   // Initialise the WiFi
   wifi_setup();
@@ -142,7 +137,11 @@ void setup() {
 } // end setup
 
 void led_flash(int ton, int toff) {
-  digitalWrite(LEDpin,LOW); delay(ton); digitalWrite(LEDpin,HIGH); delay(toff);
+  if (LEDpin_inverted) {
+      digitalWrite(LEDpin,LOW); delay(ton); digitalWrite(LEDpin,HIGH); delay(toff);
+  } else {
+      digitalWrite(LEDpin,HIGH); delay(ton); digitalWrite(LEDpin,LOW); delay(toff);  
+  }
 }
 
 // -------------------------------------------------------------------
@@ -185,8 +184,11 @@ void loop()
     // 1. Timer
     int timenow = timeClient.getHours()*100+timeClient.getMinutes();
     
-    if (timenow>=timer_start1 && timenow<timer_stop1) ctrl_state = 1;
-    if (timenow>=timer_start2 && timenow<timer_stop2) ctrl_state = 1;
+    if (timer_stop1>=timer_start1 && (timenow>=timer_start1 && timenow<timer_stop1)) ctrl_state = 1;
+    if (timer_stop2>=timer_start2 && (timenow>=timer_start2 && timenow<timer_stop2)) ctrl_state = 1;
+
+    if (timer_stop1<timer_start1 && (timenow>=timer_start1 || timenow<timer_stop1)) ctrl_state = 1;
+    if (timer_stop2<timer_start2 && (timenow>=timer_start2 || timenow<timer_stop2)) ctrl_state = 1;    
 
     // 2. On/Off
     if (ctrl_mode=="On") ctrl_state = 1;
@@ -195,34 +197,22 @@ void loop()
     // 3. Apply
     if (ctrl_state) {
       // ON
-      if (node_type=="smartplug") {
-        digitalWrite(12,HIGH);
-        digitalWrite(16,HIGH);
-      } else if (node_type=="wifirelay") {
-        digitalWrite(5,HIGH);
-      } else if (node_type=="espwifi") {
-        digitalWrite(2,LOW);
-      } else if (node_type=="hpmon") {
-        digitalWrite(5,HIGH);
+      if (node_type=="espwifi") {
+        digitalWrite(CONTROLpin,LOW);
+      } else {
+        digitalWrite(CONTROLpin,HIGH);
       }
     } else {
       // OFF
-      if (node_type=="smartplug") {
-        digitalWrite(12,LOW);
-        digitalWrite(16,LOW);
-      } else if (node_type=="wifirelay") {
-        digitalWrite(5,LOW);
-      } else if (node_type=="espwifi") {
-        digitalWrite(2,HIGH);
-      } else if (node_type=="hpmon") {
-        digitalWrite(5,LOW);
+      if (node_type=="espwifi") {
+        digitalWrite(CONTROLpin,HIGH);
+      } else {
+        digitalWrite(CONTROLpin,LOW);
       }
     }
 
     if (node_type=="hpmon") {
-      analogWrite(4,voltage_output);  
-      // DEBUG.print("voltage_output: "); 
-      // DEBUG.println(voltage_output);
+      analogWrite(4,voltage_output);
     }
   }
   // --------------------------------------------------------------

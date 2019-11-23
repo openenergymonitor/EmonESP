@@ -28,8 +28,8 @@ Download EmonESP:
 **Compilation using PlatformIO:**
 
     cd EmonESP
-    pio run -t upload
-    pio run -t uploadfs
+    pio run -esmartplug -t upload
+    pio run -esmartplug -t uploadfs
 
 **Compilation using Arduino:**
 

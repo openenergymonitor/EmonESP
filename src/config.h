@@ -35,6 +35,8 @@
 // -------------------------------------------------------------------
 
 extern int LEDpin;
+extern int LEDpin_inverted;
+extern int CONTROLpin;
 
 // Global config varables
 extern String node_type;
