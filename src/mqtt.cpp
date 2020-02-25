@@ -54,7 +54,7 @@ void mqtt_callback(char* topic, byte* payload, unsigned int length) {
   // --------------------------------------------------------------------------
   // State 
   // --------------------------------------------------------------------------
-  if (topicstr.compareTo("emon/"+node_name+"/in/ctrlmode")==0) {
+  if (topicstr.compareTo(mqtt_topic+"/"+node_name+"/in/ctrlmode")==0) {
     DEBUG.print("Status: ");
     if (payloadstr.compareTo("2")==0) {
       ctrl_mode = "Timer";
@@ -75,7 +75,7 @@ void mqtt_callback(char* topic, byte* payload, unsigned int length) {
   // --------------------------------------------------------------------------
   // Timer  
   // --------------------------------------------------------------------------
-  } else if (topicstr.compareTo("emon/"+node_name+"/in/timer")==0) {
+  } else if (topicstr.compareTo(mqtt_topic+"/"+node_name+"/in/timer")==0) {
     DEBUG.print("Timer: ");
     if (payloadstr.length()==9) {
       String tstart = payloadstr.substring(0,4);
@@ -98,14 +98,14 @@ void mqtt_callback(char* topic, byte* payload, unsigned int length) {
   // --------------------------------------------------------------------------
   // Vout  
   // --------------------------------------------------------------------------
-  } else if (topicstr.compareTo("emon/"+node_name+"/in/vout")==0) {
+  } else if (topicstr.compareTo(mqtt_topic+"/"+node_name+"/in/vout")==0) {
     DEBUG.print("Vout: ");
     voltage_output = payloadstr.toInt();
     DEBUG.println(voltage_output);
   // --------------------------------------------------------------------------
   // FlowT  
   // --------------------------------------------------------------------------
-  } else if (topicstr.compareTo("emon/"+node_name+"/in/flowT")==0) {
+  } else if (topicstr.compareTo(mqtt_topic+"/"+node_name+"/in/flowT")==0) {
     DEBUG.print("FlowT: ");
     float flow = payloadstr.toFloat();
     voltage_output = (int) (flow - 7.14)/0.0371;
@@ -113,7 +113,7 @@ void mqtt_callback(char* topic, byte* payload, unsigned int length) {
   // --------------------------------------------------------------------------
   // Return device state
   // --------------------------------------------------------------------------
-  } else if (topicstr.compareTo("emon/"+node_name+"/in/state")==0) {
+  } else if (topicstr.compareTo(mqtt_topic+"/"+node_name+"/in/state")==0) {
     DEBUG.println("State: ");
 
     String s = "{";
