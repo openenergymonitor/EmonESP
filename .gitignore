@@ -60,3 +60,5 @@ $RECYCLE.BIN/
 *~
 .vscode/browse.vc.db*
 .vscode
+.pio
+node_modules
