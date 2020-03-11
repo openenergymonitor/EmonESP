@@ -275,6 +275,8 @@ handleSaveTimer(AsyncWebServerRequest *request) {
   if(false == requestPreProcess(request, response, "text/plain")) {
     return;
   }
+  
+  keep_on_flag = 0;
 
   String tmp = request->arg("timer_start1");
   int qtimer_start1 = tmp.toInt();

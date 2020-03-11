@@ -29,6 +29,8 @@
 #include <Arduino.h>
 #include <EEPROM.h>                   // Save config settings
 
+int keep_on_flag = 1;
+
 int LEDpin = 2;
 int LEDpin_inverted = 1;
 int CONTROLpin = 2;
@@ -70,7 +72,7 @@ int timer_stop2 = 0;
 
 int voltage_output = 0;
 
-String ctrl_mode = "Off";
+String ctrl_mode = "On";
 bool ctrl_update = 0;
 bool ctrl_state = 0;
 int time_offset = 0;

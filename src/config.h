@@ -33,6 +33,7 @@
 //
 // This initial implementation saves the config to the EEPROM area of flash
 // -------------------------------------------------------------------
+extern int keep_on_flag;
 
 extern int LEDpin;
 extern int LEDpin_inverted;

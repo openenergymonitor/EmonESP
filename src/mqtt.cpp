@@ -77,6 +77,7 @@ void mqtt_callback(char* topic, byte* payload, unsigned int length) {
   // --------------------------------------------------------------------------
   } else if (topicstr.compareTo(mqtt_topic+"/"+node_name+"/in/timer")==0) {
     DEBUG.print("Timer: ");
+    keep_on_flag = 0;
     if (payloadstr.length()==9) {
       String tstart = payloadstr.substring(0,4);
       String tstop = payloadstr.substring(5,9);

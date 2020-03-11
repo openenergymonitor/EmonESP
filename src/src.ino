@@ -188,7 +188,11 @@ void loop()
     if (timer_stop2>=timer_start2 && (timenow>=timer_start2 && timenow<timer_stop2)) ctrl_state = 1;
 
     if (timer_stop1<timer_start1 && (timenow>=timer_start1 || timenow<timer_stop1)) ctrl_state = 1;
-    if (timer_stop2<timer_start2 && (timenow>=timer_start2 || timenow<timer_stop2)) ctrl_state = 1;    
+    if (timer_stop2<timer_start2 && (timenow>=timer_start2 || timenow<timer_stop2)) ctrl_state = 1;
+    
+    if (ctrl_state==1) keep_on_flag = 1;
+    
+    if (keep_on_flag) ctrl_state = 1;
 
     // 2. On/Off
     if (ctrl_mode=="On") ctrl_state = 1;
