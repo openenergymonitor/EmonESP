@@ -245,6 +245,11 @@ $ pio run
 
 The first time platformIO is ran the espressif arduino tool chain and all the required libs will be installed if required.
 
+To compile EmonESP for sonoff s20 smartplugs, WIFI Relay and Heatpump Monitor specify the following environment:
+
+    pio run -esmartplug
+    pio run -ewifirelay
+    pio run -ehpmon
 
 #### 3. Upload
 
@@ -256,11 +261,23 @@ The first time platformIO is ran the espressif arduino tool chain and all the re
 
 `$ pio run -t upload`
 
+To compile and upload EmonESP for sonoff s20 smartplugs, WIFI Relay and Heatpump Monitor specify the following environment:
+
+    pio run -esmartplug -tupload
+    pio run -ewifirelay -tupload
+    pio run -ehpmon -tupload
+
 ##### b.) Upload data folder to the file system (html, CSS etc.) (SPIFFS):
 
 - Put ESP back into bootloder mode, see above
 
 `$ pio run -t uploadfs`
+
+To compile and upload the EmonESP file system for sonoff s20 smartplugs, WIFI Relay and Heatpump Monitor specify the following environment:
+
+    pio run -esmartplug -tuploadfs
+    pio run -ewifirelay -tuploadfs
+    pio run -ehpmon -tuploadfs
 
 See [PlatfomrIO docs regarding SPIFFS uploading](http://docs.platformio.org/en/latest/platforms/espressif.html#uploading-files-to-file-system-spiffs)
 
@@ -318,7 +335,7 @@ pio run -t upload --upload-port 172.16.0.80
 ```
 ***
 
-### Option 2: Compie Using Arduino IDE
+### Option 2: Compile Using Arduino IDE
 
 An overview of this process is:
 - Install ESP boards using board manager.
