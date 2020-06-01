@@ -38,6 +38,7 @@
 WiFiUDP ntpUDP;
 NTPClient timeClient(ntpUDP,"europe.pool.ntp.org",time_offset,60000);
 unsigned long last_ctrl_update = 0;
+unsigned long last_state_update = 0;
 unsigned long last_pushbtn_check = 0;
 bool pushbtn_action = 0;
 bool pushbtn_state = 0;
@@ -213,6 +214,17 @@ void loop()
 
     if (node_type=="hpmon") {
       analogWrite(4,voltage_output);
+    }
+    
+    // --------------------------------------------------------------
+    // Publish state every 10s
+    if (node_type=="wifirelay" || node_type=="smartplug") {
+      if ((millis()-last_state_update)>=10000) {
+        last_state_update = millis();
+        if (mqtt_server!=0) {
+            mqtt_publish("state",String(ctrl_state));
+        }
+      }
     }
   }
   // --------------------------------------------------------------
