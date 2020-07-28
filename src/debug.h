@@ -1,31 +1,18 @@
 #ifndef __DEBUG_H
 #define __DEBUG_H
 
-//#define DEBUG
-//#define DEBUG_PORT Serial
+#undef DEBUG_PORT
+#define DEBUG_PORT SerialDebug
 
-#define TEXTIFY(A) #A
-#define ESCAPEQUOTE(A) TEXTIFY(A)
+#undef EMONTX_PORT
+#define EMONTX_PORT SerialEmonTx
 
-#ifdef ENABLE_DEBUG
+#include "MicroDebug.h"
+#include "StreamSpy.h"
 
-#ifndef DEBUG_PORT
-#define DEBUG_PORT Serial1
-#endif
+extern StreamSpy SerialDebug;
+extern StreamSpy SerialEmonTx;
 
-#define DEBUG_BEGIN(speed)  DEBUG_PORT.begin(speed)
-
-#define DBUGF(format, ...)  DEBUG_PORT.printf(format "\n", ##__VA_ARGS__)
-#define DBUG(...)           DEBUG_PORT.print(__VA_ARGS__)
-#define DBUGLN(...)         DEBUG_PORT.println(__VA_ARGS__)
-
-#else
-
-#define DEBUG_BEGIN(speed)
-#define DBUGF(...)
-#define DBUG(...)
-#define DBUGLN(...)
-
-#endif // DEBUG
+extern void debug_setup();
 
 #endif // __DEBUG_H

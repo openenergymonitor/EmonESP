@@ -26,7 +26,9 @@
 #include "emonesp.h"
 #include "wifi.h"
 #include "mqtt.h"
-#include "config.h"
+#include "app_config.h"
+
+#include "espal.h"
 
 #include <Arduino.h>
 #include <PubSubClient.h>             // MQTT https://github.com/knolleary/pubsubclient PlatformIO lib: 89
@@ -35,15 +37,20 @@
 WiFiClient espClient;                 // Create client for MQTT
 PubSubClient mqttclient(espClient);   // Create client for MQTT
 
-long lastMqttReconnectAttempt = 0;
+static long nextMqttReconnectAttempt = 0;
+static unsigned long mqttRestartTime = 0;
+
 int clientTimeout = 0;
 int i = 0;
 
+#ifndef MQTT_CONNECT_TIMEOUT
+#define MQTT_CONNECT_TIMEOUT (5 * 1000)
+#endif // !MQTT_CONNECT_TIMEOUT
 
 // -------------------------------------------------------------------
 // MQTT Control callback for WIFI Relay and Sonoff smartplug
 // -------------------------------------------------------------------
-void mqtt_callback(char* topic, byte* payload, unsigned int length) {
+static void mqtt_msg_callback(char *topic, byte *payload, unsigned int length) {
   
   String topicstr = String(topic);
   String payloadstr = String((char *)payload);
@@ -133,13 +140,15 @@ void mqtt_callback(char* topic, byte* payload, unsigned int length) {
 boolean mqtt_connect()
 {
   mqttclient.setServer(mqtt_server.c_str(), mqtt_port);
-  mqttclient.setCallback(mqtt_callback);
+  mqttclient.setCallback(mqtt_msg_callback); //function to be called when mqtt msg is received on subscribed topic
   
-  DEBUG.println("MQTT Connecting...");
+  DEBUG.print("MQTT Connecting to...");
+  DEBUG.println(mqtt_server.c_str());
+  
   String strID = String(ESP.getChipId());
   if (mqttclient.connect(strID.c_str(), mqtt_user.c_str(), mqtt_pass.c_str())) {  // Attempt to connect
     DEBUG.println("MQTT connected");
-    mqtt_publish_keyval(node_describe);
+    mqtt_publish("describe", node_type);
     
     String subscribe_topic = mqtt_topic + "/" + node_name + "/in/#";
     mqttclient.subscribe(subscribe_topic.c_str());
@@ -157,8 +166,12 @@ boolean mqtt_connect()
 // -------------------------------------------------------------------
 void mqtt_publish(String topic_p2, String data)
 {
-    String topic = mqtt_topic + "/" + node_name + "/" + topic_p2;
-    mqttclient.publish(topic.c_str(), data.c_str());
+  if(!config_mqtt_enabled() || !mqttclient.connected()) {
+    return;
+  }
+
+  String topic = mqtt_topic + "/" + node_name + "/" + topic_p2;
+  mqttclient.publish(topic.c_str(), data.c_str());
 }
 
 // -------------------------------------------------------------------
@@ -168,43 +181,27 @@ void mqtt_publish(String topic_p2, String data)
 // base topic = emon/emonesp
 // MQTT Publish: emon/emonesp/CT1 > 3935 etc..
 // -------------------------------------------------------------------
-void mqtt_publish_keyval(String data)
+void mqtt_publish(JsonDocument &data)
 {
-  String mqtt_data = "";
-  String topic = mqtt_topic + "/" + node_name + "/" + mqtt_feed_prefix;
-  int i=0;
-  while (int (data[i]) != 0)
-  {
-    // Construct MQTT topic e.g. <base_topic>/CT1 e.g. emonesp/CT1
-    while (data[i]!=':'){
-      topic+= data[i];
-      i++;
-      if (int(data[i])==0){
-        break;
-      }
-    }
-    i++;
-    // Construct data string to publish to above topic
-    while (data[i]!=','){
-      mqtt_data+= data[i];
-      i++;
-      if (int(data[i])==0){
-        break;
-      }
-    }
-    // send data via mqtt
-    //delay(100);
-    //DEBUG.printf("%s = %s\r\n", topic.c_str(), mqtt_data.c_str());
-    mqttclient.publish(topic.c_str(), mqtt_data.c_str());
-    topic = mqtt_topic + "/" + node_name + "/" + mqtt_feed_prefix;
-    mqtt_data="";
-    i++;
-    if (int(data[i]) == 0) break;
+  Profile_Start(mqtt_publish);
+
+  if(!config_mqtt_enabled() || !mqttclient.connected()) {
+    return;
+  }
+
+  JsonObject root = data.as<JsonObject>();
+  for (JsonPair kv : root) {
+    String topic = mqtt_topic + "/";
+    topic += kv.key().c_str();
+    String val = kv.value().as<String>();
+    mqttclient.publish(topic.c_str(), val.c_str());
   }
 
   String ram_topic = mqtt_topic + "/" + node_name + "/" + mqtt_feed_prefix + "freeram";
   String free_ram = String(ESP.getFreeHeap());
   mqttclient.publish(ram_topic.c_str(), free_ram.c_str());
+
+  Profile_End(mqtt_publish, 5);
 }
 
 // -------------------------------------------------------------------
@@ -214,27 +211,41 @@ void mqtt_publish_keyval(String data)
 // -------------------------------------------------------------------
 void mqtt_loop()
 {
-  if (!mqttclient.connected()) {
-    long now = millis();
-    // try and reconnect continuously for first 5s then try again once every 10s
-    if ( (now < 5000) || ((now - lastMqttReconnectAttempt)  > 10000) ) {
-      lastMqttReconnectAttempt = now;
-      if (mqtt_connect()) { // Attempt to reconnect
-        lastMqttReconnectAttempt = millis();
-        delay(100);
-      }
+  Profile_Start(mqtt_loop);
+
+  // Do we need to restart MQTT?
+  if(mqttRestartTime > 0 && millis() > mqttRestartTime) 
+  {
+    mqttRestartTime = 0;
+    if (mqttclient.connected()) {
+      DBUGF("Disconnecting MQTT");
+      mqttclient.disconnect();
     }
-  } else {
-    // if MQTT connected
-    mqttclient.loop();
+    nextMqttReconnectAttempt = 0;
   }
+
+  if(config_mqtt_enabled())
+  {
+    if (!mqttclient.connected()) {
+      long now = millis();
+      // try and reconnect every x seconds
+      if (now > nextMqttReconnectAttempt) {
+        nextMqttReconnectAttempt = now + MQTT_CONNECT_TIMEOUT;
+        mqtt_connect(); // Attempt to reconnect
+      }
+    } else {
+      // if MQTT connected
+      mqttclient.loop();
+    }
+  }
+
+  Profile_End(mqtt_loop, 5);
 }
 
 void mqtt_restart()
 {
-  if (mqttclient.connected()) {
-    mqttclient.disconnect();
-  }
+  // If connected disconnect MQTT to trigger re-connect with new details
+  mqttRestartTime = millis();
 }
 
 boolean mqtt_connected()

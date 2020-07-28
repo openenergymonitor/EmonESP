@@ -27,6 +27,7 @@
 #define _EMONESP_CONFIG_H
 
 #include <Arduino.h>
+#include <ArduinoJson.h>
 
 // -------------------------------------------------------------------
 // Load and save the EmonESP config.
@@ -81,20 +82,45 @@ extern String ctrl_mode;
 extern bool ctrl_update;
 extern bool ctrl_state;
 
+// 24-bits of Flags
+extern uint32_t flags;
+
+#define CONFIG_SERVICE_EMONCMS  (1 << 0)
+#define CONFIG_SERVICE_MQTT     (1 << 1)
+#define CONFIG_CTRL_UPDATE      (1 << 2)
+#define CONFIG_CTRL_STATE       (1 << 3)
+
+inline bool config_emoncms_enabled() {
+  return CONFIG_SERVICE_EMONCMS == (flags & CONFIG_SERVICE_EMONCMS);
+}
+
+inline bool config_mqtt_enabled() {
+  return CONFIG_SERVICE_MQTT == (flags & CONFIG_SERVICE_MQTT);
+}
+
+inline bool config_ctrl_update() {
+  return CONFIG_CTRL_UPDATE == (flags & CONFIG_CTRL_UPDATE);
+}
+
+inline bool config_ctrl_state() {
+  return CONFIG_CTRL_STATE == (flags & CONFIG_CTRL_STATE);
+}
+
 // -------------------------------------------------------------------
 // Load saved settings
 // -------------------------------------------------------------------
 extern void config_load_settings();
+extern void config_load_v1_settings();
 
 // -------------------------------------------------------------------
 // Save the EmonCMS server details
 // -------------------------------------------------------------------
-extern void config_save_emoncms(String server, String path, String node, String apikey, String fingerprint);
+extern void config_save_emoncms(bool enable, String server, String path, String node, String apikey, String fingerprint);
 
 // -------------------------------------------------------------------
 // Save the MQTT broker details
 // -------------------------------------------------------------------
-extern void config_save_mqtt(String server, int port, String topic, String prefix, String user, String pass);
+extern void config_save_mqtt(bool enable, String server, int port, String topic, String prefix, String user, String pass);
 extern void config_save_mqtt_server(String server);
 
 // -------------------------------------------------------------------
@@ -117,5 +143,20 @@ extern void config_save_wifi(String qsid, String qpass);
 // Reset the config back to defaults
 // -------------------------------------------------------------------
 extern void config_reset();
+
+void config_set(const char *name, uint32_t val);
+void config_set(const char *name, String val);
+void config_set(const char *name, bool val);
+void config_set(const char *name, double val);
+
+// Read config settings from JSON object
+bool config_deserialize(String& json);
+bool config_deserialize(const char *json);
+bool config_deserialize(DynamicJsonDocument &doc);
+void config_commit();
+
+// Write config settings to JSON object
+bool config_serialize(String& json, bool longNames = true, bool compactOutput = false, bool hideSecrets = false);
+bool config_serialize(DynamicJsonDocument &doc, bool longNames = true, bool compactOutput = false, bool hideSecrets = false);
 
 #endif // _EMONESP_CONFIG_H

@@ -1,0 +1,63 @@
+{
+  "name": "emonesp_gui",
+  "version": "1.0.0",
+  "description": "GUI for the EmonESP WiFi module",
+  "dependencies": {
+    "jquery": "^3.4.1",
+    "knockout": "^3.5.0",
+    "knockout-mapping": "^2.6.0"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.6.2",
+    "@babel/preset-env": "^7.6.2",
+    "clean-webpack-plugin": "^0.1.19",
+    "copy-webpack-plugin": "^5.1.1",
+    "css-loader": "^1.0.1",
+    "dotenv": "^8.1.0",
+    "eslint": "^5.16.0",
+    "extract-text-webpack-plugin": "^4.0.0-beta.0",
+    "file-loader": "^2.0.0",
+    "html-webpack-plugin": "^3.2.0",
+    "imports-loader": "^0.8.0",
+    "mini-css-extract-plugin": "^0.4.5",
+    "optimize-css-assets-webpack-plugin": "^5.0.3",
+    "style-loader": "^0.23.0",
+    "uglify-js": "^3.6.0",
+    "uglifyjs-webpack-plugin": "^2.2.0",
+    "webpack": "^4.41.0",
+    "webpack-bundle-analyzer": "^3.5.2",
+    "webpack-cli": "^3.3.9",
+    "webpack-dev-server": "^3.8.2",
+    "webpack-merge-and-include-globally": "^2.1.20"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "watch": "webpack --watch",
+    "start": "webpack-dev-server --open",
+    "build": "webpack",
+    "prepare": "npm run build",
+    "lint": "eslint src"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/openenergymonitor/EmonESP.git"
+  },
+  "keywords": [
+    "evse"
+  ],
+  "author": "Jeremy Poulter <jeremy@bigjungle.net>",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/openenergymonitor/EmonESP/issues"
+  },
+  "homepage": "https://github.com/openenergymonitor/EmonESP#readme",
+  "files": [
+    "dist/",
+    "lib/"
+  ],
+  "main": "lib/index.js",
+  "directories": {
+    "dist": "dist",
+    "lib": "lib"
+  }
+}

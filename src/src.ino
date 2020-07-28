@@ -24,7 +24,7 @@
  */
 
 #include "emonesp.h"
-#include "config.h"
+#include "app_config.h"
 #include "wifi.h"
 #include "web_server.h"
 #include "ota.h"
@@ -58,10 +58,6 @@ void setup() {
   DEBUG.print("EmonESP ");
   DEBUG.println(ESP.getChipId());
   DEBUG.println("Firmware: "+ currentfirmware);
-
-  // Read saved settings from the config
-  config_load_settings();
-  timeClient.setTimeOffset(time_offset);
 
   // EmonEsp is designed for use with the following node types:
   // Sonoff S20 Smartplug
@@ -99,8 +95,9 @@ void setup() {
   chip_tmp = chip_tmp * 10000;
   node_id = (chip_id - chip_tmp);
   
-  node_name = node_type + String(node_id);  
-  node_describe = "describe:"+node_type;
+  // Read saved settings from the config
+  config_load_settings();
+  timeClient.setTimeOffset(time_offset);
 
   // ---------------------------------------------------------
   // pin setup
@@ -154,20 +151,15 @@ void loop()
   wifi_loop();
   timeClient.update();
 
-  String input = "";
-  boolean gotInput = input_get(input);
+  DynamicJsonDocument data(4096);
+  boolean gotInput = input_get(data);
 
-  if (wifi_mode == WIFI_MODE_STA || wifi_mode == WIFI_MODE_AP_AND_STA)
+  if (wifi_client_connected())
   {
-    if(emoncms_apikey != 0 && gotInput) {
-      emoncms_publish(input);
-    }
-    if(mqtt_server != 0)
-    {
-      mqtt_loop();
-      if(gotInput) {
-        mqtt_publish_keyval(input);
-      }
+    mqtt_loop();
+    if(gotInput) {
+      emoncms_publish(data);
+      event_send(data);
     }
   }
 
@@ -241,3 +233,19 @@ void setTimeOffset() {
     timeClient.setTimeOffset(time_offset);
 }
 
+void event_send(String &json)
+{
+  StaticJsonDocument<512> event;
+  deserializeJson(event, json);
+  event_send(event);
+}
+
+void event_send(JsonDocument &event)
+{
+  #ifdef ENABLE_DEBUG
+  serializeJson(event, DEBUG_PORT);
+  DBUGLN("");
+  #endif
+  web_server_event(event);
+  mqtt_publish(event);
+}

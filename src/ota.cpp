@@ -22,7 +22,7 @@
  * Free Software Foundation, Inc., 59 Temple Place - Suite 330,
  * Boston, MA 02111-1307, USA.
  */
-#include "config.h"
+#include "app_config.h"
 #include "emonesp.h"
 #include "ota.h"
 #include "web_server.h"
@@ -40,8 +40,6 @@
 // Array of strings Used to check firmware version
 const char* u_host = "217.9.195.227";
 const char* u_url = "/esp/firmware.php";
-
-extern const char *esp_hostname;
 
 void ota_setup()
 {
@@ -71,8 +69,6 @@ String ota_get_latest_version()
 
 t_httpUpdate_return ota_http_update()
 {
-  SPIFFS.end(); // unmount filesystem
   t_httpUpdate_return ret = ESPhttpUpdate.update("http://" + String(u_host) + String(u_url) + "?tag=" + currentfirmware);
-  SPIFFS.begin(); //mount-file system
   return ret;
 }

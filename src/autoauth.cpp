@@ -24,7 +24,7 @@
  */
 
 #include "emonesp.h"
-#include "config.h"
+#include "app_config.h"
 #include "http.h"
 #include <Arduino.h>
 #include <WiFiUdp.h>
@@ -67,13 +67,13 @@ void auth_request() {
         // Only save if we received 3 setting parts (0,1,2)
         if (stringpart==2) {
             mqtt_auth_transfer_flag = 2;
-            config_save_mqtt(mqtt_server.c_str(),mqtt_port,mqtt_basetopic,"",mqtt_username,mqtt_password);
+            config_save_mqtt(true, mqtt_server.c_str(), mqtt_port, mqtt_basetopic, "", mqtt_username, mqtt_password);
             DEBUG.println("MQTT Settings:"); DEBUG.println(result);
         }
         
         if (stringpart==3) {
             mqtt_auth_transfer_flag = 2;
-            config_save_mqtt(mqtt_server.c_str(),mqtt_portnum.toInt(),mqtt_basetopic,"",mqtt_username,mqtt_password);
+            config_save_mqtt(true, mqtt_server.c_str() ,mqtt_portnum.toInt(), mqtt_basetopic, "", mqtt_username, mqtt_password);
             DEBUG.println("MQTT Settings:"); DEBUG.println(result);
         }
     }
