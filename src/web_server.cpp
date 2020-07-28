@@ -919,7 +919,6 @@ web_server_setup()
   server.on("/firmware", handleUpdateCheck);
   server.on("/update", handleUpdate);
 
-
   server.onNotFound(handleNotFound);
   server.onRequestBody(handleBody);
 

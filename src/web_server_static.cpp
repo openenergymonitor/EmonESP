@@ -33,12 +33,13 @@ bool StaticFileWebHandler::_getFile(AsyncWebServerRequest *request, StaticFile *
   // Remove the found uri
   String path = request->url();
   if(path == "/") {
-    path = String(wifi_mode_is_ap_only() ? WIFI_PAGE : HOME_PAGE);
+//    path = String(wifi_mode_is_ap_only() ? WIFI_PAGE : HOME_PAGE);
+    path = String(HOME_PAGE);
   }
 
   DBUGF("Looking for %s", path.c_str());
 
-  for(int i = 0; i < ARRAY_LENGTH(staticFiles); i++) {
+  for(uint32_t i = 0; i < ARRAY_LENGTH(staticFiles); i++) {
     if(path == staticFiles[i].filename)
     {
       DBUGF("Found %s %d@%p", staticFiles[i].filename, staticFiles[i].length, staticFiles[i].data);
@@ -119,6 +120,8 @@ size_t StaticFileResponse::write(AsyncWebServerRequest *request)
     // How should failures to send be handled?
     request->client()->send();
   }
+
+  return total;
 }
 
 size_t StaticFileResponse::writeData(AsyncWebServerRequest *request)
@@ -139,7 +142,6 @@ size_t StaticFileResponse::writeData(AsyncWebServerRequest *request)
   {
     size_t written = 0;
 
-    bool aligned = RESPONSE_CONTENT == _state;
     char buffer[128];
     uint32_t copy = sizeof(buffer);
     if(copy > length) {
@@ -220,6 +222,8 @@ size_t StaticFileResponse::writeData(AsyncWebServerRequest *request)
           break;
         case RESPONSE_CONTENT:
           _state = RESPONSE_WAIT_ACK;
+          break;
+        default:
           break;
       }
     }

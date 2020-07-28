@@ -4,11 +4,17 @@
 // development folder
 var development = "";
 
-var baseHost = window.location.hostname+development;
+var baseHost = window.location.hostname;
 //var baseHost = 'emonesp.local';
 //var baseHost = '192.168.4.1';
 //var baseHost = '172.16.0.52';
-var baseEndpoint = 'http://' + baseHost;
+var basePort = window.location.port;
+
+var baseEndpoint = "//" + baseHost;
+if(80 !== basePort) {
+  baseEndpoint += ":" + basePort;
+}
+baseEndpoint += development
 
 var statusupdate = false;
 var selected_network_ssid = "";
@@ -23,8 +29,14 @@ function scaleString(string, scale, precision) {
 }
 
 function addcolon(t) {
-    if (t.length==3) t = "0"+t
-    return t.substr(0,2)+":"+t.substr(2,4);
+  t = new String(t);
+  if (t.length < 3) {
+    return "00:00";
+  }
+  if (t.length == 3) {
+    t = "0"+t;
+  }
+  return t.substr(0,2)+":"+t.substr(2,4);
 }
 
 function BaseViewModel(defaults, remoteUrl, mappings) {

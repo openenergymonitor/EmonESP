@@ -47,13 +47,9 @@ bool last_pushbtn_state = 0;
 // SETUP
 // -------------------------------------------------------------------
 void setup() {
-  delay(2000);
+  debug_setup();
 
-  Serial.begin(115200);
-#ifdef DEBUG_SERIAL1
-  Serial1.begin(115200);
-#endif
-
+  DEBUG.println();
   DEBUG.println();
   DEBUG.print("EmonESP ");
   DEBUG.println(ESP.getChipId());
@@ -87,8 +83,8 @@ void setup() {
     CONTROLpin = 2;
   #endif
   
-  Serial.print("Node type: ");
-  Serial.println(node_type);
+  DBUG("Node type: ");
+  DBUGLN(node_type);
 
   unsigned long chip_id = ESP.getChipId();
   int chip_tmp = chip_id / 10000;
