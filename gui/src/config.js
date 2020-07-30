@@ -59,7 +59,7 @@ BaseViewModel.prototype.update = function (after) {
   self.fetching(true);
   $.get(self.remoteUrl, function (data) {
     ko.mapping.fromJS(data, self);
-  }, 'json').always(function () {
+  }, "json").always(function () {
     self.fetching(false);
     after();
   });
@@ -83,7 +83,7 @@ function StatusViewModel() {
     "time":"",
     "ctrl_mode":"off",
     "ctrl_state":0
-  }, baseEndpoint + '/status');
+  }, baseEndpoint + "/status");
 
   // Some devired values
   self.isWifiClient = ko.pureComputed(function () {
@@ -136,7 +136,7 @@ function ConfigViewModel() {
     "timer_stop2":"",
     "voltage_output":"",
     "time_offset":""
-  }, baseEndpoint + '/config');
+  }, baseEndpoint + "/config");
   
   this.f_timer_start1 = ko.pureComputed({
       read: function () {
@@ -190,7 +190,7 @@ ConfigViewModel.prototype.constructor = ConfigViewModel;
 
 function LastValuesViewModel() {
   var self = this;
-  self.remoteUrl = baseEndpoint + '/lastvalues';
+  self.remoteUrl = baseEndpoint + "/lastvalues";
 
   // Observable properties
   self.fetching = ko.observable(false);
@@ -221,7 +221,7 @@ function LastValuesViewModel() {
         self.lastValues(false);
       }
       ko.mapping.fromJS(vals, self.values);
-    }, 'text').always(function () {
+    }, "text").always(function () {
       self.fetching(false);
       after();
     });
@@ -284,7 +284,7 @@ function EmonEspViewModel() {
   var logUpdateTime = 500;
     
   // Upgrade URL
-  self.upgradeUrl = ko.observable('about:blank');
+  self.upgradeUrl = ko.observable("about:blank");
 
   // -----------------------------------------------------------------------
   // Initialise the app
@@ -299,7 +299,7 @@ function EmonEspViewModel() {
           updateTimer = setTimeout(self.update, updateTime);
           logUpdateTimer = setTimeout(self.updateLogs, logUpdateTime);
 
-          self.upgradeUrl(baseEndpoint + '/update');
+          self.upgradeUrl(baseEndpoint + "/update");
           self.updating(false);
         });
       });
@@ -509,7 +509,7 @@ document.getElementById("apoff").addEventListener("click", function (e) {
       return;
     var str = r.responseText;
     console.log(str);
-    document.getElementById("apoff").style.display = 'none';
+    document.getElementById("apoff").style.display = "none";
     if (ipaddress !== "")
       window.location = "http://" + ipaddress;
   };
@@ -558,10 +558,10 @@ document.getElementById("restart").addEventListener("click", function (e) {
 
 function toggle(id) {
    var e = document.getElementById(id);
-   if(e.style.display == 'block')
-      e.style.display = 'none';
+   if(e.style.display == "block")
+      e.style.display = "none";
    else
-      e.style.display = 'block';
+      e.style.display = "block";
 }
 
 // -----------------------------------------------------------------------
