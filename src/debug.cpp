@@ -8,20 +8,18 @@
 #define EMONTX_PORT Serial
 #endif
 
+#ifndef DEBUG_LOG_BUFFER
+#define DEBUG_LOG_BUFFER 2048
+#endif
+
 StreamSpy SerialDebug(DEBUG_PORT);
 StreamSpy SerialEmonTx(EMONTX_PORT);
 
 void debug_setup()
 {
   DEBUG_PORT.begin(115200);
-  SerialDebug.begin(2048);
-  SerialDebug.onWrite([](const uint8_t *buffer, size_t size) {
-
-  });
+  SerialDebug.begin(DEBUG_LOG_BUFFER);
 
   EMONTX_PORT.begin(115200);
-  SerialEmonTx.begin(2048);
-  SerialEmonTx.onWrite([](const uint8_t *buffer, size_t size) {
-
-  });
+  SerialEmonTx.begin(DEBUG_LOG_BUFFER);
 }

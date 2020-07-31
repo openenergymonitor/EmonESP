@@ -41,9 +41,9 @@ boolean input_get(JsonDocument &data)
     gotData = true;
   }
   // If data received on serial
-  else if (Serial.available()) {
+  else if (EMONTX_PORT.available()) {
     // Could check for string integrity here
-    line = Serial.readStringUntil('\n');
+    line = EMONTX_PORT.readStringUntil('\n');
     gotData = true;
   }
 

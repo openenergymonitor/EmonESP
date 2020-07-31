@@ -46,6 +46,8 @@
 
 AsyncWebServer server(80);          // Create class for Web server
 AsyncWebSocket ws("/ws");
+AsyncWebSocket wsDebug("/debug/console");
+AsyncWebSocket wsEmonTx("/emontx/console");
 StaticFileWebHandler staticFile;
 
 bool enableCors = true;
@@ -805,6 +807,18 @@ void handleCtrlMode(AsyncWebServerRequest *request) {
   request->send(response);
 }
 
+void handleDebug(AsyncWebServerRequest *request, StreamSpy &spy)
+{
+  AsyncResponseStream *response;
+  if(false == requestPreProcess(request, response, CONTENT_TYPE_TEXT)) {
+    return;
+  }
+
+  response->setCode(200);
+  spy.printBuffer(*response);
+  request->send(response);
+
+}
 
 void handleNotFound(AsyncWebServerRequest *request)
 {
@@ -881,6 +895,8 @@ web_server_setup()
   // Add the Web Socket server
   ws.onEvent(onWsEvent);
   server.addHandler(&ws);
+  server.addHandler(&wsDebug);
+  server.addHandler(&wsEmonTx);
   server.addHandler(&staticFile);
 
   // Start server & server root html /
@@ -918,6 +934,25 @@ web_server_setup()
 
   server.on("/firmware", handleUpdateCheck);
   server.on("/update", handleUpdate);
+
+  // Remote debug consoles
+  server.on("/debug", [](AsyncWebServerRequest *request) {
+    handleDebug(request, SerialDebug);
+  });
+  SerialDebug.onWrite([](const uint8_t *buffer, size_t size)
+  {
+    wsDebug.textAll((const char *)buffer, size);
+  });
+
+  server.on("/emontx", [](AsyncWebServerRequest *request) {
+    handleDebug(request, SerialEmonTx);
+  });
+  SerialEmonTx.onWrite([](const uint8_t *buffer, size_t size) {
+    wsEmonTx.textAll((const char *)buffer, size);
+  });
+  SerialEmonTx.onRead([](const uint8_t *buffer, size_t size) {
+    wsEmonTx.textAll((const char *)buffer, size);
+  });
 
   server.onNotFound(handleNotFound);
   server.onRequestBody(handleBody);

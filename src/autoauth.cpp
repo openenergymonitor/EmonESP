@@ -91,18 +91,18 @@ void auth_loop() {
   if (packetSize)
   {
     // receive incoming UDP packets
-    Serial.printf("Received %d bytes from %s, port %d\n", packetSize, Udp.remoteIP().toString().c_str(), Udp.remotePort());
+    DBUGF("Received %d bytes from %s, port %d", packetSize, Udp.remoteIP().toString().c_str(), Udp.remotePort());
     int len = Udp.read(incomingPacket, 255);
     if (len > 0)
     {
       incomingPacket[len] = 0;
     }
-    Serial.printf("UDP packet contents: %s\n", incomingPacket);
+    DBUGF("UDP packet contents: %s", incomingPacket);
 
     if (strcmp(incomingPacket,"emonpi.local")==0) {
       if (mqtt_server!=Udp.remoteIP().toString().c_str()) {
         config_save_mqtt_server(Udp.remoteIP().toString().c_str());        
-        Serial.printf("MQTT Server Updated");
+        DBUGF("MQTT Server Updated");
         mqtt_auth_transfer_flag = 1;
         auth_request();
         // ---------------------------------------------------------------------------------------------------

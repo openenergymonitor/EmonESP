@@ -59,12 +59,18 @@ module.exports = {
         "/flow",
         "/upload",
         "/firmware",
-        "/update"
+        "/update",
+        "/debug",
+        "/emontx"
       ],
       target: emonespEndpoint
     },
     {
-      context: [ "/ws" ],
+      context: [
+        "/ws",
+        "/debug/console",
+        "/emontx/console"
+      ],
       target: emonespEndpoint,
       ws: true
     }]
@@ -88,6 +94,12 @@ module.exports = {
       inject: false,
       minify: htmlMinify
     }),
+    new HtmlWebpackPlugin({
+      filename: "term.html",
+      template: "./src/term.html",
+      inject: false,
+      minify: htmlMinify
+    }),
     new MiniCssExtractPlugin({
       // Options similar to the same options in webpackOptions.output
       // both options are optional
@@ -103,11 +115,16 @@ module.exports = {
         ],
         "config.js": [
           "src/config.js"
+        ],
+        "term.js": [
+          "node_modules/jquery/dist/jquery.js",
+          "src/term.js"
         ]
       },
       transform: {
         "lib.js": code => uglify("lib.js", code),
-        "config.js": code => uglify("config.js", code)
+        "config.js": code => uglify("config.js", code),
+        "term.js": code => uglify("term.js", code)
       }
     }) 
   ],
