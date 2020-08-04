@@ -55,70 +55,43 @@ void setup() {
   DEBUG.println(ESP.getChipId());
   DEBUG.println("Firmware: "+ currentfirmware);
 
-  // EmonEsp is designed for use with the following node types:
-  // Sonoff S20 Smartplug
-  #ifdef SMARTPLUG
-    node_type = "smartplug";
-    node_description = "Sonoff Smartplug";
-    LEDpin = 13;
-    CONTROLpin = 12; // or/and 16 test!!
-  // Martin Harizanov's ProSmart WIFI Relay
-  #elif WIFIRELAY
-    node_type = "wifirelay";
-    node_description = "WiFi Relay";
-    LEDpin = 16;
-    LEDpin_inverted = 0;
-    CONTROLpin = 5;
-  // Heatpump Monitor, used for heating on/off and flow temp control of FTC2B Controller
-  #elif HPMON
-    node_type = "hpmon";
-    node_description = "Heatpump Monitor";
-    LEDpin = 2;
-    CONTROLpin = 5;
-  // Default: ESP12E Huzzah WiFi adapter
-  #else 
-    node_type = "espwifi";
-    node_description = "WiFi Emoncms Link";
-    LEDpin = 2;
-    CONTROLpin = 2;
-  #endif
-  
   DBUG("Node type: ");
   DBUGLN(node_type);
-
-  unsigned long chip_id = ESP.getChipId();
-  int chip_tmp = chip_id / 10000;
-  chip_tmp = chip_tmp * 10000;
-  node_id = (chip_id - chip_tmp);
   
   // Read saved settings from the config
   config_load_settings();
   timeClient.setTimeOffset(time_offset);
+  
+  DBUG("Node name: ");
+  DBUGLN(node_name);
 
   // ---------------------------------------------------------
   // pin setup
-  pinMode(LEDpin, OUTPUT);
-  pinMode(CONTROLpin, OUTPUT);
-  digitalWrite(CONTROLpin,LOW);
+  pinMode(WIFI_LED, OUTPUT);
+  digitalWrite(WIFI_LED, !WIFI_LED_ON_STATE);
+
+  pinMode(CONTROL_PIN, OUTPUT);
+  digitalWrite(CONTROL_PIN, !CONTROL_PIN_ON_STATE);
+
   // custom: analog output pin
-  if (node_type=="hpmon") pinMode(4,OUTPUT);
+  #ifdef VOLTAGE_OUT_PIN
+  pinMode(4, OUTPUT);
+  #endif
   // ---------------------------------------------------------
   
   // Initial LED on
-  led_flash(3000,100);
+  led_flash(3000, 100);
 
   // Initialise the WiFi
   wifi_setup();
-  led_flash(50,50);
+  led_flash(50, 50);
 
   // Bring up the web server
   web_server_setup();
-  led_flash(50,50);
+  led_flash(50, 50);
 
   // Start the OTA update systems
   ota_setup();
-
-  DEBUG.println("Server started");
 
   // Start auto auth
   auth_setup();
@@ -130,11 +103,10 @@ void setup() {
 } // end setup
 
 void led_flash(int ton, int toff) {
-  if (LEDpin_inverted) {
-      digitalWrite(LEDpin,LOW); delay(ton); digitalWrite(LEDpin,HIGH); delay(toff);
-  } else {
-      digitalWrite(LEDpin,HIGH); delay(ton); digitalWrite(LEDpin,LOW); delay(toff);  
-  }
+  digitalWrite(WIFI_LED, WIFI_LED_ON_STATE);
+  delay(ton);
+  digitalWrite(WIFI_LED, WIFI_LED_ON_STATE);
+  delay(toff);
 }
 
 // -------------------------------------------------------------------
@@ -185,23 +157,14 @@ void loop()
     // 3. Apply
     if (ctrl_state) {
       // ON
-      if (node_type=="espwifi") {
-        digitalWrite(CONTROLpin,LOW);
-      } else {
-        digitalWrite(CONTROLpin,HIGH);
-      }
+      digitalWrite(CONTROL_PIN, CONTROL_PIN_ON_STATE);
     } else {
-      // OFF
-      if (node_type=="espwifi") {
-        digitalWrite(CONTROLpin,HIGH);
-      } else {
-        digitalWrite(CONTROLpin,LOW);
-      }
+      digitalWrite(CONTROL_PIN, !CONTROL_PIN_ON_STATE);
     }
 
-    if (node_type=="hpmon") {
-      analogWrite(4,voltage_output);
-    }
+    #ifdef VOLTAGE_OUT_PIN
+    analogWrite(VOLTAGE_OUT_PIN, voltage_output);
+    #endif
   }
   // --------------------------------------------------------------
   if ((millis()-last_pushbtn_check)>100) {

@@ -142,54 +142,6 @@ startClient()
   WiFi.enableSTA(true);
 }
 
-//  //WiFi.mode(WIFI_STA);
-//  digitalWrite(LEDpin,LOW);
-//
-//  int t = 0;
-//  int attempt = 0;
-//  unsigned long start_connect = millis();
-//  while (WiFi.status() != WL_CONNECTED) {
-//
-//    delay(200);
-//    digitalWrite(LEDpin,HIGH); delay(20); digitalWrite(LEDpin,LOW);
-//
-//    // Timeout
-//    if ((millis()-start_connect)>30000) {
-//      delay(2000);
-//      digitalWrite(LEDpin,HIGH);
-//      ESP.reset(); // ESP.restart(); ?
-//    }
-//
-//    if (digitalRead(0) == LOW) {
-//      startAP();
-//      wifi_mode = WIFI_MODE_AP_ONLY;
-//      break;
-//    }
-//  }
-//
-//  if (wifi_mode == WIFI_MODE_STA || wifi_mode == WIFI_MODE_AP_AND_STA) {
-//
-//    IPAddress myAddress = WiFi.localIP();
-//    char tmpStr[40];
-//    sprintf(tmpStr, "%d.%d.%d.%d", myAddress[0], myAddress[1], myAddress[2],myAddress[3]);
-//    DEBUG.print("Connected, IP: ");
-//    DEBUG.println(tmpStr);
-//    // Copy the connected network and ipaddress to global strings for use in status request
-//    connected_network = esid;
-//    ipaddress = tmpStr;
-//
-//    for (int f=0; f<10; f++) {
-//        digitalWrite(LEDpin,HIGH); 
-//        delay(80); 
-//        digitalWrite(LEDpin,LOW); 
-//        delay(20);
-//    }
-//    digitalWrite(LEDpin,HIGH); 
-//  } else {
-//    DEBUG.print("startClient wifi_mode is not STA??");
-//  }
-//}
-
 static void wifi_start()
 {
   // 1) If no network configured start up access point
@@ -303,6 +255,8 @@ wifi_setup() {
 void wifi_loop() 
 {
   Profile_Start(wifi_loop);
+
+  MDNS.update();
 
 //  bool isClient = wifi_mode_is_sta();
   bool isClientOnly = wifi_mode_is_sta_only();

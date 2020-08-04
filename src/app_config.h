@@ -35,10 +35,6 @@
 // This initial implementation saves the config to the EEPROM area of flash
 // -------------------------------------------------------------------
 
-extern int LEDpin;
-extern int LEDpin_inverted;
-extern int CONTROLpin;
-
 // Global config varables
 extern String node_type;
 extern int node_id;

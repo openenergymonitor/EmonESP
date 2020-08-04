@@ -34,4 +34,36 @@ String getTime();
 
 void setTimeOffset();
 
+#ifndef WIFI_LED
+#define WIFI_LED 0
+#endif
+
+#ifndef WIFI_LED_ON_STATE
+#define WIFI_LED_ON_STATE LOW
+#endif
+
+#ifndef WIFI_BUTTON
+#define WIFI_BUTTON 0
+#endif
+
+#ifndef WIFI_BUTTON_PRESSED_STATE
+#define WIFI_BUTTON_PRESSED_STATE LOW
+#endif
+
+#ifndef CONTROL_PIN
+#define CONTROL_PIN 2
+#endif
+
+#ifndef CONTROL_PIN_ON_STATE
+#define CONTROL_PIN_ON_STATE HIGH
+#endif
+
+#ifndef NODE_TYPE
+#define NODE_TYPE "espwifi"
+#endif
+
+#ifndef NODE_DESCRIPTION
+#define NODE_DESCRIPTION "WiFi EmonCMS Link"
+#endif
+
 #endif // _EMONESP_H

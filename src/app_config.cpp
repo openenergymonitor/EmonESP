@@ -13,15 +13,22 @@
 #define EEPROM_SIZE     4096
 #define CHECKSUM_SEED    128
 
-int LEDpin = 2;
-int LEDpin_inverted = 1;
-int CONTROLpin = 2;
+static int getNodeId()
+{
+  unsigned long chip_id = ESP.getChipId();
+  DBUGVAR(chip_id);
+  int chip_tmp = chip_id / 10000;
+  chip_tmp = chip_tmp * 10000;
+  DBUGVAR(chip_tmp);
+  return (chip_id - chip_tmp);
+}
 
-String node_type = "";
-int node_id = 0;
+String node_type = NODE_TYPE;
+String node_description = NODE_DESCRIPTION;
+int node_id = getNodeId();
+String node_name_default = node_type + String(node_id);
 String node_name = "";
 String node_describe = "";
-String node_description = "";
 
 // Wifi Network Strings
 String esid = "";
@@ -59,7 +66,6 @@ bool ctrl_update = 0;
 bool ctrl_state = 0;
 int time_offset = 0;
 
-String node_name_default = node_type + String(node_id);
 
 uint32_t flags;
 
