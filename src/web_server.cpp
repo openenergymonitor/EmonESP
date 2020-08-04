@@ -882,6 +882,12 @@ void onWsEvent(AsyncWebSocket * server, AsyncWebSocketClient *client, AwsEventTy
   }
 }
 
+void onEmonTxEvent(AsyncWebSocket * server, AsyncWebSocketClient *client, AwsEventType type, void *arg, uint8_t *data, size_t len) {
+  if(type == WS_EVT_DATA) {
+    EMONTX_PORT.write(data, len);
+  }
+}
+
 void
 web_server_setup()
 {
@@ -894,6 +900,8 @@ web_server_setup()
 
   // Add the Web Socket server
   ws.onEvent(onWsEvent);
+  wsEmonTx.onEvent(onEmonTxEvent);
+
   server.addHandler(&ws);
   server.addHandler(&wsDebug);
   server.addHandler(&wsEmonTx);

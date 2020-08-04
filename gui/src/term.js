@@ -1,9 +1,10 @@
 /* global $, Terminal */
 
+var socket = false;
+
 (function () {
   "use strict";
 
-  var socket = false;
   var reconnectInterval = false;
 
   var validTerminals = ["debug", "emontx"];
@@ -26,12 +27,11 @@
     ws += ":" + url.port;
   }
   ws += url.pathname + "/console";
-
   
   function addText(text, clear = false) {
     var term = $("#term");
     var scroll = ($(document).height() - ($(document).scrollTop() + window.innerHeight)) < 10;
-    text = text.replace(/(\r\n|\n|\r)/gm, "\n");
+    text = text.replace(/(\r\n|\n\r|\n|\r)/gm, "\n");
     if(clear) {
       term.text(text);
     } else {
@@ -71,5 +71,27 @@
       addText(data, true);
       connect();
     }, "text");
+
+    $("#term").click(() => {
+      $("#input").focus();
+    })
+    $("body").click(() => {
+      $("#input").focus();
+    })
   });
 })();
+
+var inputHistory = [];
+var historyPointer = inputHistory.length;
+
+function term_input()
+{
+  var line = $("#input").val();
+  $("#input").val("");
+  
+  socket.send(line+"\r\n");
+  inputHistory.push(line);
+  historyPointer = inputHistory.length;
+
+  return false;
+}
