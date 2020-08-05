@@ -31,6 +31,7 @@ String last_datastr="";
 
 boolean input_get(JsonDocument &data)
 {
+  boolean gotLine = false;
   boolean gotData = false;
   String line;
 
@@ -38,25 +39,55 @@ boolean input_get(JsonDocument &data)
   if(input_string.length() > 0) {
     line = input_string;
     input_string = "";
-    gotData = true;
+    gotLine = true;
   }
   // If data received on serial
   else if (EMONTX_PORT.available()) {
     // Could check for string integrity here
     line = EMONTX_PORT.readStringUntil('\n');
-    gotData = true;
+    gotLine = true;
   }
 
-  if(gotData)
+  if(gotLine)
   {
     // Get rid of any whitespace, newlines etc
     line.trim();
 
-    if(line.length() > 0) {
+    int len = line.length();
+    if(len > 0) 
+    {
       DEBUG.printf("Got '%s'\n", line.c_str());
       last_datastr = line;
-    } else {
-      gotData = false;
+
+      for(int i = 0; i < len; i++)
+      {
+        String name = "";
+
+        // Get the name
+        while (i < len && line[i] != ':') {
+          name += line[i++];
+        }
+
+        if (i++ >= len) {
+          break;
+        }
+
+        // Get the value
+        String value = "";
+        while (i < len && line[i] != ','){
+          value += line[i++];
+        }
+
+        DBUGVAR(name);
+        DBUGVAR(value);
+
+        if(name.length() > 0 && value.length() > 0)
+        {
+          // IMPROVE: check that value is only a number, toDouble() will skip white space and and chars after the number
+          data[name] = value.toDouble();
+          gotData = true;
+        }
+      }
     }
   }
 
