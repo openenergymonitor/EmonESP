@@ -100,15 +100,24 @@
 #define EEPROM_TIME_OFFSET_START      EEPROM_VOLTAGE_OUTPUT_END
 #define EEPROM_TIME_OFFSET_END        (EEPROM_TIME_OFFSET_START + EEPROM_TIME_OFFSET_SIZE)
 
+int read_offset = 0;
+
 void EEPROM_read_string(int start, int count, String & val) {
+  String newVal;
+  start += read_offset;
   for (int i = 0; i < count; ++i){
     byte c = EEPROM.read(start+i);
     if (c != 0 && c != 255)
-      val += (char) c;
+      newVal += (char) c;
+  }
+
+  if(newVal) {
+    val = newVal;
   }
 }
 
 void EEPROM_read_int(int start, int & val) {
+  start += read_offset;
   byte high = EEPROM.read(start);
   byte low = EEPROM.read(start+1);
   val=word(high,low);
@@ -142,7 +151,17 @@ void config_load_v1_settings()
   // MQTT settings
   EEPROM_read_string(EEPROM_MQTT_SERVER_START, EEPROM_MQTT_SERVER_SIZE, mqtt_server);
   EEPROM_read_int(EEPROM_MQTT_PORT_START, mqtt_port);
-  if (mqtt_port==0) mqtt_port = 1883; // apply a default port
+  DBUGF("mqtt_port %d %2s", mqtt_port, (char *)&mqtt_port);
+  if (mqtt_port==0) {
+    mqtt_port = 1883; // apply a default port
+  }
+
+  // Anoyingly the mqtt_port was added in the middle of the mqtt block not at the end of EEPROM
+  // detect some values that may be older firmwares
+  if(word('e', 'm')) { 
+    mqtt_port = 1883; // apply a default port
+    read_offset = -EEPROM_MQTT_PORT_SIZE;
+  }
   
   EEPROM_read_string(EEPROM_MQTT_TOPIC_START, EEPROM_MQTT_TOPIC_SIZE, mqtt_topic);
   EEPROM_read_string(EEPROM_MQTT_FEED_PREFIX_START, EEPROM_MQTT_FEED_PREFIX_SIZE, mqtt_feed_prefix);
