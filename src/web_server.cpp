@@ -50,6 +50,9 @@ AsyncWebSocket wsDebug("/debug/console");
 AsyncWebSocket wsEmonTx("/emontx/console");
 StaticFileWebHandler staticFile;
 
+String emonTxBuffer = "";
+String debugBuffer = "";
+
 bool enableCors = true;
 
 // Event timeouts
@@ -505,8 +508,6 @@ handleStatus(AsyncWebServerRequest *request) {
   doc["ctrl_mode"] = ctrl_mode;
   doc["ctrl_state"] = ctrl_state;
 
-
-
   response->setCode(200);
   serializeJson(doc, *response);
   request->send(response);
@@ -891,13 +892,6 @@ void onEmonTxEvent(AsyncWebSocket * server, AsyncWebSocketClient *client, AwsEve
 void
 web_server_setup()
 {
-//  SPIFFS.begin(); // mount the fs
-
-  // Setup the static files
-//  server.serveStatic("/", SPIFFS, "/")
-//    .setDefaultFile("index.html")
-//    .setAuthentication(www_username.c_str(), www_password.c_str());
-
   // Add the Web Socket server
   ws.onEvent(onWsEvent);
   wsEmonTx.onEvent(onEmonTxEvent);
@@ -906,9 +900,6 @@ web_server_setup()
   server.addHandler(&wsDebug);
   server.addHandler(&wsEmonTx);
   server.addHandler(&staticFile);
-
-  // Start server & server root html /
-  //server.on("/",handleHome);
 
   // Handle status updates
   server.on("/status", handleStatus);
@@ -949,17 +940,17 @@ web_server_setup()
   });
   SerialDebug.onWrite([](const uint8_t *buffer, size_t size)
   {
-    wsDebug.textAll((const char *)buffer, size);
+    debugBuffer.concat((const char *)buffer, size);
   });
 
   server.on("/emontx", [](AsyncWebServerRequest *request) {
     handleDebug(request, SerialEmonTx);
   });
   SerialEmonTx.onWrite([](const uint8_t *buffer, size_t size) {
-    wsEmonTx.textAll((const char *)buffer, size);
+    emonTxBuffer.concat((const char *)buffer, size);
   });
   SerialEmonTx.onRead([](const uint8_t *buffer, size_t size) {
-    wsEmonTx.textAll((const char *)buffer, size);
+    emonTxBuffer.concat((const char *)buffer, size);
   });
 
   server.onNotFound(handleNotFound);
@@ -1004,6 +995,16 @@ web_server_loop() {
     systemRebootTime = 0;
     wifi_disconnect();
     ESP.reset();
+  }
+
+  if(debugBuffer.length() > 0) {
+    wsDebug.textAll(debugBuffer.c_str(), debugBuffer.length());
+    debugBuffer.clear();
+  }
+
+  if(emonTxBuffer.length() > 0) {
+    wsEmonTx.textAll(emonTxBuffer.c_str(), emonTxBuffer.length());
+    emonTxBuffer.clear();
   }
 
   Profile_End(web_server_loop, 5);
