@@ -5,10 +5,15 @@ sudo: false
 cache:
   directories:
   - "~/.platformio"
+env:
+  - PIO_ENV=emonesp
+  - PIO_ENV=smartplug
+  - PIO_ENV=wifirelay
+  - PIO_ENV=hpmon
+  - PIO_ENV=esp12e
 install:
 - pip install -U platformio
-- platformio platform install espressif8266 --with-package tool-mkspiffs
+- platformio platform install espressif8266
 script:
 - platformio --version
-- platformio run 
-- platformio run -t buildfs
+- platformio run -e $PIO_ENV
