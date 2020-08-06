@@ -100,6 +100,12 @@ module.exports = {
       inject: false,
       minify: htmlMinify
     }),
+    new HtmlWebpackPlugin({
+      filename: "split_term.html",
+      template: "./src/split_term.html",
+      inject: false,
+      minify: htmlMinify
+    }),
     new MiniCssExtractPlugin({
       // Options similar to the same options in webpackOptions.output
       // both options are optional
