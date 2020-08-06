@@ -148,6 +148,11 @@ void config_load_v1_settings()
   EEPROM_read_string(EEPROM_EMON_FINGERPRINT_START,
                      EEPROM_EMON_FINGERPRINT_SIZE, emoncms_fingerprint);
 
+  flags &= ~CONFIG_SERVICE_EMONCMS;
+  if(emoncms_apikey != 0) {
+    flags |= CONFIG_SERVICE_EMONCMS;
+  }
+
   // MQTT settings
   EEPROM_read_string(EEPROM_MQTT_SERVER_START, EEPROM_MQTT_SERVER_SIZE, mqtt_server);
   EEPROM_read_int(EEPROM_MQTT_PORT_START, mqtt_port);
@@ -167,6 +172,11 @@ void config_load_v1_settings()
   EEPROM_read_string(EEPROM_MQTT_FEED_PREFIX_START, EEPROM_MQTT_FEED_PREFIX_SIZE, mqtt_feed_prefix);
   EEPROM_read_string(EEPROM_MQTT_USER_START, EEPROM_MQTT_USER_SIZE, mqtt_user);
   EEPROM_read_string(EEPROM_MQTT_PASS_START, EEPROM_MQTT_PASS_SIZE, mqtt_pass);
+
+  flags &= ~CONFIG_SERVICE_MQTT;
+  if(mqtt_server != 0) {
+    flags |= CONFIG_SERVICE_MQTT;
+  }
 
   // Web server credentials
   EEPROM_read_string(EEPROM_WWW_USER_START, EEPROM_WWW_USER_SIZE, www_username);
