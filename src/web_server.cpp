@@ -997,12 +997,12 @@ web_server_loop() {
     ESP.reset();
   }
 
-  if(debugBuffer.length() > 0) {
+  if(debugBuffer.length() > 0 && wsDebug.availableForWriteAll()) {
     wsDebug.textAll(debugBuffer.c_str(), debugBuffer.length());
     debugBuffer.clear();
   }
 
-  if(emonTxBuffer.length() > 0) {
+  if(emonTxBuffer.length() > 0 && wsEmonTx.availableForWriteAll()) {
     wsEmonTx.textAll(emonTxBuffer.c_str(), emonTxBuffer.length());
     emonTxBuffer.clear();
   }
