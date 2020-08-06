@@ -196,31 +196,53 @@ function LastValuesViewModel() {
   self.fetching = ko.observable(false);
   self.lastValues = ko.observable(false);
   self.values = ko.mapping.fromJS([]);
+  self.entries = ko.mapping.fromJS([]);
+
+  let oldData = "";
 
   self.update = function (after) {
     if(after === undefined){
-     after = function () { };
+      after = function () { };
     }
     self.fetching(true);
-    $.get(self.remoteUrl, function (data) {
+    $.get(self.remoteUrl, (data) =>
+    {
       // Transform the data into something a bit easier to handle as a binding
       var vals = [];
-      if (data!="") {
-        var namevaluepairs = data.split(",");
-        if (namevaluepairs.length>0) {
-          for (var z in namevaluepairs) {
-            var namevalue = namevaluepairs[z].split(":");
+      if (data != "" && data !== oldData)
+      {
+        oldData = data;
+        self.entries.push({
+          timestamp: new Date().toISOString(),
+          log: data
+        });
+
+        try
+        {
+
+          var parsed = JSON.parse(data);
+          for (var key in parsed) {
+            let value = parsed[key];
             var units = "";
-            if (namevalue[0].indexOf("CT") === 0) units = "W";
-            if (namevalue[0].indexOf("T") === 0) units = String.fromCharCode(176)+"C";
-            vals.push({key: namevalue[0], value: namevalue[1]+units});
+
+            if (key.startsWith("CT")) units = " W";
+            if (key.startsWith("P")) units = " W";
+            if (key.startsWith("E")) units = " Wh";
+            if (key.startsWith("V")) units = " V";
+            if (key.startsWith("T")) units = " "+String.fromCharCode(176)+"C";
+
+            vals.push({key: key, value: value+units});
           }
           self.lastValues(true);
+          ko.mapping.fromJS(vals, self.values);
+        }
+        catch(e) {
+          console.error(e);
+          self.lastValues(false);
         }
       } else {
-        self.lastValues(false);
+        self.lastValues(data!="");
       }
-      ko.mapping.fromJS(vals, self.values);
     }, "text").always(function () {
       self.fetching(false);
       after();
@@ -228,43 +250,6 @@ function LastValuesViewModel() {
   };
 }
 
-function LogsViewModel() {
-  var self = this;
-  self.remoteUrl = baseEndpoint + "/lastvalues";
-
-  // Observable properties
-  self.fetching = ko.observable(false);
-  self.entries = ko.mapping.fromJS([]);
-
-  let oldData = "";
-
-  self.update = function (after) {
-    if (after === undefined) {
-      after = function () { };
-    }
-    self.fetching(true);
-
-    $.get(
-      self.remoteUrl,
-      function (data) {
-        if (data !== oldData) {
-          var logEntries = self.entries.slice();
-          logEntries.push({
-            timestamp: new Date().toISOString(),
-            log: data
-          });
-
-          ko.mapping.fromJS(logEntries, self.entries);
-          oldData = data;
-        }
-      },
-      "text"
-    ).always(function () {
-      self.fetching(false);
-      after();
-    });
-  };
-}
 
 function EmonEspViewModel() {
   var self = this;
@@ -272,7 +257,6 @@ function EmonEspViewModel() {
   self.config = new ConfigViewModel();
   self.status = new StatusViewModel();
   self.last = new LastValuesViewModel();
-  self.logs = new LogsViewModel();
 
   self.initialised = ko.observable(false);
   self.updating = ko.observable(false);
@@ -297,7 +281,6 @@ function EmonEspViewModel() {
           self.initialised(true);
 
           updateTimer = setTimeout(self.update, updateTime);
-          logUpdateTimer = setTimeout(self.updateLogs, logUpdateTime);
 
           self.upgradeUrl(baseEndpoint + "/update");
           self.updating(false);
@@ -323,16 +306,6 @@ function EmonEspViewModel() {
         updateTimer = setTimeout(self.update, updateTime);
         self.updating(false);
       });
-    });
-  };
-
-  self.updateLogs = function () {
-    if (null !== logUpdateTimer) {
-      clearTimeout(logUpdateTimer);
-      logUpdateTimer = null;
-    }
-    self.logs.update(function () {
-      logUpdateTimer = setTimeout(self.updateLogs, logUpdateTime);
     });
   };
 

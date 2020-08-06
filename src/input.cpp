@@ -25,6 +25,10 @@
 
 #include "emonesp.h"
 #include "input.h"
+#include "emoncms.h"
+#include "espal.h"
+
+#include <ESP8266WiFi.h>
 
 String input_string="";
 String last_datastr="";
@@ -57,7 +61,6 @@ boolean input_get(JsonDocument &data)
     if(len > 0) 
     {
       DEBUG.printf("Got '%s'\n", line.c_str());
-      last_datastr = line;
 
       for(int i = 0; i < len; i++)
       {
@@ -89,6 +92,17 @@ boolean input_get(JsonDocument &data)
         }
       }
     }
+  }
+
+  // Append some system info
+  if(gotData) {
+    data["freeram"] = ESPAL.getFreeHeap();
+    data["srssi"] = WiFi.RSSI();
+    data["packets_sent"] = packets_sent;
+    data["packets_success"] = packets_success;
+
+    last_datastr.clear();
+    serializeJson(data, last_datastr);
   }
 
   return gotData;
