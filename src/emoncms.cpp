@@ -52,9 +52,6 @@ static void emoncms_result(bool success, String message)
 {
   StaticJsonDocument<128> event;
   
-  emoncms_connected = success;
-  event["emoncms_connected"] = (int)emoncms_connected;
-  event["emoncms_message"] = message.substring(0, 64);
 
   if(success) {
     packets_success++;
@@ -65,7 +62,13 @@ static void emoncms_result(bool success, String message)
     }
   }
 
-  event_send(event);
+  if(emoncms_connected != success)
+  {
+    emoncms_connected = success;
+    event["emoncms_connected"] = (int)emoncms_connected;
+    event["emoncms_message"] = message.substring(0, 64);
+    event_send(event);
+  }
 }
 
 void emoncms_publish(JsonDocument &data)
