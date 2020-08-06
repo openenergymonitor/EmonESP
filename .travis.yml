@@ -6,14 +6,14 @@ cache:
   directories:
   - "~/.platformio"
 env:
-  - PLATFORMIO_DEFAULT_ENVS=emonesp
-  - PLATFORMIO_DEFAULT_ENVS=smartplug
-  - PLATFORMIO_DEFAULT_ENVS=wifirelay
-  - PLATFORMIO_DEFAULT_ENVS=hpmon
-  - PLATFORMIO_DEFAULT_ENVS=esp12e
+  - PIO_ENV=emonesp
+  - PIO_ENV=smartplug
+  - PIO_ENV=wifirelay
+  - PIO_ENV=hpmon
+  - PIO_ENV=esp12e
 install:
 - pip install -U platformio
-- platformio platform install espressif8266 --with-package tool-mkspiffs
+- platformio platform install espressif8266
 script:
 - platformio --version
-- platformio run
+- platformio run -e $PIO_ENV
