@@ -5,10 +5,15 @@ sudo: false
 cache:
   directories:
   - "~/.platformio"
+env:
+  - PLATFORMIO_DEFAULT_ENVS=emonesp
+  - PLATFORMIO_DEFAULT_ENVS=smartplug
+  - PLATFORMIO_DEFAULT_ENVS=wifirelay
+  - PLATFORMIO_DEFAULT_ENVS=hpmon
+  - PLATFORMIO_DEFAULT_ENVS=esp12e
 install:
 - pip install -U platformio
 - platformio platform install espressif8266 --with-package tool-mkspiffs
 script:
 - platformio --version
-- platformio run 
-- platformio run -t buildfs
+- platformio run
