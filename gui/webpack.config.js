@@ -123,7 +123,6 @@ module.exports = {
           "src/config.js"
         ],
         "term.js": [
-          "node_modules/jquery/dist/jquery.js",
           "src/term.js"
         ]
       },
@@ -132,7 +131,7 @@ module.exports = {
         "config.js": code => uglify("config.js", code),
         "term.js": code => uglify("term.js", code)
       }
-    }) 
+    })
   ],
   optimization: {
     splitChunks: {},
