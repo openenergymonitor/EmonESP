@@ -22,4 +22,4 @@ static const char CONTENT_TERM_HTML[] PROGMEM =
   "    }\n"
   "    input:focus {\n"
   "      outline: none;\n"
-  "    } </style> <script src=\"term.js\"></script> </head> <body> <pre id=\"term\"></pre> <form onsubmit=\"return term_input()\" action=\"#\"> <input id=\"input\"> </form> </body> </html>\n";
+  "    } </style> <script src=\"lib.js\"></script> <script src=\"term.js\"></script> </head> <body> <pre id=\"term\"></pre> <form onsubmit=\"return term_input()\" action=\"#\"> <input id=\"input\"> </form> </body> </html> \n";
