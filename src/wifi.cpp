@@ -145,7 +145,8 @@ startClient()
 static void wifi_start()
 {
   // 1) If no network configured start up access point
-  if (esid == 0 || esid == "" || digitalRead(0) == LOW)
+  DBUGVAR(esid);
+  if (esid == 0 || esid == "")
   {
     startAP();
   }
