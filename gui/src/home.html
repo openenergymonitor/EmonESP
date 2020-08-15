@@ -159,7 +159,11 @@
           </p>
           <p>
             <b>Write apikey*:</b><br>
-            <input type="text" data-bind="textInput: config.emoncms_apikey"><br>
+            <input type="password" autocapitalize="none" data-bind="textInput: emoncmsApiKey.value, attr: { type: emoncmsApiKey.show() ? 'text' : 'password' }" /><br />
+            <span>
+              <input id="emoncmsApiKey" type="checkbox" data-bind="checked: emoncmsApiKey.show" />
+              <label for="emoncmsApiKey">Show password</label>
+            </span>
           </p>
           <p>
             <b>SSL SHA-1 Fingerprint:</b><br>
@@ -206,7 +210,11 @@
             <span class="small-text">Leave blank for authentication</span>
           </p>
           <p><b>Password:</b><br>
-            <input data-bind="textInput: config.mqtt_pass" type="password"><br/>
+            <input type="password" autocapitalize="none" data-bind="textInput: mqttPassword.value, attr: { type: mqttPassword.show() ? 'text' : 'password' }" /><br />
+            <span>
+              <input id="mqttPassword" type="checkbox" data-bind="checked: mqttPassword.show" />
+              <label for="mqttPassword">Show password</label>
+            </span>
             <span class="small-text">Leave blank for no authentication</span><br>
           <p>
             <button data-bind="click: saveMqtt, text: (saveMqttFetching() ? 'Saving' : (saveMqttSuccess() ? 'Saved' : 'Save')), disable: saveMqttFetching">Save</button>
@@ -224,7 +232,11 @@
           </p>
           <p>
             <b>Password:</b><br>
-            <input type="text" data-bind="textInput: config.www_password"><br><br>
+            <input type="password" autocapitalize="none" data-bind="textInput: wwwPassword.value, attr: { type: wwwPassword.show() ? 'text' : 'password' }" pattern=".{15}" title="The field requires 15 characters" maxlength="15" required="" /><br />
+            <span>
+              <input id="wwwPassword" type="checkbox" data-bind="checked: wwwPassword.show" />
+              <label for="wwwPassword">Show password</label>
+            </span><br />
             <span>Web interface HTTP authentication.</span><br><br>
             <button data-bind="click: saveAdmin, text: (saveAdminFetching() ? 'Saving' : (saveAdminSuccess() ? 'Saved' : 'Save')), disable: saveAdminFetching">Save</button>
           </p>
