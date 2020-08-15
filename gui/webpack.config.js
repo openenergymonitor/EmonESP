@@ -120,6 +120,11 @@ module.exports = {
           "node_modules/knockout-mapping/dist/knockout.mapping.js"
         ],
         "config.js": [
+          "src/ViewModels/BaseViewModel.js",
+          "src/ViewModels/StatusViewModel.js",
+          "src/ViewModels/ConfigViewModel.js",
+          "src/ViewModels/LastValuesViewModel.js",
+          "src/ViewModels/EmonEspViewModel.js",
           "src/config.js"
         ],
         "term.js": [
