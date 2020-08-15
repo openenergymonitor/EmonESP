@@ -53,7 +53,7 @@ void setup() {
   DEBUG.println();
   DEBUG.print("EmonESP ");
   DEBUG.println(ESP.getChipId());
-  DEBUG.println("Firmware: "+ currentfirmware);
+  DEBUG.println("Firmware: " + currentfirmware);
 
   DBUG("Node type: ");
   DBUGLN(node_type);
