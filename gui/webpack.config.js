@@ -123,7 +123,10 @@ module.exports = {
           "src/ViewModels/BaseViewModel.js",
           "src/ViewModels/StatusViewModel.js",
           "src/ViewModels/ConfigViewModel.js",
+          "src/ViewModels/WiFiConfigViewModel.js",
+          "src/ViewModels/WiFiScanViewModel.js",
           "src/ViewModels/LastValuesViewModel.js",
+          "src/ViewModels/PasswordViewModel.js",
           "src/ViewModels/EmonEspViewModel.js",
           "src/config.js"
         ],
@@ -136,7 +139,10 @@ module.exports = {
         "config.js": code => uglify("config.js", code),
         "term.js": code => uglify("term.js", code)
       }
-    })
+    }),
+    new CopyPlugin([
+      { from: "assets/*", flatten: true }
+    ])
   ],
   optimization: {
     splitChunks: {},

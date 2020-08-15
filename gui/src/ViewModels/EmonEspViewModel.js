@@ -1,13 +1,55 @@
 
-function EmonEspViewModel() {
+function EmonEspViewModel(baseHost, basePort, baseProtocol) {
   var self = this;
+
+  self.baseHost = ko.observable("" !== baseHost ? baseHost : "openevse.local");
+  self.basePort = ko.observable(basePort);
+  self.baseProtocol = ko.observable(baseProtocol);
+
+  self.baseEndpoint = ko.pureComputed(function () {
+    var endpoint = "//" + self.baseHost();
+    if(80 !== self.basePort()) {
+      endpoint += ":"+self.basePort();
+    }
+    return endpoint;
+  });
+
+  self.wsEndpoint = ko.pureComputed(function () {
+    var endpoint = "ws://" + self.baseHost();
+    if("https:" === self.baseProtocol()){
+      endpoint = "wss://" + self.baseHost();
+    }
+    if(80 !== self.basePort()) {
+      endpoint += ":"+self.basePort();
+    }
+    endpoint += "/ws";
+    return endpoint;
+  });
 
   self.config = new ConfigViewModel();
   self.status = new StatusViewModel();
   self.last = new LastValuesViewModel();
+  self.scan = new WiFiScanViewModel(self.baseEndpoint);
+  self.wifi = new WiFiConfigViewModel(self.baseEndpoint, self.config, self.status, self.scan);
+
+  // Show/hide password state
+  self.wifiPassword = new PasswordViewModel(self.config.pass);
+  self.emoncmsApiKey = new PasswordViewModel(self.config.emoncms_apikey);
+  self.mqttPassword = new PasswordViewModel(self.config.mqtt_pass);
+  self.wwwPassword = new PasswordViewModel(self.config.www_password);
 
   self.initialised = ko.observable(false);
   self.updating = ko.observable(false);
+
+  self.wifi.selectedNet.subscribe((net) => {
+    if(false !== net) {
+      self.config.ssid(net.ssid());
+    }
+  });
+
+  self.config.ssid.subscribe((ssid) => {
+    self.wifi.setSsid(ssid);
+  });
     
   var updateTimer = null;
   var updateTime = 1 * 1000;

@@ -247,3 +247,48 @@ button {
 .btn-group button:last-child {
   border-radius: 0px 20px 20px 0px;
 }
+
+#wifiList {
+  display: inline-block;
+  width: 100%;
+  max-height: 230px;
+  overflow: auto
+}
+
+/*  Stolen from Bootstrap */
+
+.list-group {
+  display: flex;
+  flex-direction: column;
+  padding-left: 0;
+  margin-bottom: 0;
+}
+
+.list-group-item {
+  position: relative;
+  display: flex;
+  padding: .75rem 1.25rem;
+  margin-bottom: -1px;
+  background-color: #fff;
+  border: 1px solid rgba(0, 0, 0, .125);
+  justify-content: space-between;
+  align-items: center;
+}
+
+.list-group-item.active {
+  z-index: 2;
+  color: #fff;
+  background-color: #0699fa;
+  border-color: #0699fa;
+}
+
+.list-group-item:first-child {
+  border-top-left-radius: .25rem;
+  border-top-right-radius: .25rem;
+}
+
+.list-group-item:last-child {
+  margin-bottom: 0;
+  border-bottom-right-radius: .25rem;
+  border-bottom-left-radius: .25rem;
+}

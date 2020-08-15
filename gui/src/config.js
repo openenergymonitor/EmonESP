@@ -9,6 +9,7 @@ var baseHost = window.location.hostname;
 //var baseHost = '192.168.4.1';
 //var baseHost = '172.16.0.52';
 var basePort = window.location.port;
+var baseProtocol = window.location.protocol;
 
 var baseEndpoint = "//" + baseHost;
 if(80 !== basePort) {
@@ -41,7 +42,7 @@ function addcolon(t) {
 
 $(function () {
   // Activates knockout.js
-  var emonesp = new EmonEspViewModel();
+  var emonesp = new EmonEspViewModel(baseHost, basePort, baseProtocol);
   ko.applyBindings(emonesp);
   emonesp.start();
 });
