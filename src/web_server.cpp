@@ -29,7 +29,7 @@
 
 #include <Arduino.h>
 #include <ESP8266WiFi.h>
-//#include <FS.h>                       // SPIFFS file-system: store web server html, CSS etc.
+#include <string>
 
 #include "emonesp.h"
 #include "web_server.h"
@@ -50,8 +50,8 @@ AsyncWebSocket wsDebug("/debug/console");
 AsyncWebSocket wsEmonTx("/emontx/console");
 StaticFileWebHandler staticFile;
 
-String emonTxBuffer = "";
-String debugBuffer = "";
+std::string emonTxBuffer = "";
+std::string debugBuffer = "";
 
 bool enableCors = true;
 
@@ -940,17 +940,17 @@ web_server_setup()
   });
   SerialDebug.onWrite([](const uint8_t *buffer, size_t size)
   {
-    debugBuffer.concat((const char *)buffer, size);
+    debugBuffer.append((const char *)buffer, size);
   });
 
   server.on("/emontx", [](AsyncWebServerRequest *request) {
     handleDebug(request, SerialEmonTx);
   });
   SerialEmonTx.onWrite([](const uint8_t *buffer, size_t size) {
-    emonTxBuffer.concat((const char *)buffer, size);
+    emonTxBuffer.append((const char *)buffer, size);
   });
   SerialEmonTx.onRead([](const uint8_t *buffer, size_t size) {
-    emonTxBuffer.concat((const char *)buffer, size);
+    emonTxBuffer.append((const char *)buffer, size);
   });
 
   server.onNotFound(handleNotFound);
