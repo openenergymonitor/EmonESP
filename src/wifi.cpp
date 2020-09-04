@@ -177,6 +177,16 @@ void wifi_onStationModeGotIP(const WiFiEventStationModeGotIP &event)
   // Clear any error state
   client_disconnects = 0;
   client_retry = false;
+
+  if (MDNS.begin(node_name.c_str())) {
+    MDNS.addService("http", "tcp", 80);
+    MDNSResponder::hMDNSService hService = MDNS.addService(NULL, "emonesp", "tcp", 80);
+    if(hService) {
+      MDNS.addServiceTxt(hService, "node_type", node_type.c_str());
+    }
+  } else {
+    DEBUG_PORT.println("Failed to start mDNS");
+  }
 }
 
 void wifi_onStationModeDisconnected(const WiFiEventStationModeDisconnected &event)
@@ -213,6 +223,8 @@ void wifi_onStationModeDisconnected(const WiFiEventStationModeDisconnected &even
   "UNKNOWN");
 
   client_disconnects++;
+
+  MDNS.end();
 }
 
 void
@@ -247,23 +259,20 @@ wifi_setup() {
   });
 
   wifi_start();
-
-  if (MDNS.begin(node_name.c_str())) {
-    MDNS.addService("http", "tcp", 80);
-  }
 }
 
 void wifi_loop() 
 {
   Profile_Start(wifi_loop);
 
-  MDNS.update();
-
-//  bool isClient = wifi_mode_is_sta();
+  bool isClient = wifi_mode_is_sta();
   bool isClientOnly = wifi_mode_is_sta_only();
 //  bool isAp = wifi_mode_is_ap();
   bool isApOnly = wifi_mode_is_ap_only();
 
+  if(isClient) {
+    MDNS.update();
+  }
 #ifdef WIFI_LED
   if ((isApOnly || !WiFi.isConnected()) &&
       millis() > wifiLedTimeOut)
