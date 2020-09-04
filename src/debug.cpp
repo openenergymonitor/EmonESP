@@ -9,7 +9,7 @@
 #endif
 
 #ifndef DEBUG_LOG_BUFFER
-#define DEBUG_LOG_BUFFER 2048
+#define DEBUG_LOG_BUFFER 512
 #endif
 
 StreamSpy SerialDebug(DEBUG_PORT);

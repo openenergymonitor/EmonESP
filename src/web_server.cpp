@@ -50,8 +50,8 @@ AsyncWebSocket wsDebug("/debug/console");
 AsyncWebSocket wsEmonTx("/emontx/console");
 StaticFileWebHandler staticFile;
 
-std::string emonTxBuffer = "";
-std::string debugBuffer = "";
+StreamSpyReader emonTxBuffer;
+StreamSpyReader debugBuffer;
 
 bool enableCors = true;
 
@@ -889,6 +889,19 @@ void onEmonTxEvent(AsyncWebSocket * server, AsyncWebSocketClient *client, AwsEve
   }
 }
 
+void streamBuffer(StreamSpyReader &buffer, AsyncWebSocket &client) 
+{
+  if(buffer.available() > 0 && client.availableForWriteAll()) 
+  {
+    uint8_t *buf;
+    size_t len;
+
+    buffer.getBuffer(buf, len);
+    client.textAll(buf, len);
+    buffer.readBuffer(len);
+  }
+}
+
 void
 web_server_setup()
 {
@@ -938,20 +951,12 @@ web_server_setup()
   server.on("/debug", [](AsyncWebServerRequest *request) {
     handleDebug(request, SerialDebug);
   });
-  SerialDebug.onWrite([](const uint8_t *buffer, size_t size)
-  {
-    debugBuffer.append((const char *)buffer, size);
-  });
+  debugBuffer.attach(SerialDebug);
 
   server.on("/emontx", [](AsyncWebServerRequest *request) {
     handleDebug(request, SerialEmonTx);
   });
-  SerialEmonTx.onWrite([](const uint8_t *buffer, size_t size) {
-    emonTxBuffer.append((const char *)buffer, size);
-  });
-  SerialEmonTx.onRead([](const uint8_t *buffer, size_t size) {
-    emonTxBuffer.append((const char *)buffer, size);
-  });
+  emonTxBuffer.attach(SerialEmonTx);
 
   server.onNotFound(handleNotFound);
   server.onRequestBody(handleBody);
@@ -997,15 +1002,8 @@ web_server_loop() {
     ESP.reset();
   }
 
-  if(debugBuffer.length() > 0 && wsDebug.availableForWriteAll()) {
-    wsDebug.textAll(debugBuffer.c_str(), debugBuffer.length());
-    debugBuffer.clear();
-  }
-
-  if(emonTxBuffer.length() > 0 && wsEmonTx.availableForWriteAll()) {
-    wsEmonTx.textAll(emonTxBuffer.c_str(), emonTxBuffer.length());
-    emonTxBuffer.clear();
-  }
+  streamBuffer(debugBuffer, wsDebug);
+  streamBuffer(emonTxBuffer, wsEmonTx);
 
   Profile_End(web_server_loop, 5);
 }
