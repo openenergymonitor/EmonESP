@@ -131,9 +131,9 @@ void
 startClient()
 {
   DEBUG.print("Connecting to SSID: ");
-  DEBUG.print(esid.c_str());
-  DEBUG.print(" PSK:");
-  DEBUG.println(epass.c_str());
+  DEBUG.println(esid.c_str());
+  //DEBUG.print(" PSK:");
+  //DEBUG.println(epass.c_str());
   
   client_disconnects = 0;
 
