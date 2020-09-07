@@ -132,6 +132,11 @@ button {
     outline: none;
 }
 
+button:disabled {
+  background-color: #eee;
+  color: #ccc;
+}
+
 /*----------------*/
 
 .box {
@@ -291,4 +296,18 @@ button {
   margin-bottom: 0;
   border-bottom-right-radius: .25rem;
   border-bottom-left-radius: .25rem;
+}
+
+#progressBack {
+  width: 100%;
+  border-color: #0699fa;
+  border-style: solid;
+  border-width: 1px;
+  border-radius: 4px
+}
+
+#progressBar {
+  width: 1%;
+  height: 30px;
+  background-color: #0699fa;
 }

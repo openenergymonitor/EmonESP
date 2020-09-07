@@ -77,7 +77,11 @@ Content-Type: application/json
 
 ###
 
-POST {{baseUrl}}/update
+GET  {{baseUrl}}/upload
+
+###
+
+POST {{baseUrl}}/upload
 Content-Type: multipart/form-data; boundary=----WebKitFormBoundary7MA4YWxkTrZu0gW
 
 ----WebKitFormBoundary7MA4YWxkTrZu0gW
@@ -107,3 +111,9 @@ ssid={{ssid}}&pass={{pass}}
 GET {{baseUrl}}/scan HTTP/1.1
 
 ###
+
+GET {{baseUrl}}/firmware HTTP/1.1
+
+###
+
+GET {{baseUrl}}/update HTTP/1.1

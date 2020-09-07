@@ -113,10 +113,3 @@ function toggle(id) {
    else
       e.style.display = "block";
 }
-
-// -----------------------------------------------------------------------
-// Event:Upload Firmware
-// -----------------------------------------------------------------------
-//document.getElementById("upload").addEventListener("click", function(e) {
-//  window.location.href='/upload'
-//});

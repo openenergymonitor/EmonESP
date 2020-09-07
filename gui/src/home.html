@@ -246,26 +246,26 @@
       <div id="six">
         <h2 onclick="toggle('firmware');"><span>+</span> Firmware</h2>
         <div id="firmware" class="itembody-wrapper" style="display:none">
-          <div id="firmware" style="display:none">
-            <table>
-              <tr>
-                <th>Running</th>
-                <th>Latest</th>
-              </tr>
-              <tbody id="firmware-version">
-                <tr>
-                  <td data-bind="text: status.version"></td>
-                  <td></td>
-                </tr>
-              </tbody>
-            </table><br>
-            <a href="https://github.com/openenergymonitor/EmonESP/releases">
-              View changelog</a><br>
-          </div><br>
-          <!-- <button id="updatecheck">Check for Updates</button> -->
-          <!-- <button id="update" style="display:none">Apply
-          Update</button><p><span id="update-info"></span>-->
-          </p><button id="upload">Upload</button>
+          <p><b>Version:</b> <a href="https://github.com/openenergymonitor/EmonESP/releases">v<span data-bind="text: config.version"></span></a></p>
+          <div data-bind="visible: !updateFetching() && !updateComplete()">
+            <form action="#" method="post" enctype="multipart/form-data" id="upload_form" data-bind="submit: otaUpdate">
+              <input type="file" name="update" data-bind="value: updateFilename">
+              <button data-bind="click: otaUpdate, text: (updateFetching() ? 'Updating...' : 'Update'), disable: ('' == updateFilename())">Update</button>
+            </form>
+          </div>
+          <div data-bind="visible: (updateError() !== '')" class="box error">
+            <h4>Error:</h4>
+            <p data-bind="text: updateError"></p>
+          </div>
+          <div data-bind="visible: updateFetching() && !updateComplete()">
+            Updating... <br/>
+            <div id="progressBack">
+              <div id="progressBar" data-bind="style: { width: updateProgress()+'%' }"></div>
+            </div>
+          </div>
+          <p  data-bind="visible: updateComplete">
+            Firmware update completed ok
+          </p>
         </div>
       </div>
       <!--//////////////////////////////////////////////////////////////////////////////////-->
