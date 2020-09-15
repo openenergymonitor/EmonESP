@@ -30,6 +30,7 @@
 #define _EMONESP_INPUT_H
 
 #include <Arduino.h>
+#include <ArduinoJson.h>
 
 // -------------------------------------------------------------------
 // Support for reading input
@@ -44,6 +45,6 @@ extern String input_string;
 // data: if true is returned data will be updated with the new line of
 //       input
 // -------------------------------------------------------------------
-extern boolean input_get(String& data);
+extern boolean input_get(JsonDocument &data);
 
 #endif // _EMONESP_INPUT_H

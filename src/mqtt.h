@@ -33,6 +33,7 @@
 // -------------------------------------------------------------------
 
 #include <Arduino.h>
+#include <ArduinoJson.h>
 
 // -------------------------------------------------------------------
 // Perform the background MQTT operations. Must be called in the main
@@ -41,11 +42,16 @@
 extern void mqtt_loop();
 
 // -------------------------------------------------------------------
+// Generic Publish to MQTT
+// -------------------------------------------------------------------
+extern void mqtt_publish(String topic, String data);
+
+// -------------------------------------------------------------------
 // Publish values to MQTT
 //
 // data: a comma seperated list of name:value pairs to send
 // -------------------------------------------------------------------
-extern void mqtt_publish(String data);
+extern void mqtt_publish(JsonDocument &event);
 
 // -------------------------------------------------------------------
 // Restart the MQTT connection

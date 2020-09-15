@@ -1,0 +1,47 @@
+<html>
+
+<head>
+  <title>EmonESP Terminal</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0px;
+    }
+
+    /* Create two equal columns that floats next to each other */
+    .column {
+      float: left;
+      width: 50%;
+      height: 100%;
+    }
+
+    /* Clear floats after the columns */
+    .row:after {
+      content: "";
+      display: table;
+      clear: both;
+    }
+
+    /* Responsive layout - makes the two columns stack on top of each other instead of next to each other */
+    @media screen and (max-width: 1000px) {
+      .column {
+        width: 100%;
+        height: 50%;
+      }
+    }
+
+  </style>
+</head>
+
+<body>
+  <div class="row">
+    <iframe class="column" src="term.html?debug"></iframe>
+    <iframe class="column" src="term.html?emontx"></iframe>
+  </div>
+</body>
+
+</html>

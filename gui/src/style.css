@@ -18,49 +18,26 @@ body {
     overflow-x: hidden;
 }
 
-@media screen and (min-width: 1024px) {
-
-#left-hand-container {
-    width: 50%;
-    float: left;
+#container {
+    width: 100%;
     margin-bottom: 40px;
 }
-}
 
-@media screen and (min-width: 1024px) {
-
-#right-hand-container {
-    width: 50%;
-    float: right;
-    margin-bottom: 40px;
-}
-}
-
-#one,#two,#three,#four,#five,#six,#seven,#eight {
+#one,#two,#three,#four,#five,#six,#seven,#eight,#nine {
     background-color: #f1f1f1;
     box-sizing: border-box;
     margin: 5px 5px 5px 5px;
 }
 
-@media screen and (min-width: 1024px) {
-     #one,#two,#three {
-         vertical-align: top;
-         display: inline-block;
-         width: 500px;
-     }
-}
-
-@media screen and (min-width: 1024px) {
-     #four,#five,#six,#eight {
-        vertical-align: top;
-         display: inline-block;
-         width: 500px;
-         right: 0;
-     }
-}
+.hide {display:none;}
 
 .itembody-wrapper {
     padding: 5px 25px 5px 25px;
+}
+
+.scrollable-logs {
+    overflow: auto;
+    max-height: 500px;
 }
 
 input[type="text"],
@@ -127,10 +104,16 @@ a {
 
 h2 {
     font-size: 20px;
-    background-color: #777777;
-    color: #ffffff;
-    padding: 5px 25px 5px 25px;
+    background-color: #82afcc;
+    color: #fff;
+    padding: 10px 15px 10px 15px;
     margin: 0;
+    cursor:pointer;
+    font-weight:normal;
+}
+
+h2:hover {
+    background-color: #98c4e1;
 }
 
 button {
@@ -147,6 +130,11 @@ button {
     margin: 4px 2px;
     cursor: pointer;
     outline: none;
+}
+
+button:disabled {
+  background-color: #eee;
+  color: #ccc;
 }
 
 /*----------------*/
@@ -166,7 +154,7 @@ button {
 }
 
 .box h1 span {
-    color: #0699fa;
+    color: #82afcc;
 }
 
 .box h3 {
@@ -176,7 +164,7 @@ button {
     font-size: 19px;
     text-align: center;
     color: #b6b6b6;
-    margin: -12px 0 0 0;
+    margin: -6px 0 0 0;
 }
 
 /*----------------*/
@@ -231,4 +219,95 @@ button {
   margin-top: 40px;
   margin-bottom: 40px;
   text-align: center;
+}
+
+.btn-group button{
+  width:auto;
+  height:40px;
+  padding:10px 20px 10px 20px;
+  border:none;
+  /*border-right:1px solid #888;*/
+  background-color:#666;
+  color:#fff;
+  cursor:pointer;
+  border-radius: 0px;
+  margin:0px;
+}
+
+.btn-group button:hover{
+  /*background-color:#888;*/
+}
+
+.btn-group .active{
+  background-color:#888;
+}
+
+.btn-group .green {background-color:#76de32;}
+.btn-group .red {background-color:#ff5d32;}
+
+.btn-group button:first-child {
+  border-radius: 20px 0px 0px 20px;
+}
+
+.btn-group button:last-child {
+  border-radius: 0px 20px 20px 0px;
+}
+
+#wifiList {
+  display: inline-block;
+  width: 100%;
+  max-height: 230px;
+  overflow: auto
+}
+
+/*  Stolen from Bootstrap */
+
+.list-group {
+  display: flex;
+  flex-direction: column;
+  padding-left: 0;
+  margin-bottom: 0;
+}
+
+.list-group-item {
+  position: relative;
+  display: flex;
+  padding: .75rem 1.25rem;
+  margin-bottom: -1px;
+  background-color: #fff;
+  border: 1px solid rgba(0, 0, 0, .125);
+  justify-content: space-between;
+  align-items: center;
+}
+
+.list-group-item.active {
+  z-index: 2;
+  color: #fff;
+  background-color: #0699fa;
+  border-color: #0699fa;
+}
+
+.list-group-item:first-child {
+  border-top-left-radius: .25rem;
+  border-top-right-radius: .25rem;
+}
+
+.list-group-item:last-child {
+  margin-bottom: 0;
+  border-bottom-right-radius: .25rem;
+  border-bottom-left-radius: .25rem;
+}
+
+#progressBack {
+  width: 100%;
+  border-color: #0699fa;
+  border-style: solid;
+  border-width: 1px;
+  border-radius: 4px
+}
+
+#progressBar {
+  width: 1%;
+  height: 30px;
+  background-color: #0699fa;
 }

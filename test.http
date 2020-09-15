@@ -1,0 +1,119 @@
+# Name: REST Client
+# Id: humao.rest-client
+# Description: REST Client for Visual Studio Code
+# Version: 0.21.3
+# Publisher: Huachao Mao
+# VS Marketplace Link: https://marketplace.visualstudio.com/items?itemName=humao.rest-client
+
+# You should use environment vars (https://marketplace.visualstudio.com/items?itemName=humao.rest-client#environment-variables) for these
+# but you can also set here if needed (just don't check in!)
+
+#@baseUrl = http://emonesp.local
+
+#@ssid = your_ssid
+#@pass = your_password
+#@apikey = your_key
+
+###
+
+GET {{baseUrl}}/ HTTP/1.1
+
+###
+
+GET {{baseUrl}}/status HTTP/1.1
+
+###
+
+GET {{baseUrl}}/config HTTP/1.1
+
+###
+
+GET {{baseUrl}}/lastvalues HTTP/1.1
+
+###
+
+POST {{baseUrl}}/config HTTP/1.1
+Content-Type: application/json
+
+{
+  "emoncms_enabled": true,
+  "emoncms_server": "emoncms.org",
+  "emoncms_node": "emonesp_test",
+  "emoncms_apikey": "{{apikey_emoncms}}",
+  "emoncms_fingerprint": ""
+}
+
+###
+
+POST {{baseUrl}}/config HTTP/1.1
+Content-Type: application/json
+
+{
+  "emoncms_enabled": false
+}
+
+###
+
+POST {{baseUrl}}/config HTTP/1.1
+Content-Type: application/json
+
+{
+  "mqtt_enabled": true,
+  "mqtt_server": "home.lan",
+  "mqtt_port": 1883,
+  "mqtt_topic": "emonesp_test",
+  "mqtt_user": "emonpi",
+  "mqtt_pass": "emonpimqtt2016"
+}
+
+###
+
+POST {{baseUrl}}/config HTTP/1.1
+Content-Type: application/json
+
+{
+  "mqtt_enabled": false
+}
+
+###
+
+GET  {{baseUrl}}/upload
+
+###
+
+POST {{baseUrl}}/upload
+Content-Type: multipart/form-data; boundary=----WebKitFormBoundary7MA4YWxkTrZu0gW
+
+----WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="image"; filename="firmware.bin"
+Content-Type: application/octet-stream
+
+< ./.pio/build/emonesp/firmware.bin
+----WebKitFormBoundary7MA4YWxkTrZu0gW
+
+###
+
+GET {{baseUrl}}/debug HTTP/1.1
+
+###
+
+GET {{baseUrl}}/emontx HTTP/1.1
+
+###
+
+POST {{baseUrl}}/savenetwork HTTP/1.1
+Content-Type: application/x-www-form-urlencoded
+
+ssid={{ssid}}&pass={{pass}}
+
+###
+
+GET {{baseUrl}}/scan HTTP/1.1
+
+###
+
+GET {{baseUrl}}/firmware HTTP/1.1
+
+###
+
+GET {{baseUrl}}/update HTTP/1.1

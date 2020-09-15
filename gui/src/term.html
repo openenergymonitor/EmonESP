@@ -1,0 +1,39 @@
+<html>
+<head>
+  <title>EmonESP Terminal</title>
+  <style>
+    body {
+      color:#fff;
+      background-color:#300a24;
+    }
+    pre {
+      word-break: break-all;
+      white-space: pre-wrap;
+      margin-bottom: 0px;
+      font-family: monospace;
+      font-size: 13px;
+    }
+    input {
+      width: 100%;
+      font-family: monospace;
+      font-size: 13px;
+      border: none;
+      color: #fff;
+      background-color: #300a24;
+      padding: 0px;
+      margin-bottom: 13px;
+    }
+    input:focus {
+      outline: none;
+    }
+  </style>
+  <script src="lib.js"></script>
+  <script src="term.js"></script>
+</head>
+<body>
+  <pre id="term"></pre>
+  <form onsubmit="return term_input()" action="#">
+    <input id="input"/>
+  </form>
+</body>
+</html>
