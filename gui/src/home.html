@@ -139,6 +139,10 @@
         <h2 onclick="toggle('emoncms');"><span>+</span> Emoncms</h2>
         <div id="emoncms" class="itembody-wrapper" style="display:none">
           <p>
+            <input type="checkbox" id="emoncms_enabled" data-bind="checked: config.emoncms_enabled" />
+            <label for="emoncms_enabled"><b>Enable Emoncms</b></label>
+          </p>
+          <p data-bind="visible: config.emoncms_enabled">
             <b>Emoncms Server*:</b><br>
             <input type="text" data-bind="textInput: config.emoncms_server"><br/>
             <span>
@@ -146,18 +150,18 @@
               'emonpi', or '192.168.1.4'
             </span><br/>
           </p>
-          <p>
+          <p data-bind="visible: config.emoncms_enabled">
             <b>Emoncms Path:</b><br>
             <input type="text" data-bind="textInput: config.emoncms_path"><br/>
             <span>
               e.g '/emoncms', or empty for emoncms.org
             </span><br/>
           </p>
-          <p>
+          <p data-bind="visible: config.emoncms_enabled">
             <b>Emoncms Node Name*:</b><br>
             <input type="text" data-bind="textInput: config.emoncms_node">
           </p>
-          <p>
+          <p data-bind="visible: config.emoncms_enabled">
             <b>Write apikey*:</b><br>
             <input type="password" autocapitalize="none" data-bind="textInput: emoncmsApiKey.value, attr: { type: emoncmsApiKey.show() ? 'text' : 'password' }" /><br />
             <span>
@@ -165,17 +169,21 @@
               <label for="emoncmsApiKey">Show password</label>
             </span>
           </p>
-          <p>
+          <p data-bind="visible: config.emoncms_enabled">
             <b>SSL SHA-1 Fingerprint:</b><br>
             <input type="text" data-bind="textInput: config.emoncms_fingerprint"><br>
-            <br></p>HTTPS will be enabled if present e.g:<br>
+            <br>HTTPS will be enabled if present e.g:<br>
             <br>
-            <div class="small-text">
+            <span class="small-text">
               7D:82:15:BE:D7:BC:72:58:87:7D:8E:40:D4:80:BA:1A:9F:8B:8D:DA
-            </div><br>
+            </s[ac]><br>
+          </p>
+          <p>
             <button data-bind="click: saveEmonCms, text: (saveEmonCmsFetching() ? 'Saving' : (saveEmonCmsSuccess() ? 'Saved' : 'Save')), disable: saveEmonCmsFetching">Save</button>
-            <b>&nbsp; Connected:&nbsp;<span data-bind="text: 1 === status.emoncms_connected() ? 'Yes' : 'No'"></span></b>
-            <span data-bind="visible: 1 === status.emoncms_connected()"></br></br><b>&nbsp; Successful messages:&nbsp;<span data-bind="text: status.packets_success()+'/'+status.packets_sent()+' '+((status.packets_success()/status.packets_sent())*100)+'%'"></span></b></span>
+            <span data-bind="visible: config.emoncms_enabled">
+              <b>&nbsp; Connected:&nbsp;<span data-bind="text: 1 === status.emoncms_connected() ? 'Yes' : 'No'"></span></b>
+              <span data-bind="visible: 1 === status.emoncms_connected()"></br></br><b>&nbsp; Successful messages:&nbsp;<span data-bind="text: status.packets_success()+'/'+status.packets_sent()+' '+((status.packets_success()/status.packets_sent())*100)+'%'"></span></b></span>
+            </span>
           </p>
         </div>
       </div>
@@ -183,39 +191,50 @@
       <div id="three">
         <h2 onclick="toggle('mqtt');"><span>+</span> MQTT</h2>
         <div id="mqtt" class="itembody-wrapper" style="display:none">
-          <p><b>MQTT Server*:</b><br>
+          <p>
+            <input type="checkbox" id="mqtt_enabled" data-bind="checked: config.mqtt_enabled" />
+            <label for="mqtt_enabled"><b>Enable MQTT</b></label>
+          </p>
+          <p data-bind="visible: config.mqtt_enabled">
+            <b>MQTT Server*:</b><br>
             <input data-bind="textInput: config.mqtt_server" type="text"><br/>
             <span class="small-text">e.g 'emonpi', 'test.mosquitto.org' or '192.168.1.4'</span><br>
           </p>
-          <p><b>MQTT Port:</b><br>
+          <p data-bind="visible: config.mqtt_enabled">
+            <b>MQTT Port:</b><br>
             <input data-bind="textInput: config.mqtt_port" type="text"><br/>
             <span class="small-text">e.g 1883</span><br>
           </p>
-          <p><b>MQTT Base-topic*:</b><br>
+          <p data-bind="visible: config.mqtt_enabled">
+            <b>MQTT Base-topic*:</b><br>
             <input data-bind="textInput: config.mqtt_topic" type="text"><br/>
             <span class="small-text">
               e.g 'emon/emonesp', 'emon/heatpump'<br>
               Data will be published to sub topic e.g. 'emon/emonesp/CT1'
             </span>
           </p>
-          <p><b>MQTT Feed-name prefix:</b><br>
+          <p data-bind="visible: config.mqtt_enabled">
+            <b>MQTT Feed-name prefix:</b><br>
             <input data-bind="textInput: config.mqtt_feed_prefix" type="text"><br/>
             <span class="small-text">
               Value to prefix the feed names with: &#60;base-topic&#62;/&#60;prefix&#62;&#60;feed-name&#62;. Required for posting to AdafruitIO.
               Leave blank for no prefix.
             </span>
           </p>
-          <p><b>Username:</b><br>
+          <p data-bind="visible: config.mqtt_enabled">
+            <b>Username:</b><br>
             <input data-bind="textInput: config.mqtt_user" type="text"><br/>
             <span class="small-text">Leave blank for authentication</span>
           </p>
-          <p><b>Password:</b><br>
+          <p data-bind="visible: config.mqtt_enabled">
+            <b>Password:</b><br>
             <input type="password" autocapitalize="none" data-bind="textInput: mqttPassword.value, attr: { type: mqttPassword.show() ? 'text' : 'password' }" /><br />
             <span>
               <input id="mqttPassword" type="checkbox" data-bind="checked: mqttPassword.show" />
               <label for="mqttPassword">Show password</label>
             </span>
             <span class="small-text">Leave blank for no authentication</span><br>
+          </p>
           <p>
             <button data-bind="click: saveMqtt, text: (saveMqttFetching() ? 'Saving' : (saveMqttSuccess() ? 'Saved' : 'Save')), disable: saveMqttFetching">Save</button>
             <b>&nbsp; Connected:&nbsp;<span data-bind="text: 1 === status.mqtt_connected() ? 'Yes' : 'No'"></span></b>

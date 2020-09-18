@@ -196,6 +196,7 @@ function EmonEspViewModel(baseHost, basePort, baseProtocol) {
   self.saveEmonCmsSuccess = ko.observable(false);
   self.saveEmonCms = function () {
     var emoncms = {
+      enable: self.config.emoncms_enabled(),
       server: self.config.emoncms_server(),
       path: self.config.emoncms_path(),
       apikey: self.config.emoncms_apikey(),
@@ -205,7 +206,7 @@ function EmonEspViewModel(baseHost, basePort, baseProtocol) {
 
     if (emoncms.server === "" || emoncms.node === "") {
       alert("Please enter Emoncms server and node");
-    } else if (emoncms.apikey.length != 32) {
+    } else if (emoncms.apikey.length != 32 && !self.emoncmsApiKey.isDummy()) {
       alert("Please enter valid Emoncms apikey");
     } else if (emoncms.fingerprint !== "" && emoncms.fingerprint.length != 59) {
       alert("Please enter valid SSL SHA-1 fingerprint");
@@ -229,6 +230,7 @@ function EmonEspViewModel(baseHost, basePort, baseProtocol) {
   self.saveMqttSuccess = ko.observable(false);
   self.saveMqtt = function () {
     var mqtt = {
+      enable: self.config.mqtt_enabled(),
       server: self.config.mqtt_server(),
       port: self.config.mqtt_port(),
       topic: self.config.mqtt_topic(),
