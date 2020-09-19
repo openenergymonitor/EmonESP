@@ -24,6 +24,12 @@ static const char _HOME_PAGE[] PROGMEM = "/home.html";
 static const char _WIFI_PAGE[] PROGMEM = "/wifi_portal.html";
 #define WIFI_PAGE FPSTR(_WIFI_PAGE)
 
+static const char _BUILD_TIME[] PROGMEM = __DATE__ " " __TIME__ " GMT";
+#define BUILD_TIME FPSTR(_BUILD_TIME)
+
+static const char _HEADER_IF_MODIFIED_SINCE[] PROGMEM = "If-Modified-Since";
+#define HEADER_IF_MODIFIED_SINCE FPSTR(_HEADER_IF_MODIFIED_SINCE)
+
 StaticFileWebHandler::StaticFileWebHandler()
 {
 }
@@ -62,6 +68,7 @@ bool StaticFileWebHandler::canHandle(AsyncWebServerRequest *request)
   {
     request->_tempObject = file;
     DBUGF("[StaticFileWebHandler::canHandle] TRUE");
+    request->addInterestingHeader(HEADER_IF_MODIFIED_SINCE);
     return true;
   }
 
@@ -72,21 +79,30 @@ void StaticFileWebHandler::handleRequest(AsyncWebServerRequest *request)
 {
   dumpRequest(request);
 
-  // Are we authenticated
-  if(wifi_mode_is_sta() &&
-     _username != "" && _password != "" &&
-     false == request->authenticate(_username.c_str(), _password.c_str()))
-  {
-    request->requestAuthentication(node_name.c_str());
-    return;
-  }
-
   // Get the filename from request->_tempObject and free it
   StaticFile *file = (StaticFile *)request->_tempObject;
   if (file)
   {
+    // Clear so we do not try and free
     request->_tempObject = NULL;
+
+    // Are we authenticated
+    if(wifi_mode_is_sta() &&
+      _username != "" && _password != "" &&
+      false == request->authenticate(_username.c_str(), _password.c_str()))
+    {
+      request->requestAuthentication(node_name.c_str());
+      return;
+    }
+
+    if (request->header(HEADER_IF_MODIFIED_SINCE).equals(BUILD_TIME)) {
+      request->send(304);
+      return;
+    }
+
     AsyncWebServerResponse *response = new StaticFileResponse(200, file);
+    //response->addHeader("Content-Encoding", "gzip");
+    response->addHeader("Last-Modified", BUILD_TIME);
     request->send(response);
   } else {
     request->send(404);
