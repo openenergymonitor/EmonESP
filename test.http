@@ -15,8 +15,15 @@
 #@apikey = your_key
 
 ###
+# @name index
+GET {{baseUrl}}/ HTTP/1.1
+
+###
+
+@lastModified = {{index.response.headers.Last-Modified}}
 
 GET {{baseUrl}}/ HTTP/1.1
+If-Modified-Since: {{lastModified}}
 
 ###
 
@@ -117,3 +124,8 @@ GET {{baseUrl}}/firmware HTTP/1.1
 ###
 
 GET {{baseUrl}}/update HTTP/1.1
+
+###
+
+GET {{baseUrl}}/restart HTTP/1.1
+
