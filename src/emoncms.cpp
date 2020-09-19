@@ -65,8 +65,8 @@ static void emoncms_result(bool success, String message)
   if(emoncms_connected != success)
   {
     emoncms_connected = success;
-    event["emoncms_connected"] = (int)emoncms_connected;
-    event["emoncms_message"] = message.substring(0, 64);
+    event[F("emoncms_connected")] = (int)emoncms_connected;
+    event[F("emoncms_message")] = message.substring(0, 64);
     event_send(event);
   }
 }
@@ -80,11 +80,11 @@ void emoncms_publish(JsonDocument &data)
     String url = post_path;
     String json;
     serializeJson(data, json);
-    url += "fulljson=";
+    url += F("fulljson=");
     url += urlencode(json);
-    url += "&node=";
+    url += F("&node=");
     url += emoncms_node;
-    url += "&apikey=";
+    url += F("&apikey=");
     url += emoncms_apikey;
 
     DBUGVAR(url);
@@ -95,13 +95,13 @@ void emoncms_publish(JsonDocument &data)
     String result = "";
     if (emoncms_fingerprint != 0) {
       // HTTPS on port 443 if HTTPS fingerprint is present
-      DBUGLN("HTTPS Enabled");
+      DBUGLN(F("HTTPS Enabled"));
       result =
         get_https(emoncms_fingerprint.c_str(), emoncms_server.c_str(), url,
                   443);
     } else {
       // Plain HTTP if other emoncms server e.g EmonPi
-      DBUGLN("Plain old HTTP");
+      DBUGLN(F("Plain old HTTP"));
       result = get_http(emoncms_server.c_str(), url);
     }
 
@@ -109,13 +109,13 @@ void emoncms_publish(JsonDocument &data)
     DynamicJsonDocument doc(capacity);
     if(DeserializationError::Code::Ok == deserializeJson(doc, result.c_str(), result.length()))
     {
-      DBUGLN("Got JSON");
-      bool success = doc["success"]; // true
-      emoncms_result(success, doc["message"]);
-    } else if (result == "ok") {
+      DBUGLN(F("Got JSON"));
+      bool success = doc[F("success")]; // true
+      emoncms_result(success, doc[F("message")]);
+    } else if (result == F("ok")) {
       emoncms_result(true, result);
     } else {
-      DEBUG.print("Emoncms error: ");
+      DEBUG.print(F("Emoncms error: "));
       DEBUG.println(result);
       emoncms_result(false, result);
     }

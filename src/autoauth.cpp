@@ -38,12 +38,12 @@ unsigned long last_auth_request_attempt = 0;
  
 void auth_request() {
 
-    DEBUG.println("Fetching MQTT Auth");
+    DEBUG.println(F("Fetching MQTT Auth"));
     DEBUG.println(mqtt_server.c_str());
 
     // Fetch emoncms mqtt broker credentials
-    String url = "/emoncms/device/auth/request.json";
-    String result="";
+    String url = F("/emoncms/device/auth/request.json");
+    String result = "";
     String mqtt_username = "";
     String mqtt_password = "";
     String mqtt_basetopic = "";
@@ -52,7 +52,7 @@ void auth_request() {
     
     // This needs to be done with an encrypted request otherwise credentials are shared as plain text
     result = get_http(mqtt_server.c_str(), url);
-    if (result!="request registered") {
+    if (result != F("request registered")) {
         for (int i=0; i<result.length(); i++) {
             char c = result[i];
             if (c==':') { 
@@ -68,13 +68,13 @@ void auth_request() {
         if (stringpart==2) {
             mqtt_auth_transfer_flag = 2;
             config_save_mqtt(true, mqtt_server.c_str(), mqtt_port, mqtt_basetopic, "", mqtt_username, mqtt_password);
-            DEBUG.println("MQTT Settings:"); DEBUG.println(result);
+            DEBUG.println(F("MQTT Settings:")); DEBUG.println(result);
         }
         
         if (stringpart==3) {
             mqtt_auth_transfer_flag = 2;
             config_save_mqtt(true, mqtt_server.c_str() ,mqtt_portnum.toInt(), mqtt_basetopic, "", mqtt_username, mqtt_password);
-            DEBUG.println("MQTT Settings:"); DEBUG.println(result);
+            DEBUG.println(F("MQTT Settings:")); DEBUG.println(result);
         }
     }
 

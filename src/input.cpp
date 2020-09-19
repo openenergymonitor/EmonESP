@@ -60,7 +60,7 @@ boolean input_get(JsonDocument &data)
     int len = line.length();
     if(len > 0) 
     {
-      DEBUG.printf("Got '%s'\n", line.c_str());
+      DEBUG.printf_P(PSTR("Got '%s'\n"), line.c_str());
 
       for(int i = 0; i < len; i++)
       {
@@ -96,10 +96,10 @@ boolean input_get(JsonDocument &data)
 
   // Append some system info
   if(gotData) {
-    data["freeram"] = ESPAL.getFreeHeap();
-    data["srssi"] = WiFi.RSSI();
-    data["packets_sent"] = packets_sent;
-    data["packets_success"] = packets_success;
+    data[F("freeram")] = ESPAL.getFreeHeap();
+    data[F("srssi")] = WiFi.RSSI();
+    data[F("packets_sent")] = packets_sent;
+    data[F("packets_success")] = packets_success;
 
     last_datastr.clear();
     serializeJson(data, last_datastr);

@@ -56,13 +56,13 @@ static void mqtt_msg_callback(char *topic, byte *payload, unsigned int length) {
   String payloadstr = String((char *)payload);
   payloadstr = payloadstr.substring(0,length);
   
-  DEBUG.println("Message arrived topic:["+topicstr+"] payload: ["+payloadstr+"]");
+  DBUGF("Message arrived topic:[%s] payload: [%s]", topic, payload);
 
   // --------------------------------------------------------------------------
   // State 
   // --------------------------------------------------------------------------
   if (topicstr.compareTo(mqtt_topic+"/"+node_name+"/in/ctrlmode")==0) {
-    DEBUG.print("Status: ");
+    DEBUG.print(F("Status: "));
     if (payloadstr.compareTo("2")==0) {
       ctrl_mode = "Timer";
     } else if (payloadstr.compareTo("1")==0) {
@@ -83,7 +83,7 @@ static void mqtt_msg_callback(char *topic, byte *payload, unsigned int length) {
   // Timer  
   // --------------------------------------------------------------------------
   } else if (topicstr.compareTo(mqtt_topic+"/"+node_name+"/in/timer")==0) {
-    DEBUG.print("Timer: ");
+    DEBUG.print(F("Timer: "));
     if (payloadstr.length()==9) {
       String tstart = payloadstr.substring(0,4);
       String tstop = payloadstr.substring(5,9);
@@ -106,14 +106,14 @@ static void mqtt_msg_callback(char *topic, byte *payload, unsigned int length) {
   // Vout  
   // --------------------------------------------------------------------------
   } else if (topicstr.compareTo(mqtt_topic+"/"+node_name+"/in/vout")==0) {
-    DEBUG.print("Vout: ");
+    DEBUG.print(F("Vout: "));
     voltage_output = payloadstr.toInt();
     DEBUG.println(voltage_output);
   // --------------------------------------------------------------------------
   // FlowT  
   // --------------------------------------------------------------------------
   } else if (topicstr.compareTo(mqtt_topic+"/"+node_name+"/in/flowT")==0) {
-    DEBUG.print("FlowT: ");
+    DEBUG.print(F("FlowT: "));
     float flow = payloadstr.toFloat();
     voltage_output = (int) (flow - 7.14)/0.0371;
     DEBUG.println(String(flow)+" vout:"+String(voltage_output));
@@ -121,7 +121,7 @@ static void mqtt_msg_callback(char *topic, byte *payload, unsigned int length) {
   // Return device state
   // --------------------------------------------------------------------------
   } else if (topicstr.compareTo(mqtt_topic+"/"+node_name+"/in/state")==0) {
-    DEBUG.println("State: ");
+    DEBUG.println(F("State: "));
 
     String s = "{";
     s += "\"ip\":\""+ipaddress+"\",";
@@ -142,19 +142,19 @@ boolean mqtt_connect()
   mqttclient.setServer(mqtt_server.c_str(), mqtt_port);
   mqttclient.setCallback(mqtt_msg_callback); //function to be called when mqtt msg is received on subscribed topic
   
-  DEBUG.print("MQTT Connecting to...");
+  DEBUG.print(F("MQTT Connecting to..."));
   DEBUG.println(mqtt_server.c_str());
   
   String strID = String(ESP.getChipId());
   if (mqttclient.connect(strID.c_str(), mqtt_user.c_str(), mqtt_pass.c_str())) {  // Attempt to connect
-    DEBUG.println("MQTT connected");
+    DEBUG.println(F("MQTT connected"));
     mqtt_publish("describe", node_type);
     
     String subscribe_topic = mqtt_topic + "/" + node_name + "/in/#";
     mqttclient.subscribe(subscribe_topic.c_str());
     
   } else {
-    DEBUG.print("MQTT failed: ");
+    DEBUG.print(F("MQTT failed: "));
     DEBUG.println(mqttclient.state());
     return(0);
   }
