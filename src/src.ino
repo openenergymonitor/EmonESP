@@ -143,7 +143,7 @@ void loop()
   wifi_loop();
   timeClient.update();
 
-  DynamicJsonDocument data(4096);
+  StaticJsonDocument<512> data;
   boolean gotInput = input_get(data);
 
   if (wifi_client_connected())
