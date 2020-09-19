@@ -38,8 +38,8 @@
 // -------------------------------------------------------------------
 //UPDATE SERVER strings and interfers for upate server
 // Array of strings Used to check firmware version
-const char* u_host = "217.9.195.227";
-const char* u_url = "/esp/firmware.php";
+//const char* u_host = "217.9.195.227";
+//const char* u_url = "/esp/firmware.php";
 
 void ota_setup()
 {
@@ -63,12 +63,14 @@ void ota_loop()
 String ota_get_latest_version()
 {
   // Get latest firmware version number
-  String url = u_url;
-  return get_http(u_host, url);
+//  String url = u_url;
+//  return get_http(u_host, url);
+  return F("TODO");
 }
 
 t_httpUpdate_return ota_http_update()
 {
-  t_httpUpdate_return ret = ESPhttpUpdate.update("http://" + String(u_host) + String(u_url) + "?tag=" + currentfirmware);
-  return ret;
+//  t_httpUpdate_return ret = ESPhttpUpdate.update("http://" + String(u_host) + String(u_url) + "?tag=" + currentfirmware);
+//  return ret;
+  return HTTP_UPDATE_FAILED;
 }
