@@ -15,7 +15,8 @@ function StatusViewModel() {
     "free_heap": 0,
     "time":"",
     "ctrl_mode":"off",
-    "ctrl_state":0
+    "ctrl_state":0,
+    "ota_update": false
   }, baseEndpoint + "/status");
 
   // Some devired values
