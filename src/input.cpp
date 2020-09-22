@@ -98,8 +98,8 @@ boolean input_get(JsonDocument &data)
   if(gotData) {
     data[F("freeram")] = ESPAL.getFreeHeap();
     data[F("srssi")] = WiFi.RSSI();
-    data[F("packets_sent")] = packets_sent;
-    data[F("packets_success")] = packets_success;
+    data[F("psent")] = packets_sent;
+    data[F("psuccess")] = packets_success;
 
     last_datastr.clear();
     serializeJson(data, last_datastr);
