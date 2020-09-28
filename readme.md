@@ -6,8 +6,6 @@ ESP8266 WIFI serial to emoncms link
 
 For applications that only require basic posting of data from one emonTx to a remote server such as Emoncms.org an emonTx with this WiFi module provides a lower cost route than an emonBase or emonPi base-station installation.
 
-#*The core of EmonESP is also used for [emonPixel](https://github.com/openenergymonitor/emonpixel) and [OpenEVSE ESP WiFi 2.0](https://github.com/OpenEVSE/ESP8266_WiFi_v2.x).*
-
 ![EmonEsp WiFi AP Setup Portal](docs/emonesp.png)
 
 ## Contents
@@ -213,13 +211,9 @@ Use our emonupload tool to download latest pre-compiled firmware release and upl
 Find and Install [esptool, python required.](https://github.com/espressif/esptool) 
 Navigate to the Releases section of the github page and get the firmware.bin and spiffs.bin files. Use the command below to flash the ESP.
 
-```
-esptool.py --baud 460800 write_flash 0x0 ./firmware.bin 0x300000 ./spiffs.bin
-or for sonoff devices:
-esptool.py --baud 460800 write_flash 0x0 ./firmware.bin 0x7B000 ./spiffs.bin
-```
+`esptool.py write_flash 0x0 ./firmware.bin`
 
-The file paths in the line above are relative, the command is run from the directory where the files are contained, you might need to substitute them for absolute file paths. The 460800 baud can be too high for some programmers, 115200 is a failsafe option.
+If you're having issues uploading try a slower baudrate, `--baud 115200` is a failsafe option.
 
 ### Option 1: Compile Using PlatformIO
 
@@ -264,9 +258,13 @@ $ pio run -e esp12e
 
 #### 3. Upload
 
-- Put ESP into bootloader mode for every upload.
-   - On Heatpump monitor use jumper to pull `GPIO0` low then reset then connect power (simulates reset) or pull RST pin low.
-   - On other ESP boards (Adafruit HUZZAH) press and hold `GPIO0` button then press Reset, LED should light dimly to indicate bootloader mode.
+Put ESP into bootloader mode:
+
+- For Adafruit HUZZAH press and hold `GPIO0` button then press Reset, LED should light dimly to indicate bootloader mode.
+- For WiFi relay press and hold the reset button for the duration of the upload 
+- For Sonof S20 press the front button when connecting power
+- On Heatpump monitor use jumper to pull `GPIO0` low then reset then connect power (simulates reset) or pull RST pin low.
+
 
 ##### a.) Upload main program:
 
@@ -276,61 +274,14 @@ $ pio run -t upload
 
 To compile and upload EmonESP for sonoff s20 smartplugs, WIFI Relay and Heatpump Monitor specify the following environment:
 
+The default option without specifying any enviroment will upload to the Huzzah
+
 ```
+$ pio run -t upload
 $ pio run -e smartplug -t upload
 $ pio run -e wifirelay -t upload
 $ pio run -e hpmon -t upload
 ```
-
-To compile for 4Mb esp12e modules use environment:
-
-```
-$ pio run -e esp12e -t upload
-```
-
-##### b.) Upload data folder to the file system (html, CSS etc.) (SPIFFS):
-
-```
-$ pio run -t uploadfs
-```
-
-To compile and upload the EmonESP file system for sonoff s20 smartplugs, WIFI Relay and Heatpump Monitor specify the following environment:
-
-```
-$ pio run -e smartplug -t uploadfs
-$ pio run -e wifirelay -t uploadfs
-$ pio run -e hpmon -t uploadfs
-```
-
-To compile for 4Mb esp12e modules use environment:
-
-```
-$ pio run -e esp12e -t uploadfs
-```
-
-See [PlatfomrIO docs regarding SPIFFS uploading](http://docs.platformio.org/en/latest/platforms/espressif.html#uploading-files-to-file-system-spiffs)
-
-###### Upload all in one go
-
-When the firmware and spiffs are compiled both can be uploaded in a single command:
-
-```
-$ esptool.py write_flash 0x000000 .pioenvs/emonesp/firmware.bin 0x300000 .pioenvs/emonesp/spiffs.bin
-  or for 1Mb flash sonoff devices:
-$ esptool.py write_flash 0x000000 .pioenvs/emonesp/firmware.bin 0x7B000 .pioenvs/emonesp/spiffs.bin
-```
-
-##### c.) OTA upload over local network
-
-###### Note that OTA flashing works if using a 4Mb ESP module, it's not suitable for Sonoff devices with 1Mb flash, this is because the OTA flash requires free space on the device and emonESP hasn't been designed such that this is possible, yet.
-
-```
-$ pio run -e esp12e -t upload --upload-port <LOCAL-ESP-IP-ADDRESS>
-
-$ pio run -e esp12e -t uploadfs --upload-port <LOCAL-ESP-IP-ADDRESS>
-```
-
-OTA uses port 8266. See [PlatformIO ESP OTA docs](http://docs.platformio.org/en/latest/platforms/espressif.html#over-the-air-ota-update):
 
 #### 4. Debugging ESP subsystems
 
@@ -366,55 +317,6 @@ pio run -t upload --upload-port 172.16.0.80
 ```
 ***
 
-### Option 2: Compile Using Arduino IDE
-
-An overview of this process is:
-- Install ESP boards using board manager.
-- Install Arduino IDE plug-in for uploading spiffs files.
-- Download the emonESP source files.
-- Upload src.ino and Upload spiffs.
-
-#### 1. Install ESP8266 boards for Arduino IDE with Boards Manager
-
-Install steps from: https://github.com/esp8266/Arduino
-
-- Install Arduino IDE 1.6.8 or later from the Arduino website.
-- Start Arduino and open ‘Preferences’ window from the menu bar.
-- At the bottom of this window find the field “Additional Board Manager URLs” and enter ‘http://arduino.esp8266.com/stable/package_esp8266com_index.json`. You can add multiple URLs, separating them with commas.
-- Open `Tools > Board > Board Manager`, scroll down and click on esp8266 platform, select the latest version then install. Now the Arduino IDE can communicate with ESP8266 based modules.
-
-#### 2. Install ESP spiffs filesystem file uploader plug-in.
-
-Install steps from: http://esp8266.github.io/Arduino/versions/2.0.0/doc/filesystem.html
-
-- Download the plug-in (.zip) from (https://github.com/esp8266/arduino-esp8266fs-plugin/releases/).
-- Open Arduino IDE ‘Preferences’ from the menu bar. Note ‘Sketchbook location:’ and navigate to there using your file explorer, then:
-- Create folder ‘tools’ if it doesn’t exist, and within ’tools’ create folder ‘ESP8266FS’.
-- The folder structure should be “…/Arduino/tools/ESP8266FS/
-- Unpack the plug-in from the .zip here, in total it should look like “…/Arduino/tools/ESP8266FS/tool/esp8266fs.jar”.
-- Restart Arduino IDE
-
-#### 3. Clone this repo
-
-``` 
-$ git clone https://github.com/openenergymonitor/EmonESP
-```
-
-or click the green ‘Clone or download’ button at the top of this page.
-
-#### 4. Compile and Upload
-
-- Open src/src.ino in the Arduino IDE from this cloned or downloaded repo.
-- Select 'Tools > Board > Generic ESP8266 Module'.
-- Select 'Tools > Flash Size: > 4M (1M SPIFFS)'
-- Put ESP into bootloader mode/
-   - On Heatpump monitor use jumper to pull `GPIO0` low then reset then connect power (simulates reset)
-   - On other ESP boards (Adafruit HUZZAH) press and hold `GPIO0` button then press Reset, LED should light dimly to indicate bootloader mode.
-- **Upload main sketch:** Compile and Upload as normal using Arduino IDE [CTRL + u]
-- Reset into bootloader mode again (optional if next step doesn't work consistently).
-- **Upload 'data' folder**: Upload data folder (home.html web page etc) using `tools > ESP8266 Sketch Data Upload tool`.
-- If compiling fails because PubSubClient.h library (or any other libraries) cannot be found. Open the Library Manager again (Sketch > Include Library > Library Manager) and search for 'PubSubClient', install.
-***
 
 ### Troubleshooting Upload
 
