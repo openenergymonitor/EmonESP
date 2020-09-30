@@ -11,9 +11,9 @@ For applications that only require basic posting of data from one emonTx to a re
 ## Contents
 
 <!-- toc -->
-- [EmonESP](#emonesp)
-  * [Requirements](#requirements)
-- [EmonESP User Guide](#emonesp-user-guide)
+
+- [Requirements](#requirements)
+- [User Guide](#user-guide)
   * [Hardware Setup](#hardware-setup)
   * [First Setup](#first-setup)
     + [1. WiFi Connection](#1-wifi-connection)
@@ -30,32 +30,22 @@ For applications that only require basic posting of data from one emonTx to a re
     + [Save Emoncms server details](#save-emoncms-server-details)
     + [Save Emoncms MQTT server details](#save-emoncms-mqtt-server-details)
   * [Installation](#installation)
-    + [Option 0: Flash using pre-compiled binaries](#flash-precompiled-binaries)
-    + [Option 1: Using PlatformIO](#option-1-using-platformio)
-      - [1a. Install PlatformIO command line](#1a-install-platformio-command-line)
-      - [1b. And / Or use PlatformIO IDE](#1b-and--or-use-platformio-ide)
+    + [Option 0: Flash using pre-compiled binaries](#option-0-flash-using-pre-compiled-binaries)
+      - [Using EmonUpload](#using-emonupload)
+      - [Using Esptool](#using-esptool)
+    + [Option 1: Compile Using PlatformIO](#option-1-compile-using-platformio)
+      - [1. Install PlatformIO](#1-install-platformio)
       - [2. Clone this repo](#2-clone-this-repo)
       - [3. Compile](#3-compile)
       - [3. Upload](#3-upload)
         * [a.) Upload main program:](#a-upload-main-program)
-        * [b.) Upload data folder to the file system (html, CSS etc.) (SPIFFS):](#b-upload-data-folder-to-the-file-system-html-css-etc-spiffs)
-      - [Or upload all in one go](#or-upload-all-in-one-go)
-        * [c.) OTA upload over local network](#c-ota-upload-over-local-network)
       - [4. Debugging ESP subsystems](#4-debugging-esp-subsystems)
-    + [Option 2: Using Arduino IDE](#option-2-using-arduino-ide)
-      - [1. Install ESP for Arduino IDE with Boards Manager](#1-install-esp-for-arduino-ide-with-boards-manager)
-      - [2. Install ESP filesystem file uploader](#2-install-esp-filesystem-file-uploader)
-      - [3. Clone this repo](#3-clone-this-repo)
-      - [4. Compile and Upload](#4-compile-and-upload)
     + [Troubleshooting Upload](#troubleshooting-upload)
       - [Erase Flash](#erase-flash)
-      - [Fully erase ESP-12E](#fully-erase-esp-12e)
     + [Development Forum Threads](#development-forum-threads)
     + [License](#license)
 
 <!-- tocstop -->
-
-
 
 # Requirements
 
