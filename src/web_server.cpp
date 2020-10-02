@@ -314,7 +314,8 @@ handleSaveMqtt(AsyncWebServerRequest *request) {
   }
 
   int port = 1883;
-  AsyncWebParameter *portParm = request->getParam("port");
+  AsyncWebParameter *portParm = request->getParam(F("port"), true);
+  DBUGVAR((uint32_t)portParm);
   if(nullptr != portParm) {
     port = portParm->value().toInt();
   }

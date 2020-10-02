@@ -84,6 +84,13 @@ Content-Type: application/json
 
 ###
 
+POST {{baseUrl}}/savemqtt HTTP/1.1
+Content-Type: application/x-www-form-urlencoded
+
+enable=true&server=home.lan&port=1883&topic=espwifi8052&prefix=&user=emonpi&pass=_DUMMY_PASSWORD
+
+###
+
 GET  {{baseUrl}}/upload
 
 ###
