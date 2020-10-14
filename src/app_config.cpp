@@ -99,7 +99,7 @@ ConfigOpt *opts[] =
   new ConfigOptDefenition<String>(mqtt_topic, "emonesp", "mqtt_topic", "mt"),
   new ConfigOptDefenition<String>(mqtt_user, "emonpi", "mqtt_user", "mu"),
   new ConfigOptSecret(mqtt_pass, "emonpimqtt2016", "mqtt_pass", "mp"),
-  new ConfigOptDefenition<String>(mqtt_feed_prefix, "", "mqtt_feed_prefix", "mp"),
+  new ConfigOptDefenition<String>(mqtt_feed_prefix, "", "mqtt_feed_prefix", "mfp"),
 
 // Timer Settings, 16
   new ConfigOptDefenition<int>(timer_start1, 0, "timer_start1", "tsr1"),
@@ -239,7 +239,7 @@ void config_save_mqtt(bool enable, String server, int port, String topic, String
   config.set(F("mqtt_server"), server);
   config.set(F("mqtt_port"), port);
   config.set(F("mqtt_topic"), topic);
-  config.set(F("mqtt_prefix"), prefix);
+  config.set(F("mqtt_feed_prefix"), prefix);
   config.set(F("mqtt_user"), user);
   config.set(F("mqtt_pass"), pass);
   config.set(F("flags"), newflags);
