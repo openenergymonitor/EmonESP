@@ -197,10 +197,11 @@ Data in string:pairs can be sent to EmonESP via HTTP API. This is useful to emul
 
 ## Installation
 
-EmonESP uses [ESP8266 Arduino core](https://github.com/esp8266/Arduino)
+EmonESP uses [ESP8266 core, Arduino framework](https://github.com/esp8266/Arduino)
 
-Firmware can be compiled and uploaded either using PlatfomIO ([see blog post](https://blog.openenergymonitor.org/2016/06/platformio/)) or Arduino IDE.
-Firmware can also be flashed using the pre-compiled binaries using esptool.py.
+Firmware can be compiled and uploaded either using ([PlatfomIO,](https://blog.openenergymonitor.org/2016/06/platformio/)) Arduino IDE, or flashed with pre-compiles binaries found in Releases using esptool.py.
+
+Note different flash sizes of ESP12 module (4Mb) verses Sonoff devices (1Mb). 
 
 ### Option 0: Flash using pre-compiled binaries
 
@@ -212,7 +213,11 @@ Use our emonupload tool to download latest pre-compiled firmware release and upl
 Find and Install [esptool, python required.](https://github.com/espressif/esptool) 
 Navigate to the Releases section of the github page and get the firmware.bin and spiffs.bin files. Use the command below to flash the ESP.
 
+```
 esptool.py --baud 460800 write_flash 0x0 ./firmware.bin 0x300000 ./spiffs.bin
+or for sonoff devices:
+esptool.py --baud 460800 write_flash 0x0 ./firmware.bin 0x7B000 ./spiffs.bin
+```
 
 The file paths in the line above are relative, the command is run from the directory where the files are contained, you might need to substitute them for absolute file paths. The 460800 baud can be too high for some programmers, 115200 is a failsafe option.
 
@@ -220,21 +225,19 @@ The file paths in the line above are relative, the command is run from the direc
 
 For more detailed ESP8266 Arduino core specific PlatfomIO notes see: https://github.com/esp8266/Arduino#using-platformio
 
-#### 1a. Install PlatformIO command line
+#### 1. Install PlatformIO
 
-The easiest way if running Linux is to install use the install script, this installed pio via python pip and installs pip if not present. See [PlatformIO installation docs](http://docs.platformio.org/en/latest/installation.html#installer-script). Or PlatformIO IDE can be used :
+The easiest way if running Linux is to install use the install script, this installs platformIO via python pip and installs pip if not present. See [PlatformIO installation docs](http://docs.platformio.org/en/latest/installation.html#installer-script).
 
-`$ sudo python -c "$(curl -fsSL https://raw.githubusercontent.com/platformio/platformio/master/scripts/get-platformio.py)"`
-
-#### 1b. And / Or use PlatformIO IDE
-
-Standalone built on GitHub Atom IDE, or use PlatformIO Atom IDE plug-in if you already have Atom installed. The IDE is nice, easy and self-explanitory.
-
-[Download PlatfomIO IDE](http://platformio.org/platformio-ide)
+```
+$ sudo python -c "$(curl -fsSL https://raw.githubusercontent.com/platformio/platformio/master/scripts/get-platformio.py)"
+```
 
 #### 2. Clone this repo
 
-`$ git clone https://github.com/openenergymonitor/EmonESP`
+```
+$ git clone https://github.com/openenergymonitor/EmonESP
+```
 
 #### 3. Compile
 
@@ -243,61 +246,89 @@ $ cd EmonESP
 $ pio run
 ```
 
-The first time platformIO is ran the espressif arduino tool chain and all the required libs will be installed if required.
+The first time platformIO is run the espressif Arduino toolchain and all the required libs will be installed if required.
 
 To compile EmonESP for sonoff s20 smartplugs, WIFI Relay and Heatpump Monitor specify the following environment:
 
-    pio run -esmartplug
-    pio run -ewifirelay
-    pio run -ehpmon
+```
+$ pio run -e smartplug
+$ pio run -e wifirelay
+$ pio run -e hpmon
+```
+
+To compile for 4Mb esp12e modules use environment:
+
+```
+$ pio run -e esp12e
+```
 
 #### 3. Upload
 
-- Put ESP into bootloader mode
+- Put ESP into bootloader mode for every upload.
    - On Heatpump monitor use jumper to pull `GPIO0` low then reset then connect power (simulates reset) or pull RST pin low.
-   - On other ESP boards (Adafruit HUZZAH) press and hold `GPIO0` button then press Reset, LED should light dimly to indicate bootloader mode
+   - On other ESP boards (Adafruit HUZZAH) press and hold `GPIO0` button then press Reset, LED should light dimly to indicate bootloader mode.
 
 ##### a.) Upload main program:
 
-`$ pio run -t upload`
+```
+$ pio run -t upload
+```
 
 To compile and upload EmonESP for sonoff s20 smartplugs, WIFI Relay and Heatpump Monitor specify the following environment:
 
-    pio run -esmartplug -tupload
-    pio run -ewifirelay -tupload
-    pio run -ehpmon -tupload
+```
+$ pio run -e smartplug -t upload
+$ pio run -e wifirelay -t upload
+$ pio run -e hpmon -t upload
+```
+
+To compile for 4Mb esp12e modules use environment:
+
+```
+$ pio run -e esp12e -t upload
+```
 
 ##### b.) Upload data folder to the file system (html, CSS etc.) (SPIFFS):
 
-- Put ESP back into bootloder mode, see above
-
-`$ pio run -t uploadfs`
+```
+$ pio run -t uploadfs
+```
 
 To compile and upload the EmonESP file system for sonoff s20 smartplugs, WIFI Relay and Heatpump Monitor specify the following environment:
 
-    pio run -esmartplug -tuploadfs
-    pio run -ewifirelay -tuploadfs
-    pio run -ehpmon -tuploadfs
+```
+$ pio run -e smartplug -t uploadfs
+$ pio run -e wifirelay -t uploadfs
+$ pio run -e hpmon -t uploadfs
+```
+
+To compile for 4Mb esp12e modules use environment:
+
+```
+$ pio run -e esp12e -t uploadfs
+```
 
 See [PlatfomrIO docs regarding SPIFFS uploading](http://docs.platformio.org/en/latest/platforms/espressif.html#uploading-files-to-file-system-spiffs)
 
-#### Or upload all in one go
+###### Upload all in one go
 
-This wil upload both the fimware and fs in a single command
+When the firmware and spiffs are compiled both can be uploaded in a single command:
 
-Put ESP into bootloader mode
-
-`esptool.py write_flash 0x000000 .pioenvs/emonesp/firmware.bin 0x300000 .pioenvs/emonesp/spiffs.bin`
-
-
+```
+$ esptool.py write_flash 0x000000 .pioenvs/emonesp/firmware.bin 0x300000 .pioenvs/emonesp/spiffs.bin
+  or for 1Mb flash sonoff devices:
+$ esptool.py write_flash 0x000000 .pioenvs/emonesp/firmware.bin 0x7B000 .pioenvs/emonesp/spiffs.bin
+```
 
 ##### c.) OTA upload over local network
 
-`$  pio run  -t upload --upload-port <LOCAL-ESP-IP-ADDRESS>`
+###### Note that OTA flashing works if using a 4Mb ESP module, it's not suitable for Sonoff devices with 1Mb flash, this is because the OTA flash requires free space on the device and emonESP hasn't been designed such that this is possible, yet.
 
-Upload SPIFFS filesystem over OTA (and don't flash):
+```
+$ pio run -e esp12e -t upload --upload-port <LOCAL-ESP-IP-ADDRESS>
 
-` pio run -e emonesp_spiffs -t upload --upload-port <LOCAL-ESP-IP-ADDRESS>`
+$ pio run -e esp12e -t uploadfs --upload-port <LOCAL-ESP-IP-ADDRESS>
+```
 
 OTA uses port 8266. See [PlatformIO ESP OTA docs](http://docs.platformio.org/en/latest/platforms/espressif.html#over-the-air-ota-update):
 
@@ -365,7 +396,9 @@ Install steps from: http://esp8266.github.io/Arduino/versions/2.0.0/doc/filesyst
 
 #### 3. Clone this repo
 
-`$ git clone https://github.com/openenergymonitor/EmonESP`
+``` 
+$ git clone https://github.com/openenergymonitor/EmonESP
+```
 
 or click the green ‘Clone or download’ button at the top of this page.
 
@@ -389,7 +422,9 @@ or click the green ‘Clone or download’ button at the top of this page.
 
 If you are experiencing ESP hanging in a reboot loop after upload it may be that the ESP flash has remnants of previous code (which may have the used the ESP memory in a different way). The ESP flash can be fully erased using [esptool](https://github.com/themadinventor/esptool). With the unit in bootloder mode run:
 
-`$ esptool.py erase_flash`
+```
+$ esptool.py erase_flash
+```
 
 *`sudo` maybe be required*
 
@@ -402,14 +437,6 @@ Running Cesanta flasher stub...
 Erasing flash (this may take a while)...
 Erase took 8.0 seconds
 ```
-
-#### Fully erase ESP-12E
-
-To fully erase all memory locations on an ESP-12 (4Mb) we need to upload a blank file to each memory location
-
-`esptool.py write_flash 0x000000 blank_1MB.bin 0x100000 blank_1MB.bin 0x200000 blank_1MB.bin 0x300000 blank_1MB.bin`
-
-***
 
 ### Development Forum Threads
 
