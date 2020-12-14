@@ -222,6 +222,7 @@ void config_save_emoncms(bool enable, String server, String path, String node, S
   }
 
   config.set(F("emoncms_server"), server);
+  config.set(F("emoncms_path"), path);
   config.set(F("emoncms_node"), node);
   config.set(F("emoncms_apikey"), apikey);
   config.set(F("emoncms_fingerprint"), fingerprint);
