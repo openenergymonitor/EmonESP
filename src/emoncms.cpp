@@ -77,7 +77,8 @@ void emoncms_publish(JsonDocument &data)
 
   if (config_emoncms_enabled() && emoncms_apikey != 0)
   {
-    String url = emoncms_path;
+    // String url = post_path;
+    String url = emoncms_path.c_str();
     url += post_path;
     String json;
     serializeJson(data, json);

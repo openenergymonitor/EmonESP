@@ -53,7 +53,7 @@ String mqtt_user = "";
 String mqtt_pass = "";
 String mqtt_feed_prefix = "";
 
-// Timer Settings 
+// Timer Settings
 int timer_start1 = 0;
 int timer_stop1 = 0;
 int timer_start2 = 0;
@@ -73,7 +73,7 @@ void config_changed(String name);
 
 ConfigOptDefenition<uint32_t> flagsOpt = ConfigOptDefenition<uint32_t>(flags, 0, "flags", "f");
 
-ConfigOpt *opts[] = 
+ConfigOpt *opts[] =
 {
 // Wifi Network Strings, 0
   new ConfigOptDefenition<String>(esid, "", "ssid", "ws"),
@@ -143,7 +143,7 @@ ResetEEPROM() {
 // Load saved settings from EEPROM
 // -------------------------------------------------------------------
 void
-config_load_settings() 
+config_load_settings()
 {
   config.onChanged(config_changed);
 
@@ -163,7 +163,7 @@ void config_changed(String name)
     }
     if(emoncms_connected != config_emoncms_enabled()) {
       emoncms_updated = true;
-    } 
+    }
   } else if(name.startsWith(F("mqtt_"))) {
     mqtt_restart();
   } else if(name.startsWith(F("emoncms_"))) {
@@ -185,7 +185,7 @@ bool config_deserialize(const char *json)
   return config.deserialize(json);
 }
 
-bool config_deserialize(DynamicJsonDocument &doc) 
+bool config_deserialize(DynamicJsonDocument &doc)
 {
   return config.deserialize(doc);
 }
@@ -202,16 +202,16 @@ bool config_serialize(DynamicJsonDocument &doc, bool longNames, bool compactOutp
 
 void config_set(const char *name, uint32_t val) {
   config.set(name, val);
-} 
+}
 void config_set(const char *name, String val) {
   config.set(name, val);
-} 
+}
 void config_set(const char *name, bool val) {
   config.set(name, val);
-} 
+}
 void config_set(const char *name, double val) {
   config.set(name, val);
-} 
+}
 
 void config_save_emoncms(bool enable, String server, String path, String node, String apikey,
                     String fingerprint)
