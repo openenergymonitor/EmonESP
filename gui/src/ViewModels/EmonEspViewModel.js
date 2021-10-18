@@ -50,13 +50,13 @@ function EmonEspViewModel(baseHost, basePort, baseProtocol) {
   self.config.ssid.subscribe((ssid) => {
     self.wifi.setSsid(ssid);
   });
-    
+
   var updateTimer = null;
   var updateTime = 1 * 1000;
 
   var logUpdateTimer = null;
   var logUpdateTime = 500;
-    
+
   // Upgrade URL
   self.upgradeUrl = ko.observable("about:blank");
 
@@ -86,7 +86,7 @@ function EmonEspViewModel(baseHost, basePort, baseProtocol) {
     if (self.updating()) {
       return;
     }
-    self.updating(true);    
+    self.updating(true);
     if (null !== updateTimer) {
       clearTimeout(updateTimer);
       updateTimer = null;
@@ -144,7 +144,7 @@ function EmonEspViewModel(baseHost, basePort, baseProtocol) {
       self.saveAdminFetching(false);
     });
   };
-  
+
   // -----------------------------------------------------------------------
   // Event: Timer save
   // -----------------------------------------------------------------------
@@ -153,11 +153,14 @@ function EmonEspViewModel(baseHost, basePort, baseProtocol) {
   self.saveTimer = function () {
     self.saveTimerFetching(true);
     self.saveTimerSuccess(false);
-    $.post(baseEndpoint + "/savetimer", { 
-      timer_start1: self.config.timer_start1(), 
-      timer_stop1: self.config.timer_stop1(), 
-      timer_start2: self.config.timer_start2(), 
+    $.post(baseEndpoint + "/savetimer", {
+      timer_start1: self.config.timer_start1(),
+      timer_stop1: self.config.timer_stop1(),
+      timer_start2: self.config.timer_start2(),
       timer_stop2: self.config.timer_stop2(),
+      standby_start: self.config.standby_start(),
+      standby_stop: self.config.standby_stop(),
+      rotation: self.config.rotation(),
       voltage_output: self.config.voltage_output(),
       time_offset: self.config.time_offset()
     }, function (data) {
@@ -171,13 +174,13 @@ function EmonEspViewModel(baseHost, basePort, baseProtocol) {
       self.saveTimerFetching(false);
     });
   };
-  
+
   // -----------------------------------------------------------------------
   // Event: Switch On, Off, Timer
-  // -----------------------------------------------------------------------  
+  // -----------------------------------------------------------------------
   //self.btn_off = ko.observable(false);
   //self.btn_timer = ko.observable(false);
-  
+
   self.ctrlMode = function (mode) {
     var last = self.status.ctrl_mode();
     self.status.ctrl_mode(mode);
@@ -186,6 +189,23 @@ function EmonEspViewModel(baseHost, basePort, baseProtocol) {
     }).fail(function () {
       self.status.ctrl_mode(last);
       alert("Failed to switch "+mode);
+    });
+  };
+
+  // -----------------------------------------------------------------------
+  // Event: Switch On, Off, Sstandby
+  // -----------------------------------------------------------------------
+  //self.btn_off = ko.observable(false);
+  //self.btn_timer = ko.observable(false);
+
+  self.divertMode = function (mode) {
+    var last = self.status.divert_mode();
+    self.status.divert_mode(mode);
+    $.post(baseEndpoint + "/divertmode?mode=" + mode, {}, function (data) {
+      // success
+    }).fail(function () {
+      self.status.divert_mode(last);
+      alert("Failed to switch " + mode);
     });
   };
 

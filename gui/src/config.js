@@ -12,7 +12,7 @@ var basePort = window.location.port;
 var baseProtocol = window.location.protocol;
 
 var baseEndpoint = "//" + baseHost;
-if(80 !== basePort) {
+if (80 !== basePort) {
   baseEndpoint += ":" + basePort;
 }
 baseEndpoint += development
@@ -35,9 +35,17 @@ function addcolon(t) {
     return "00:00";
   }
   if (t.length == 3) {
-    t = "0"+t;
+    t = "0" + t;
   }
-  return t.substr(0,2)+":"+t.substr(2,4);
+  return t.substr(0, 2) + ":" + t.substr(2, 4);
+}
+
+function addhyphen(d) {
+  d = new String(d);
+  if (d.length != 8) {
+    return "0000-00-00";
+  }
+  return d.substr(0, 4) + "-" + d.substr(4, 6) + "-" + d.substr(6, 8);
 }
 
 $(function () {
@@ -107,9 +115,12 @@ document.getElementById("restart").addEventListener("click", function (e) {
 });
 
 function toggle(id) {
-   var e = document.getElementById(id);
-   if(e.style.display == "block")
-      e.style.display = "none";
-   else
-      e.style.display = "block";
+  var e = document.getElementById(id);
+  if (e.style.display == "block") {
+    e.previousElementSibling.firstChild.textContent = "+";
+    e.style.display = "none";
+  } else {
+    e.previousElementSibling.firstChild.textContent = "-";
+    e.style.display = "block";
+  }
 }

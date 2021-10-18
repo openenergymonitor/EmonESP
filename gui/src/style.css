@@ -116,6 +116,20 @@ h2:hover {
     background-color: #98c4e1;
 }
 
+h4 {
+    font-size: 16px;
+    background-color: #82afcc;
+    color: #fff;
+    padding: 10px 15px 10px 15px;
+    margin: 0;
+    cursor:pointer;
+    font-weight:normal;
+}
+
+h4:hover {
+    background-color: #98c4e1;
+}
+
 button {
     background-color: #0699fa;
     border-radius: 10px;

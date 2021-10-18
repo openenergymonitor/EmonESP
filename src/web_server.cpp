@@ -84,7 +84,7 @@ void dumpRequest(AsyncWebServerRequest *request) {
                    (request->method() == HTTP_PUT) ? F("PUT") :
                    (request->method() == HTTP_PATCH) ? F("PATCH") :
                    (request->method() == HTTP_HEAD) ? F("HEAD") :
-                   (request->method() == HTTP_OPTIONS) ? F("OPTIONS") : 
+                   (request->method() == HTTP_OPTIONS) ? F("OPTIONS") :
                    F("UNKNOWN"));
   DEBUG_PORT.printf_P(PSTR(" http://%s%s\n"), request->host().c_str(), request->url().c_str());
 
@@ -329,7 +329,7 @@ handleSaveMqtt(AsyncWebServerRequest *request) {
                    request->arg(F("pass")));
 
   char tmpStr[200];
-  snprintf_P(tmpStr, sizeof(tmpStr), PSTR("Saved: %s %d %s %s %s %s"), mqtt_server.c_str(), port, 
+  snprintf_P(tmpStr, sizeof(tmpStr), PSTR("Saved: %s %d %s %s %s %s"), mqtt_server.c_str(), port,
           mqtt_topic.c_str(), mqtt_feed_prefix.c_str(), mqtt_user.c_str(), mqtt_pass.c_str());
   DBUGLN(tmpStr);
 
@@ -381,12 +381,19 @@ handleSaveTimer(AsyncWebServerRequest *request) {
   int qtimer_start2 = tmp.toInt();
   tmp = request->arg(F("timer_stop2"));
   int qtimer_stop2 = tmp.toInt();
+  tmp = request->arg(F("rotation"));
+  bool qrotation = isPositive(tmp);
+  tmp = request->arg(F("standby_start"));
+  int qstandby_start = tmp.toInt();
+  tmp = request->arg(F("standby_stop"));
+  int qstandby_stop = tmp.toInt();
+
   tmp = request->arg(F("voltage_output"));
   int qvoltage_output = tmp.toInt();
   tmp = request->arg(F("time_offset"));
   int qtime_offset = tmp.toInt();
-      
-  config_save_timer(qtimer_start1, qtimer_stop1, qtimer_start2, qtimer_stop2, qvoltage_output, qtime_offset);
+
+  config_save_timer(qtimer_start1, qtimer_stop1, qtimer_start2, qtimer_stop2, qstandby_start, qstandby_stop, qrotation, qvoltage_output, qtime_offset);
 
   mqtt_publish("out/timer",String(qtimer_start1)+" "+String(qtimer_stop1)+" "+String(qtimer_start2)+" "+String(qtimer_stop2)+" "+String(qvoltage_output));
 
@@ -497,8 +504,11 @@ handleStatus(AsyncWebServerRequest *request) {
 
   doc[F("free_heap")] = ESPAL.getFreeHeap();
   doc[F("time")] = getTime();
+  doc[F("date")] = getDate();
   doc[F("ctrl_mode")] = ctrl_mode;
   doc[F("ctrl_state")] = ctrl_state;
+  doc[F("divert_mode")] = divert_mode;
+  doc[F("divert_state")] = divert_state;
   doc[F("ota_update")] = (int)Update.isRunning();
 
   response->setCode(200);
@@ -784,6 +794,12 @@ void handleTime(AsyncWebServerRequest *request) {
   request->send(response);
 }
 
+void handleDate(AsyncWebServerRequest *request)
+{
+  AsyncWebServerResponse *response = request->beginResponse(200, CONTENT_TYPE_TEXT, getDate());
+  request->send(response);
+}
+
 void handleCtrlMode(AsyncWebServerRequest *request) {
   AsyncResponseStream *response;
   if(false == requestPreProcess(request, response, CONTENT_TYPE_TEXT)) {
@@ -795,6 +811,29 @@ void handleCtrlMode(AsyncWebServerRequest *request) {
   if (qmode=="Timer") ctrl_mode = "Timer";
 
   if (mqtt_server!=0) mqtt_publish("out/ctrlmode",String(ctrl_mode));
+
+  response->setCode(200);
+  response->print(qmode);
+  request->send(response);
+}
+
+void handleDivertMode(AsyncWebServerRequest *request)
+{
+  AsyncResponseStream *response;
+  if (false == requestPreProcess(request, response, CONTENT_TYPE_TEXT))
+  {
+    return;
+  }
+  String qmode = request->arg(F("mode"));
+  if (qmode == "On")
+    divert_mode = "On";
+  if (qmode == "Off")
+    divert_mode = "Off";
+  if (qmode == "Standby")
+    divert_mode = "Standby";
+
+  if (mqtt_server != 0)
+    mqtt_publish("out/divertmode", String(divert_mode));
 
   response->setCode(200);
   response->print(qmode);
@@ -882,9 +921,9 @@ void onEmonTxEvent(AsyncWebSocket * server, AsyncWebSocketClient *client, AwsEve
   }
 }
 
-void streamBuffer(StreamSpyReader &buffer, AsyncWebSocket &client) 
+void streamBuffer(StreamSpyReader &buffer, AsyncWebSocket &client)
 {
-  if(buffer.available() > 0 && client.availableForWriteAll()) 
+  if(buffer.available() > 0 && client.availableForWriteAll())
   {
     uint8_t *buf;
     size_t len;
@@ -929,7 +968,9 @@ web_server_setup()
 
   server.on("/emoncms/describe", handleDescribe);
   server.on("/time", handleTime);
+  server.on("/date", handleDate);
   server.on("/ctrlmode", handleCtrlMode);
+  server.on("/divertmode", handleDivertMode);
   server.on("/vout", handleSetVout);
   server.on("/flow", handleSetFlowT);
 

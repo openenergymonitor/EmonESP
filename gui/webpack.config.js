@@ -54,6 +54,7 @@ module.exports = {
         "/lastvalues",
         "/emoncms/describe",
         "/time",
+        "/date",
         "/ctrlmode",
         "/vout",
         "/flow",

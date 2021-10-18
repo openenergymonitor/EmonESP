@@ -11,6 +11,7 @@ env:
   - PIO_ENV=wifirelay
   - PIO_ENV=hpmon
   - PIO_ENV=esp12e
+  - PIO_ENV=pvrouter
 install:
 - pip install -U platformio
 - platformio platform install espressif8266

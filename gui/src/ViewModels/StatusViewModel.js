@@ -13,9 +13,12 @@ function StatusViewModel() {
     "emoncms_connected": 0,
     "mqtt_connected": 0,
     "free_heap": 0,
-    "time":"",
+    "time": "",
+    "date": "",
     "ctrl_mode":"off",
-    "ctrl_state":0,
+    "ctrl_state": 0,
+    "divert_mode": "on",
+    "divert_state":1,
     "ota_update": false
   }, baseEndpoint + "/status");
 

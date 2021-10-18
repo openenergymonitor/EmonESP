@@ -36,7 +36,7 @@
 #include <NTPClient.h>
 
 WiFiUDP ntpUDP;
-NTPClient timeClient(ntpUDP,"europe.pool.ntp.org",time_offset,60000);
+NTPClient timeClient(ntpUDP, "europe.pool.ntp.org", time_offset * 60, 60000);
 unsigned long last_ctrl_update = 0;
 unsigned long last_pushbtn_check = 0;
 bool pushbtn_action = 0;
@@ -50,7 +50,8 @@ static unsigned long mem_info_update = 0;
 // -------------------------------------------------------------------
 // SETUP
 // -------------------------------------------------------------------
-void setup() {
+void setup()
+{
   debug_setup();
 
   DEBUG.println();
@@ -62,13 +63,13 @@ void setup() {
 
   DBUG("Node type: ");
   DBUGLN(node_type);
-  
+
   // Read saved settings from the config
   config_load_settings();
   DBUGF("After config_load_settings: %d", ESP.getFreeHeap());
 
-  timeClient.setTimeOffset(time_offset);
-  
+  timeClient.setTimeOffset(time_offset * 60);
+
   DBUG("Node name: ");
   DBUGLN(node_name);
 
@@ -80,12 +81,12 @@ void setup() {
   pinMode(CONTROL_PIN, OUTPUT);
   digitalWrite(CONTROL_PIN, !CONTROL_PIN_ON_STATE);
 
-  // custom: analog output pin
-  #ifdef VOLTAGE_OUT_PIN
+// custom: analog output pin
+#ifdef VOLTAGE_OUT_PIN
   pinMode(4, OUTPUT);
-  #endif
+#endif
   // ---------------------------------------------------------
-  
+
   // Initial LED on
   led_flash(3000, 100);
 
@@ -110,13 +111,14 @@ void setup() {
   // Time
   timeClient.begin();
   DBUGF("After timeClient.begin: %d", ESP.getFreeHeap());
-  
+
   delay(100);
 
   start_mem = last_mem = ESP.getFreeHeap();
 } // end setup
 
-void led_flash(int ton, int toff) {
+void led_flash(int ton, int toff)
+{
   digitalWrite(WIFI_LED, WIFI_LED_ON_STATE);
   delay(ton);
   digitalWrite(WIFI_LED, WIFI_LED_ON_STATE);
@@ -128,11 +130,13 @@ void led_flash(int ton, int toff) {
 // -------------------------------------------------------------------
 void loop()
 {
-  if (millis() > mem_info_update) {
+  if (millis() > mem_info_update)
+  {
     mem_info_update = millis() + 2000;
     uint32_t current = ESP.getFreeHeap();
     int32_t diff = (int32_t)(last_mem - current);
-    if(diff != 0) {
+    if (diff != 0)
+    {
       DEBUG.printf("Free memory %u - diff %d %d\n", current, diff, start_mem - current);
       last_mem = current;
     }
@@ -144,12 +148,13 @@ void loop()
   timeClient.update();
 
   StaticJsonDocument<512> data;
-  boolean gotInput = input_get(data);
+  bool gotInput = input_get(data);
 
   if (wifi_client_connected())
   {
     mqtt_loop();
-    if(gotInput) {
+    if (gotInput)
+    {
       emoncms_publish(data);
       event_send(data);
     }
@@ -160,60 +165,119 @@ void loop()
   // --------------------------------------------------------------
   // CONTROL UPDATE
   // --------------------------------------------------------------
-  if ((millis()-last_ctrl_update)>1000 || ctrl_update) {
+  if ((millis() - last_ctrl_update) > 1000 || ctrl_update)
+  {
     last_ctrl_update = millis();
     ctrl_update = 0;
     ctrl_state = 0; // default off
 
     // 1. Timer
-    int timenow = timeClient.getHours()*100+timeClient.getMinutes();
-    
-    if (timer_stop1>=timer_start1 && (timenow>=timer_start1 && timenow<timer_stop1)) ctrl_state = 1;
-    if (timer_stop2>=timer_start2 && (timenow>=timer_start2 && timenow<timer_stop2)) ctrl_state = 1;
+    int timenow = timeClient.getHours() * 100 + timeClient.getMinutes();
 
-    if (timer_stop1<timer_start1 && (timenow>=timer_start1 || timenow<timer_stop1)) ctrl_state = 1;
-    if (timer_stop2<timer_start2 && (timenow>=timer_start2 || timenow<timer_stop2)) ctrl_state = 1;    
+    if (timer_stop1 >= timer_start1 && (timenow >= timer_start1 && timenow < timer_stop1))
+      ctrl_state = 1;
+    if (timer_stop2 >= timer_start2 && (timenow >= timer_start2 && timenow < timer_stop2))
+      ctrl_state = 1;
+
+    if (timer_stop1 < timer_start1 && (timenow >= timer_start1 || timenow < timer_stop1))
+      ctrl_state = 1;
+    if (timer_stop2 < timer_start2 && (timenow >= timer_start2 || timenow < timer_stop2))
+      ctrl_state = 1;
 
     // 2. On/Off
-    if (ctrl_mode=="On") ctrl_state = 1;
-    if (ctrl_mode=="Off") ctrl_state = 0;
+    if (ctrl_mode == "On")
+      ctrl_state = 1;
+    if (ctrl_mode == "Off")
+      ctrl_state = 0;
 
     // 3. Apply
-    if (ctrl_state) {
+    if (ctrl_state)
+    {
       // ON
       digitalWrite(CONTROL_PIN, CONTROL_PIN_ON_STATE);
-    } else {
+    }
+    else
+    {
       digitalWrite(CONTROL_PIN, !CONTROL_PIN_ON_STATE);
     }
 
-    #ifdef VOLTAGE_OUT_PIN
+#ifdef ROTATION_PIN
+    if (rotation && (timenow == 0))
+      digitalWrite(ROTATION_PIN, ROTATION_PIN_ON_STATE);
+    else
+      digitalWrite(ROTATION_PIN, !ROTATION_PIN_ON_STATE);
+#endif
+
+#ifdef VOLTAGE_OUT_PIN
     analogWrite(VOLTAGE_OUT_PIN, voltage_output);
-    #endif
+#endif
   }
   // --------------------------------------------------------------
-  if ((millis()-last_pushbtn_check)>100) {
+  if ((millis() - last_pushbtn_check) > 100)
+  {
     last_pushbtn_check = millis();
 
     last_pushbtn_state = pushbtn_state;
     pushbtn_state = !digitalRead(0);
-    
-    if (pushbtn_state && last_pushbtn_state && !pushbtn_action) {
-      pushbtn_action = 1;
-      if (ctrl_mode=="On") ctrl_mode = "Off"; else ctrl_mode = "On";
-      if (mqtt_server!=0) mqtt_publish("out/ctrlmode",String(ctrl_mode));
 
+    if (pushbtn_state && last_pushbtn_state && !pushbtn_action)
+    {
+      pushbtn_action = 1;
+      if (ctrl_mode == "On")
+        ctrl_mode = "Off";
+      else
+        ctrl_mode = "On";
+      if (mqtt_server != 0)
+        mqtt_publish("out/ctrlmode", String(ctrl_mode));
     }
-    if (!pushbtn_state && !last_pushbtn_state) pushbtn_action = 0;
+    if (!pushbtn_state && !last_pushbtn_state)
+      pushbtn_action = 0;
   }
-  
 } // end loop
 
-String getTime() {
-    return timeClient.getFormattedTime();
+String getTime()
+{
+  return timeClient.getFormattedTime();
 }
 
-void setTimeOffset() {
-    timeClient.setTimeOffset(time_offset);
+#define LEAP_YEAR(Y) ((Y > 0) && !(Y % 4) && ((Y % 100) || !(Y % 400)))
+
+String getDate()
+{
+  // Based on https://github.com/PaulStoffregen/Time/blob/master/Time.cpp
+  // currently assumes UTC timezone, instead of using this->_timeOffset
+  unsigned long rawTime = timeClient.getEpochTime() / 86400L; // in days
+  unsigned long days = 0, year = 1970;
+  uint8_t month;
+  static const uint8_t monthDays[] = {31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
+
+  while ((days += (LEAP_YEAR(year) ? 366 : 365)) <= rawTime)
+    year++;
+  rawTime -= days - (LEAP_YEAR(year) ? 366 : 365); // now it is days in this year, starting at 0
+  days = 0;
+  for (month = 0; month < 12; month++)
+  {
+    uint8_t monthLength;
+    if (month == 1)
+    { // february
+      monthLength = LEAP_YEAR(year) ? 29 : 28;
+    }
+    else
+    {
+      monthLength = monthDays[month];
+    }
+    if (rawTime < monthLength)
+      break;
+    rawTime -= monthLength;
+  }
+  String monthStr = ++month < 10 ? "0" + String(month) : String(month);     // jan is month 1
+  String dayStr = ++rawTime < 10 ? "0" + String(rawTime) : String(rawTime); // day of month
+  return String(year) + "-" + monthStr + "-" + dayStr;
+}
+
+void setTimeOffset()
+{
+  timeClient.setTimeOffset(time_offset * 60);
 }
 
 void event_send(String &json)
@@ -225,10 +289,10 @@ void event_send(String &json)
 
 void event_send(JsonDocument &event)
 {
-  #ifdef ENABLE_DEBUG
+#ifdef ENABLE_DEBUG
   serializeJson(event, DEBUG_PORT);
   DBUGLN("");
-  #endif
+#endif
   web_server_event(event);
   mqtt_publish(event);
 }

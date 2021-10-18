@@ -33,10 +33,10 @@
 String input_string="";
 String last_datastr="";
 
-boolean input_get(JsonDocument &data)
+bool input_get(JsonDocument &data)
 {
-  boolean gotLine = false;
-  boolean gotData = false;
+  bool gotLine = false;
+  bool gotData = false;
   String line;
 
   // If data from test API e.g `http://<IP-ADDRESS>/input?string=CT1:3935,CT2:325,T1:12.5,T2:16.9,T3:11.2,T4:34.7`
@@ -58,7 +58,7 @@ boolean input_get(JsonDocument &data)
     line.trim();
 
     int len = line.length();
-    if(len > 0) 
+    if(len > 0)
     {
       DEBUG.printf_P(PSTR("Got '%s'\n"), line.c_str());
 

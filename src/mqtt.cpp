@@ -51,15 +51,15 @@ int i = 0;
 // MQTT Control callback for WIFI Relay and Sonoff smartplug
 // -------------------------------------------------------------------
 static void mqtt_msg_callback(char *topic, byte *payload, unsigned int length) {
-  
+
   String topicstr = String(topic);
   String payloadstr = String((char *)payload);
   payloadstr = payloadstr.substring(0,length);
-  
+
   DBUGF("Message arrived topic:[%s] payload: [%s]", topic, payload);
 
   // --------------------------------------------------------------------------
-  // State 
+  // State
   // --------------------------------------------------------------------------
   if (topicstr.compareTo(mqtt_topic+"/"+node_name+"/in/ctrlmode")==0) {
     DEBUG.print(F("Status: "));
@@ -80,7 +80,7 @@ static void mqtt_msg_callback(char *topic, byte *payload, unsigned int length) {
     }
     DEBUG.println(ctrl_mode);
   // --------------------------------------------------------------------------
-  // Timer  
+  // Timer
   // --------------------------------------------------------------------------
   } else if (topicstr.compareTo(mqtt_topic+"/"+node_name+"/in/timer")==0) {
     DEBUG.print(F("Timer: "));
@@ -103,14 +103,14 @@ static void mqtt_msg_callback(char *topic, byte *payload, unsigned int length) {
       DEBUG.println(tstart1+":"+tstop1+" "+tstart2+":"+tstop2);
     }
   // --------------------------------------------------------------------------
-  // Vout  
+  // Vout
   // --------------------------------------------------------------------------
   } else if (topicstr.compareTo(mqtt_topic+"/"+node_name+"/in/vout")==0) {
     DEBUG.print(F("Vout: "));
     voltage_output = payloadstr.toInt();
     DEBUG.println(voltage_output);
   // --------------------------------------------------------------------------
-  // FlowT  
+  // FlowT
   // --------------------------------------------------------------------------
   } else if (topicstr.compareTo(mqtt_topic+"/"+node_name+"/in/flowT")==0) {
     DEBUG.print(F("FlowT: "));
@@ -137,22 +137,22 @@ static void mqtt_msg_callback(char *topic, byte *payload, unsigned int length) {
 // -------------------------------------------------------------------
 // MQTT Connect
 // -------------------------------------------------------------------
-boolean mqtt_connect()
+bool mqtt_connect()
 {
   mqttclient.setServer(mqtt_server.c_str(), mqtt_port);
   mqttclient.setCallback(mqtt_msg_callback); //function to be called when mqtt msg is received on subscribed topic
-  
+
   DEBUG.print(F("MQTT Connecting to..."));
   DEBUG.println(mqtt_server.c_str());
-  
+
   String strID = String(ESP.getChipId());
   if (mqttclient.connect(strID.c_str(), mqtt_user.c_str(), mqtt_pass.c_str())) {  // Attempt to connect
     DEBUG.println(F("MQTT connected"));
     mqtt_publish("describe", node_type);
-    
+
     String subscribe_topic = mqtt_topic + "/" + node_name + "/in/#";
     mqttclient.subscribe(subscribe_topic.c_str());
-    
+
   } else {
     DEBUG.print(F("MQTT failed: "));
     DEBUG.println(mqttclient.state());
@@ -214,7 +214,7 @@ void mqtt_loop()
   Profile_Start(mqtt_loop);
 
   // Do we need to restart MQTT?
-  if(mqttRestartTime > 0 && millis() > mqttRestartTime) 
+  if(mqttRestartTime > 0 && millis() > mqttRestartTime)
   {
     mqttRestartTime = 0;
     if (mqttclient.connected()) {
@@ -248,7 +248,7 @@ void mqtt_restart()
   mqttRestartTime = millis();
 }
 
-boolean mqtt_connected()
+bool mqtt_connected()
 {
   return mqttclient.connected();
 }

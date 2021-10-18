@@ -38,8 +38,8 @@
 #include "event.h"
 #include "urlencode.h"
 
-boolean emoncms_connected = false;
-boolean emoncms_updated = false;
+bool emoncms_connected = false;
+bool emoncms_updated = false;
 
 unsigned long packets_sent = 0;
 unsigned long packets_success = 0;
@@ -51,7 +51,7 @@ const char *post_path = "/input/post?";
 static void emoncms_result(bool success, String message)
 {
   StaticJsonDocument<128> event;
-  
+
 
   if(success) {
     packets_success++;
