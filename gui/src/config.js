@@ -37,7 +37,7 @@ function addcolon(t) {
   if (t.length == 3) {
     t = "0" + t;
   }
-  return t.substr(0, 2) + ":" + t.substr(2, 4);
+  return t.substr(0, 2) + ":" + t.substr(2, 2);
 }
 
 function addhyphen(d) {
@@ -45,7 +45,7 @@ function addhyphen(d) {
   if (d.length != 8) {
     return "0000-00-00";
   }
-  return d.substr(0, 4) + "-" + d.substr(4, 6) + "-" + d.substr(6, 8);
+  return d.substr(0, 4) + "-" + d.substr(4, 2) + "-" + d.substr(6, 2);
 }
 
 $(function () {

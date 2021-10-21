@@ -58,7 +58,6 @@ int timer_start1 = 0;
 int timer_stop1 = 0;
 int timer_start2 = 0;
 int timer_stop2 = 0;
-bool rotation = false;
 int standby_start = 0;
 int standby_stop = 0;
 
@@ -71,6 +70,8 @@ bool ctrl_state = false;
 String divert_mode = "On";
 bool divert_update = false;
 bool divert_state = true;
+
+bool rotation = false;
 
 int time_offset = 0;
 
@@ -288,7 +289,7 @@ void config_save_admin(String user, String pass)
   config.commit();
 }
 
-void config_save_timer(int start1, int stop1, int start2, int stop2, int startsb, int stopsb, bool qrotation, int qvoltage_output, int qtime_offset)
+void config_save_timer(int start1, int stop1, int start2, int stop2, int startsb, int stopsb, int qvoltage_output, int qtime_offset)
 {
   config.set(F("timer_start1"), start1);
   config.set(F("timer_stop1"), stop1);
@@ -296,7 +297,6 @@ void config_save_timer(int start1, int stop1, int start2, int stop2, int startsb
   config.set(F("timer_stop2"), stop2);
   config.set(F("voltage_output"), qvoltage_output);
   config.set(F("time_offset"), qtime_offset);
-  config.set(F("rotation"), qrotation);
   config.set(F("standby_start"), startsb);
   config.set(F("standby_stop"), stopsb);
   config.commit();
@@ -341,6 +341,12 @@ void config_save_ctrl(String mode)
 void config_save_divert(String mode)
 {
   config.set(F("divert_mode"), mode);
+  config.commit();
+}
+
+void config_save_rotation(bool mode)
+{
+  config.set(F("rotation"), mode);
   config.commit();
 }
 

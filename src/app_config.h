@@ -71,7 +71,7 @@ extern int timer_stop1;
 extern int timer_start2;
 extern int timer_stop2;
 extern int time_offset;
-extern bool rotation;
+
 extern int standby_start;
 extern int standby_stop;
 
@@ -84,6 +84,8 @@ extern bool ctrl_state;
 extern String divert_mode;
 extern bool divert_update;
 extern bool divert_state;
+
+extern bool rotation;
 
 // 24-bits of Flags
 extern uint32_t flags;
@@ -150,7 +152,7 @@ extern void config_save_admin(String user, String pass);
 // -------------------------------------------------------------------
 // Save the admin/web interface details
 // -------------------------------------------------------------------
-extern void config_save_timer(int start1, int stop1, int start2, int stop2, int startsb, int stopsb, bool rotation, int voltage_output, int qtime_offset);
+extern void config_save_timer(int start1, int stop1, int start2, int stop2, int startsb, int stopsb, int voltage_output, int qtime_offset);
 extern void config_save_voltage_output(int qvoltage_output, int save_to_eeprom);
 // -------------------------------------------------------------------
 // Save the Wifi details
@@ -166,6 +168,11 @@ extern void config_save_ctrl(String mode);
 // Save the Diversion Mode
 // -------------------------------------------------------------------
 extern void config_save_divert(String mode);
+
+// -------------------------------------------------------------------
+// Save the Rotation Mode
+// -------------------------------------------------------------------
+extern void config_save_rotation(bool mode);
 
 // -------------------------------------------------------------------
 // Reset the config back to defaults

@@ -410,7 +410,6 @@ void handleSaveTimer(AsyncWebServerRequest *request)
                     request->arg(F("timer_stop2")).toInt(),
                     request->arg(F("standby_start")).toInt(),
                     request->arg(F("standby_stop")).toInt(),
-                    isPositive(request->arg(F("rotation"))),
 
                     request->arg(F("voltage_output")).toInt(),
                     request->arg(F("time_offset")).toInt());
@@ -546,6 +545,7 @@ void handleStatus(AsyncWebServerRequest *request)
   doc[F("ctrl_state")] = ctrl_state;
   doc[F("divert_mode")] = divert_mode;
   doc[F("divert_state")] = divert_state;
+  doc[F("rotation")] = rotation;
   doc[F("ota_update")] = (int)Update.isRunning();
 
   response->setCode(200);
@@ -886,7 +886,7 @@ void handleDivertMode(AsyncWebServerRequest *request)
   {
     return;
   }
-  
+
   String qmode = request->arg(F("mode"));
   if (qmode != "On" && qmode != "Off" && qmode != "Standby")
     return;
@@ -901,7 +901,23 @@ void handleDivertMode(AsyncWebServerRequest *request)
   request->send(response);
 }
 
-void handleDebug(AsyncWebServerRequest *request, StreamSpy &spy)
+void handleRotation(AsyncWebServerRequest *request)
+{
+  AsyncResponseStream *response;
+  if (false == requestPreProcess(request, response, CONTENT_TYPE_TEXT))
+  {
+    return;
+  }
+
+  config_save_rotation(isPositive(request->arg(F("mode"))));
+
+  response->setCode(200);
+  response->print(rotation);
+  request->send(response);
+}
+
+    void
+    handleDebug(AsyncWebServerRequest *request, StreamSpy &spy)
 {
   AsyncResponseStream *response;
   if (false == requestPreProcess(request, response, CONTENT_TYPE_TEXT))
@@ -1050,6 +1066,7 @@ void web_server_setup()
   server.on("/date", handleDate);
   server.on("/ctrlmode", handleCtrlMode);
   server.on("/divertmode", handleDivertMode);
+  server.on("/rotation", handleRotation);
   server.on("/vout", handleSetVout);
   server.on("/flow", handleSetFlowT);
 

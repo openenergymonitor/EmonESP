@@ -129,14 +129,14 @@
               data-bind="click: ctrlMode.bind($data,'Timer'), css: (status.ctrl_mode()=='Timer'?(status.ctrl_state()==1?'green':'red'):'')">Timer</button>
           </div>
           <p><b>Time now:</b> <span data-bind="text: status.time">12:34:56</span></p>
-          <div style=""><b>Period 1</b></div>
+          <div><b>Period 1</b></div>
           <div style="display:inline-block; margin:10px">Start: <input type="time"
               data-bind="textInput: config.f_timer_start1"></div>
           <div style="display:inline-block; margin:10px">Stop: <input type="time"
               data-bind="textInput: config.f_timer_stop1">
           </div>
           <br><br>
-          <div style=""><b>Period 2</b></div>
+          <div><b>Period 2</b></div>
           <div style="display:inline-block; margin:10px">Start: <input type="time"
               data-bind="textInput: config.f_timer_start2"></div>
           <div style="display:inline-block; margin:10px">Stop: <input type="time"
@@ -146,7 +146,8 @@
           <p data-bind="visible: config.node_type()=='hpmon'">
             Flow temperature: <input type="text" data-bind="textInput: config.flowT">
           </p>
-          <p>Time offset (seconds): <input type="text" data-bind="textInput: config.time_offset" style="width:80px"></p>
+          <p>Time offset (in minutes): <input type="text" data-bind="textInput: config.time_offset" style="width:80px">
+          </p>
           <button
             data-bind="click: saveTimer, text: (saveTimerFetching() ? 'Saving' : (saveTimerSuccess() ? 'Saved' : 'Save')), disable: saveTimerFetching">Save</button>
           <br><br>
@@ -156,14 +157,13 @@
       <div id="nine" data-bind="visible: status.isWifiClient() && config.node_type()=='pvrouter'">
         <h2 onclick="toggle('control_router');"><span>+</span> Control</h2>
         <div id="control_router" class="itembody-wrapper" style="display:none; text-align:center">
-          <b>Date now:</b> <span data-bind="text: status.date">1234-56-78</span>
-          <b>Time now:</b> <span data-bind="text: status.time">12:34:56</span>
+          <b>Date & time now:</b> <span data-bind="text: status.date">1234-56-78</span>
+          <span> </span>
+          <span data-bind="text: status.time">12:34:56</span>
           <br>
-          <div class="itembody-wrapper"
-            style="box-sizing: content-box; border-style: solid; border-width: 1px; margin-top: 5px;">
-            <h4 onclick="toggle('control_diversion');" style="text-align: left;"><span>+</span> Diversion</h4>
-            <div id="control_diversion" style="display:none; text-align:center">
-              <br>
+          <div class="itembody-wrapper" style="box-sizing: content-box; background-color: #eaeaea; margin-top: 5px;">
+            <h4 onclick="toggle('control_diversion');"><span>+</span> Diversion</h4>
+            <div id="control_diversion" class="sub-itembody-wrapper" style="display:none; text-align:center;">
               <div class="btn-group">
                 <button id="on_divert"
                   data-bind="click: divertMode.bind($data,'On'), css: (status.divert_mode()=='On'?'green':'')">On</button>
@@ -173,16 +173,14 @@
                   data-bind="click: divertMode.bind($data,'Standby'), css: (status.divert_mode()=='Standby'?(status.divert_state()==1?'green':'red'):'')">Diversion</button>
               </div>
               <br>
-              <div style=""><b>Period of standby (no diversion)</b></div>
+              <div><b>Period of standby (no diversion)</b></div>
               <div style="display:inline-block; margin:10px">Start: <input type="date"
                   data-bind="value: config.f_standby_start"></div>
               <div style="display:inline-block; margin:10px">Stop: <input type="date"
                   data-bind="value: config.f_standby_stop"></div>
             </div>
-            <br>
-            <h4 onclick="toggle('control_override');" style="text-align: left;"><span>+</span> Override</h4>
-            <div id="control_override" style="display:none; text-align:center">
-              <br>
+            <h4 onclick="toggle('control_override');"><span>+</span> Override</h4>
+            <div id="control_override" class="sub-itembody-wrapper" style="display:none; text-align:center">
               <div class="btn-group">
                 <button id="on_override"
                   data-bind="click: ctrlMode.bind($data,'On'), css: (status.ctrl_mode()=='On'?'green':'')">On</button>
@@ -192,28 +190,32 @@
                   data-bind="click: ctrlMode.bind($data,'Timer'), css: (status.ctrl_mode()=='Timer'?(status.ctrl_state()==1?'green':'red'):'')">Timer</button>
               </div>
               <br>
-              <div style="" data-bind="visible: config.node_type()=='pvrouter'"><b>Weekdays</b></div>
+              <div data-bind="visible: config.node_type()=='pvrouter'"><b>Weekdays</b></div>
               <div style="display:inline-block; margin:10px">Start: <input type="time" step="300"
                   data-bind="textInput: config.f_timer_start1"></div>
               <div style="display:inline-block; margin:10px">Stop: <input type="time" step="300"
                   data-bind="textInput: config.f_timer_stop1"></div>
               <br>
-              <div style="" data-bind="visible: config.node_type()=='pvrouter'"><b>Weekend</b></div>
+              <div data-bind="visible: config.node_type()=='pvrouter'"><b>Weekend</b></div>
               <div style="display:inline-block; margin:10px">Start: <input type="time" step="300"
                   data-bind="textInput: config.f_timer_start2"></div>
               <div style="display:inline-block; margin:10px">Stop: <input type="time" step="300"
                   data-bind="textInput: config.f_timer_stop2"></div>
             </div>
-            <br>
-            <h4 onclick="toggle('control_rotation');" style="text-align: left;"><span>+</span> Rotation</h4>
-            <div id="control_rotation" style="display:none; text-align:center">
-              <input type="checkbox" id="rotation" data-bind="checked: config.rotation" />
-              <label for="rotation"><b>Enable Priorities Rotation (at midnight)</b></label>
+            <h4 onclick="toggle('control_rotation');"><span>+</span> Rotation</h4>
+            <div id="control_rotation" class="sub-itembody-wrapper" style="display:none; text-align:center">
+              <div class="btn-group">
+                <button id="on_rotation"
+                  data-bind="click: rotationMode.bind($data,true), css: (config.rotation()?'green':'')">On</button>
+                <button id="off_rotation"
+                  data-bind="click: rotationMode.bind($data,false), css: (!config.rotation()?'red':'')">Off</button>
+              </div>
             </div>
             <p data-bind="visible: config.node_type()=='hpmon'">
               Flow temperature: <input type="text" data-bind="textInput: config.flowT">
             </p>
-            <p>Time offset (minutes): <input type="text" data-bind="textInput: config.time_offset" style="width:60px">
+            <p>Time offset (in minutes): <input type="text" data-bind="textInput: config.time_offset"
+                style="width:60px; text-align:center">
             </p>
           </div>
           <br>

@@ -160,7 +160,6 @@ function EmonEspViewModel(baseHost, basePort, baseProtocol) {
       timer_stop2: self.config.timer_stop2(),
       standby_start: self.config.standby_start(),
       standby_stop: self.config.standby_stop(),
-      rotation: self.config.rotation(),
       voltage_output: self.config.voltage_output(),
       time_offset: self.config.time_offset()
     }, function (data) {
@@ -193,7 +192,7 @@ function EmonEspViewModel(baseHost, basePort, baseProtocol) {
   };
 
   // -----------------------------------------------------------------------
-  // Event: Switch On, Off, Sstandby
+  // Event: Switch On, Off, Standby
   // -----------------------------------------------------------------------
   //self.btn_off = ko.observable(false);
   //self.btn_timer = ko.observable(false);
@@ -205,6 +204,23 @@ function EmonEspViewModel(baseHost, basePort, baseProtocol) {
       // success
     }).fail(function () {
       self.status.divert_mode(last);
+      alert("Failed to switch " + mode);
+    });
+  };
+
+  // -----------------------------------------------------------------------
+  // Event: Switch On, Off
+  // -----------------------------------------------------------------------
+  //self.btn_off = ko.observable(false);
+  //self.btn_timer = ko.observable(false);
+
+  self.rotationMode = function (mode) {
+    var last = self.config.rotation();
+    self.config.rotation(mode);
+    $.post(baseEndpoint + "/rotation?mode=" + mode, {}, function (data) {
+      // success
+    }).fail(function () {
+      self.config.rotation(last);
       alert("Failed to switch " + mode);
     });
   };

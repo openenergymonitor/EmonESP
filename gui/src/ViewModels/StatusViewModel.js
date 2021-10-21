@@ -16,9 +16,9 @@ function StatusViewModel() {
     "time": "",
     "date": "",
     "ctrl_mode":"Off",
-    "ctrl_state": 0,
+    "ctrl_state": false,
     "divert_mode": "On",
-    "divert_state":1,
+    "divert_state": true,
     "ota_update": false
   }, baseEndpoint + "/status");
 

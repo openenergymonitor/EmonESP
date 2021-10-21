@@ -35,6 +35,11 @@ body {
     padding: 5px 25px 5px 25px;
 }
 
+.sub-itembody-wrapper {
+    padding: 5px 25px 5px 25px;
+    background-color: #e3e3e3;
+}
+
 .scrollable-logs {
     overflow: auto;
     max-height: 500px;
@@ -121,9 +126,11 @@ h4 {
     background-color: #82afcc;
     color: #fff;
     padding: 10px 15px 10px 15px;
-    margin: 0;
+    margin-top: 5px;
+    margin-bottom: 0;
     cursor:pointer;
     font-weight:normal;
+    text-align: left;
 }
 
 h4:hover {
