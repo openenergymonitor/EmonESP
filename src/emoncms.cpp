@@ -52,17 +52,20 @@ static void emoncms_result(bool success, String message)
 {
   StaticJsonDocument<128> event;
 
-
-  if(success) {
+  if (success)
+  {
     packets_success++;
     emoncms_connection_error_count = 0;
-  } else {
-    if(++emoncms_connection_error_count > 30) {
+  }
+  else
+  {
+    if (++emoncms_connection_error_count > 30)
+    {
       ESP.restart();
     }
   }
 
-  if(emoncms_connected != success)
+  if (emoncms_connected != success)
   {
     emoncms_connected = success;
     event[F("emoncms_connected")] = (int)emoncms_connected;
@@ -75,7 +78,7 @@ void emoncms_publish(JsonDocument &data)
 {
   Profile_Start(emoncms_publish);
 
-  if (config_emoncms_enabled() && emoncms_apikey != 0)
+  if (config_emoncms_enabled() && !emoncms_apikey.isEmpty())
   {
     String url = emoncms_path.c_str();
     url += post_path;
@@ -94,13 +97,16 @@ void emoncms_publish(JsonDocument &data)
 
     // Send data to Emoncms server
     String result = "";
-    if (emoncms_fingerprint != 0) {
+    if (emoncms_fingerprint.isEmpty())
+    {
       // HTTPS on port 443 if HTTPS fingerprint is present
       DBUGLN(F("HTTPS Enabled"));
       result =
-        get_https(emoncms_fingerprint.c_str(), emoncms_server.c_str(), url,
-                  443);
-    } else {
+          get_https(emoncms_fingerprint.c_str(), emoncms_server.c_str(), url,
+                    443);
+    }
+    else
+    {
       // Plain HTTP if other emoncms server e.g EmonPi
       DBUGLN(F("Plain old HTTP"));
       result = get_http(emoncms_server.c_str(), url);
@@ -108,20 +114,27 @@ void emoncms_publish(JsonDocument &data)
 
     const size_t capacity = JSON_OBJECT_SIZE(2) + result.length();
     DynamicJsonDocument doc(capacity);
-    if(DeserializationError::Code::Ok == deserializeJson(doc, result.c_str(), result.length()))
+    if (DeserializationError::Code::Ok == deserializeJson(doc, result.c_str(), result.length()))
     {
       DBUGLN(F("Got JSON"));
       bool success = doc[F("success")]; // true
       emoncms_result(success, doc[F("message")]);
-    } else if (result == F("ok")) {
+    }
+    else if (result == F("ok"))
+    {
       emoncms_result(true, result);
-    } else {
+    }
+    else
+    {
       DEBUG.print(F("Emoncms error: "));
       DEBUG.println(result);
       emoncms_result(false, result);
     }
-  } else {
-    if(emoncms_connected) {
+  }
+  else
+  {
+    if (emoncms_connected)
+    {
       emoncms_result(false, String("Disabled"));
     }
   }

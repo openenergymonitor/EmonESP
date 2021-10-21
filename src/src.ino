@@ -39,9 +39,9 @@ WiFiUDP ntpUDP;
 NTPClient timeClient(ntpUDP, "europe.pool.ntp.org", time_offset * 60, 60000);
 unsigned long last_ctrl_update = 0;
 unsigned long last_pushbtn_check = 0;
-bool pushbtn_action = 0;
-bool pushbtn_state = 0;
-bool last_pushbtn_state = 0;
+bool pushbtn_action = false;
+bool pushbtn_state = false;
+bool last_pushbtn_state = false;
 
 static uint32_t last_mem = 0;
 static uint32_t start_mem = 0;
@@ -168,27 +168,62 @@ void loop()
   if ((millis() - last_ctrl_update) > 1000 || ctrl_update)
   {
     last_ctrl_update = millis();
-    ctrl_update = 0;
-    ctrl_state = 0; // default off
+    ctrl_update = false;
+    ctrl_state = false;  // default OFF
+    divert_state = true; // default ON
 
-    // 1. Timer
     int timenow = timeClient.getHours() * 100 + timeClient.getMinutes();
+    int datenow = getDateAsInt();
+    int day = timeClient.getDay();
 
-    if (timer_stop1 >= timer_start1 && (timenow >= timer_start1 && timenow < timer_stop1))
-      ctrl_state = 1;
-    if (timer_stop2 >= timer_start2 && (timenow >= timer_start2 && timenow < timer_stop2))
-      ctrl_state = 1;
+    // Diversion
+    if (divert_mode == "Standby")
+    {
+      // 1. Standby
+      if (datenow >= standby_start && datenow < standby_stop)
+        divert_state = false;
+    }
+    else if (divert_mode == "Off") // 2. Off
+      divert_state = false;
+    else // 2. On (default)
+      divert_state = true;
 
-    if (timer_stop1 < timer_start1 && (timenow >= timer_start1 || timenow < timer_stop1))
-      ctrl_state = 1;
-    if (timer_stop2 < timer_start2 && (timenow >= timer_start2 || timenow < timer_stop2))
-      ctrl_state = 1;
+    // 3. Apply
+    if (divert_state)
+    {
+      // ON
+      digitalWrite(DIVERTION_PIN, DIVERTION_PIN_ON_STATE);
+    }
+    else
+    {
+      digitalWrite(DIVERTION_PIN, !DIVERTION_PIN_ON_STATE);
+    }
 
-    // 2. On/Off
-    if (ctrl_mode == "On")
-      ctrl_state = 1;
-    if (ctrl_mode == "Off")
-      ctrl_state = 0;
+    // Override
+    if (ctrl_mode == "Timer")
+    {
+      // 1. Timer
+      if (((node_type == "pvrouter") && day != 0 && day != 6) ||
+          (node_type != "pvrouter"))
+      {
+        if (timer_stop1 >= timer_start1 && (timenow >= timer_start1 && timenow < timer_stop1))
+          ctrl_state = true;
+        if (timer_stop1 < timer_start1 && (timenow >= timer_start1 || timenow < timer_stop1))
+          ctrl_state = true;
+      }
+      if ((node_type == "pvrouter" && (day == 0 || day == 6)) ||
+          (node_type != "pvrouter"))
+      {
+        if (timer_stop2 >= timer_start2 && (timenow >= timer_start2 && timenow < timer_stop2))
+          ctrl_state = true;
+        if (timer_stop2 < timer_start2 && (timenow >= timer_start2 || timenow < timer_stop2))
+          ctrl_state = true;
+      }
+    }
+    else if (ctrl_mode == "On") // 2. On
+      ctrl_state = true;
+    else // 2'. Off (default)
+      ctrl_state = false;
 
     // 3. Apply
     if (ctrl_state)
@@ -213,7 +248,7 @@ void loop()
 #endif
   }
   // --------------------------------------------------------------
-  if ((millis() - last_pushbtn_check) > 100)
+  if (node_type == "smartplug" && (millis() - last_pushbtn_check) > 100)
   {
     last_pushbtn_check = millis();
 
@@ -222,16 +257,21 @@ void loop()
 
     if (pushbtn_state && last_pushbtn_state && !pushbtn_action)
     {
-      pushbtn_action = 1;
+      DBUGF("Loop - Button pressed - '%s'", ctrl_mode.c_str());
+
+      pushbtn_action = true;
       if (ctrl_mode == "On")
         ctrl_mode = "Off";
       else
         ctrl_mode = "On";
-      if (mqtt_server != 0)
+
+      DBUGF("Loop - Button pressed 2 - '%s'", ctrl_mode.c_str());
+
+      if (!mqtt_server.isEmpty())
         mqtt_publish("out/ctrlmode", String(ctrl_mode));
     }
     if (!pushbtn_state && !last_pushbtn_state)
-      pushbtn_action = 0;
+      pushbtn_action = false;
   }
 } // end loop
 
@@ -273,6 +313,37 @@ String getDate()
   String monthStr = ++month < 10 ? "0" + String(month) : String(month);     // jan is month 1
   String dayStr = ++rawTime < 10 ? "0" + String(rawTime) : String(rawTime); // day of month
   return String(year) + "-" + monthStr + "-" + dayStr;
+}
+
+int getDateAsInt()
+{
+  // Based on https://github.com/PaulStoffregen/Time/blob/master/Time.cpp
+  // currently assumes UTC timezone, instead of using this->_timeOffset
+  unsigned long rawTime = timeClient.getEpochTime() / 86400L; // in days
+  unsigned long days = 0, year = 1970;
+  uint8_t month;
+  static const uint8_t monthDays[] = {31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
+
+  while ((days += (LEAP_YEAR(year) ? 366 : 365)) <= rawTime)
+    year++;
+  rawTime -= days - (LEAP_YEAR(year) ? 366 : 365); // now it is days in this year, starting at 0
+  days = 0;
+  for (month = 0; month < 12; month++)
+  {
+    uint8_t monthLength;
+    if (month == 1)
+    { // february
+      monthLength = LEAP_YEAR(year) ? 29 : 28;
+    }
+    else
+    {
+      monthLength = monthDays[month];
+    }
+    if (rawTime < monthLength)
+      break;
+    rawTime -= monthLength;
+  }
+  return (year * 10000) + (++month * 100) + (++rawTime);
 }
 
 void setTimeOffset()

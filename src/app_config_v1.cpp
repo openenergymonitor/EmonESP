@@ -149,7 +149,7 @@ void config_load_v1_settings()
                      EEPROM_EMON_FINGERPRINT_SIZE, emoncms_fingerprint);
 
   flags &= ~CONFIG_SERVICE_EMONCMS;
-  if(emoncms_apikey != 0) {
+  if(!emoncms_apikey.isEmpty()) {
     flags |= CONFIG_SERVICE_EMONCMS;
   }
 
@@ -163,18 +163,18 @@ void config_load_v1_settings()
 
   // Anoyingly the mqtt_port was added in the middle of the mqtt block not at the end of EEPROM
   // detect some values that may be older firmwares
-  if(word('e', 'm')) { 
+  if(word('e', 'm')) {
     mqtt_port = 1883; // apply a default port
     read_offset = -EEPROM_MQTT_PORT_SIZE;
   }
-  
+
   EEPROM_read_string(EEPROM_MQTT_TOPIC_START, EEPROM_MQTT_TOPIC_SIZE, mqtt_topic);
   EEPROM_read_string(EEPROM_MQTT_FEED_PREFIX_START, EEPROM_MQTT_FEED_PREFIX_SIZE, mqtt_feed_prefix);
   EEPROM_read_string(EEPROM_MQTT_USER_START, EEPROM_MQTT_USER_SIZE, mqtt_user);
   EEPROM_read_string(EEPROM_MQTT_PASS_START, EEPROM_MQTT_PASS_SIZE, mqtt_pass);
 
   flags &= ~CONFIG_SERVICE_MQTT;
-  if(mqtt_server != 0) {
+  if(!mqtt_server.isEmpty()) {
     flags |= CONFIG_SERVICE_MQTT;
   }
 
@@ -189,6 +189,6 @@ void config_load_v1_settings()
   EEPROM_read_int(EEPROM_TIMER_STOP2_START, timer_stop2);
 
   EEPROM_read_int(EEPROM_VOLTAGE_OUTPUT_START, voltage_output);
-  
+
   EEPROM_read_int(EEPROM_TIME_OFFSET_START, time_offset);
 }

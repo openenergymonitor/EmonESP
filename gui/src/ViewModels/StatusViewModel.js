@@ -15,9 +15,9 @@ function StatusViewModel() {
     "free_heap": 0,
     "time": "",
     "date": "",
-    "ctrl_mode":"off",
+    "ctrl_mode":"Off",
     "ctrl_state": 0,
-    "divert_mode": "on",
+    "divert_mode": "On",
     "divert_state":1,
     "ota_update": false
   }, baseEndpoint + "/status");

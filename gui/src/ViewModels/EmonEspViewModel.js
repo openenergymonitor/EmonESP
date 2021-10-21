@@ -8,19 +8,19 @@ function EmonEspViewModel(baseHost, basePort, baseProtocol) {
 
   self.baseEndpoint = ko.pureComputed(function () {
     var endpoint = "//" + self.baseHost();
-    if(80 !== self.basePort()) {
-      endpoint += ":"+self.basePort();
+    if (80 !== self.basePort()) {
+      endpoint += ":" + self.basePort();
     }
     return endpoint;
   });
 
   self.wsEndpoint = ko.pureComputed(function () {
     var endpoint = "ws://" + self.baseHost();
-    if("https:" === self.baseProtocol()){
+    if ("https:" === self.baseProtocol()) {
       endpoint = "wss://" + self.baseHost();
     }
-    if(80 !== self.basePort()) {
-      endpoint += ":"+self.basePort();
+    if (80 !== self.basePort()) {
+      endpoint += ":" + self.basePort();
     }
     endpoint += "/ws";
     return endpoint;
@@ -42,7 +42,7 @@ function EmonEspViewModel(baseHost, basePort, baseProtocol) {
   self.updating = ko.observable(false);
 
   self.wifi.selectedNet.subscribe((net) => {
-    if(false !== net) {
+    if (false !== net) {
       self.config.ssid(net.ssid());
     }
   });
@@ -101,7 +101,7 @@ function EmonEspViewModel(baseHost, basePort, baseProtocol) {
 
   self.wifiConnecting = ko.observable(false);
   self.status.mode.subscribe(function (newValue) {
-    if(newValue === "STA+AP" || newValue === "STA") {
+    if (newValue === "STA+AP" || newValue === "STA") {
       self.wifiConnecting(false);
     }
   });
@@ -118,13 +118,13 @@ function EmonEspViewModel(baseHost, basePort, baseProtocol) {
       self.saveNetworkFetching(true);
       self.saveNetworkSuccess(false);
       $.post(baseEndpoint + "/savenetwork", { ssid: self.config.ssid(), pass: self.config.pass() }, function (data) {
-          self.saveNetworkSuccess(true);
-          self.wifiConnecting(true);
-        }).fail(function () {
-          alert("Failed to save WiFi config");
-        }).always(function () {
-          self.saveNetworkFetching(false);
-        });
+        self.saveNetworkSuccess(true);
+        self.wifiConnecting(true);
+      }).fail(function () {
+        alert("Failed to save WiFi config");
+      }).always(function () {
+        self.saveNetworkFetching(false);
+      });
     }
   };
 
@@ -165,9 +165,9 @@ function EmonEspViewModel(baseHost, basePort, baseProtocol) {
       time_offset: self.config.time_offset()
     }, function (data) {
       self.saveTimerSuccess(true);
-      setTimeout(function(){
-          self.saveTimerSuccess(false);
-      },5000);
+      setTimeout(function () {
+        self.saveTimerSuccess(false);
+      }, 5000);
     }).fail(function () {
       alert("Failed to save Timer config");
     }).always(function () {
@@ -184,11 +184,11 @@ function EmonEspViewModel(baseHost, basePort, baseProtocol) {
   self.ctrlMode = function (mode) {
     var last = self.status.ctrl_mode();
     self.status.ctrl_mode(mode);
-    $.post(baseEndpoint + "/ctrlmode?mode="+mode,{}, function (data) {
+    $.post(baseEndpoint + "/ctrlmode?mode=" + mode, {}, function (data) {
       // success
     }).fail(function () {
       self.status.ctrl_mode(last);
-      alert("Failed to switch "+mode);
+      alert("Failed to switch " + mode);
     });
   };
 
@@ -275,62 +275,62 @@ function EmonEspViewModel(baseHost, basePort, baseProtocol) {
   };
 }
 
-  // -----------------------------------------------------------------------
-  // Event: Update
-  // -----------------------------------------------------------------------
+// -----------------------------------------------------------------------
+// Event: Update
+// -----------------------------------------------------------------------
 
-  // Support for OTA update of the OpenEVSE
-  self.updateFetching = ko.observable(false);
-  self.updateComplete = ko.observable(false);
-  self.updateError = ko.observable("");
-  self.updateFilename = ko.observable("");
-  self.updateLoaded = ko.observable(0);
-  self.updateTotal = ko.observable(1);
-  self.updateProgress = ko.pureComputed(function () {
-    return (self.updateLoaded() / self.updateTotal()) * 100;
-  });
+// Support for OTA update of the OpenEVSE
+self.updateFetching = ko.observable(false);
+self.updateComplete = ko.observable(false);
+self.updateError = ko.observable("");
+self.updateFilename = ko.observable("");
+self.updateLoaded = ko.observable(0);
+self.updateTotal = ko.observable(1);
+self.updateProgress = ko.pureComputed(function () {
+  return (self.updateLoaded() / self.updateTotal()) * 100;
+});
 
-  self.otaUpdate = function() {
-    if("" === self.updateFilename()) {
-      self.updateError("Filename not set");
-      return;
+self.otaUpdate = function () {
+  if ("" === self.updateFilename()) {
+    self.updateError("Filename not set");
+    return;
+  }
+
+  self.updateFetching(true);
+  self.updateError("");
+
+  var form = $("#upload_form")[0];
+  var data = new FormData(form);
+
+  $.ajax({
+    url: "/upload",
+    type: "POST",
+    data: data,
+    contentType: false,
+    processData: false,
+    xhr: function () {
+      var xhr = new window.XMLHttpRequest();
+      xhr.upload.addEventListener("progress", function (evt) {
+        if (evt.lengthComputable) {
+          self.updateLoaded(evt.loaded);
+          self.updateTotal(evt.total);
+        }
+      }, false);
+      return xhr;
     }
-
-    self.updateFetching(true);
-    self.updateError("");
-
-    var form = $("#upload_form")[0];
-    var data = new FormData(form);
-
-    $.ajax({
-      url: "/upload",
-      type: "POST",
-      data: data,
-      contentType: false,
-      processData:false,
-      xhr: function() {
-        var xhr = new window.XMLHttpRequest();
-        xhr.upload.addEventListener("progress", function(evt) {
-          if (evt.lengthComputable) {
-            self.updateLoaded(evt.loaded);
-            self.updateTotal(evt.total);
-          }
-        }, false);
-        return xhr;
-      }
-    }).done(function(msg) {
-      console.log(msg);
-      if("OK" == msg) {
-        self.updateComplete(true);
-        setTimeout(() => {
-          location.reload();
-        }, 5000);
-      } else {
-        self.updateError(msg);
-      }
-    }).fail(function () {
-      self.updateError("HTTP Update failed");
-    }).always(function () {
-      self.updateFetching(false);
-    });
-  };
+  }).done(function (msg) {
+    console.log(msg);
+    if ("OK" == msg) {
+      self.updateComplete(true);
+      setTimeout(() => {
+        location.reload();
+      }, 5000);
+    } else {
+      self.updateError(msg);
+    }
+  }).fail(function () {
+    self.updateError("HTTP Update failed");
+  }).always(function () {
+    self.updateFetching(false);
+  });
+};

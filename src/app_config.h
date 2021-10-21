@@ -36,11 +36,11 @@
 // -------------------------------------------------------------------
 
 // Global config varables
-extern String node_type;
+extern const String node_type;
+extern const String node_description;
 extern int node_id;
 extern String node_name;
 extern String node_describe;
-extern String node_description;
 
 // Wifi Network Strings
 extern String esid;
@@ -156,6 +156,16 @@ extern void config_save_voltage_output(int qvoltage_output, int save_to_eeprom);
 // Save the Wifi details
 // -------------------------------------------------------------------
 extern void config_save_wifi(String qsid, String qpass);
+
+// -------------------------------------------------------------------
+// Save the Control Mode
+// -------------------------------------------------------------------
+extern void config_save_ctrl(String mode);
+
+// -------------------------------------------------------------------
+// Save the Diversion Mode
+// -------------------------------------------------------------------
+extern void config_save_divert(String mode);
 
 // -------------------------------------------------------------------
 // Reset the config back to defaults

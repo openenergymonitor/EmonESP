@@ -56,6 +56,7 @@ module.exports = {
         "/time",
         "/date",
         "/ctrlmode",
+        "/divertmode",
         "/vout",
         "/flow",
         "/upload",

@@ -23,8 +23,8 @@ static int getNodeId()
   return (chip_id - chip_tmp);
 }
 
-String node_type = NODE_TYPE;
-String node_description = NODE_DESCRIPTION;
+const String node_type = NODE_TYPE;
+const String node_description = NODE_DESCRIPTION;
 int node_id = getNodeId();
 String node_name_default = node_type + String(node_id);
 String node_name = "";
@@ -69,7 +69,7 @@ bool ctrl_update = false;
 bool ctrl_state = false;
 
 String divert_mode = "On";
-bool divert_update = true;
+bool divert_update = false;
 bool divert_state = true;
 
 int time_offset = 0;
@@ -329,6 +329,18 @@ void config_save_wifi(String qsid, String qpass)
 void config_save_flags(uint32_t newFlags)
 {
   config.set(F("flags"), newFlags);
+  config.commit();
+}
+
+void config_save_ctrl(String mode)
+{
+  config.set(F("ctrl_mode"), mode);
+  config.commit();
+}
+
+void config_save_divert(String mode)
+{
+  config.set(F("divert_mode"), mode);
   config.commit();
 }
 

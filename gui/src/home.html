@@ -170,10 +170,10 @@
                 <button id="off_divert"
                   data-bind="click: divertMode.bind($data,'Off'), css: (status.divert_mode()=='Off'?'red':'')">Off</button>
                 <button id="standby"
-                  data-bind="click: divertMode.bind($data,'Standby'), css: (status.divert_mode()=='Standby'?(status.divert_state()==1?'green':'red'):'')">Standby</button>
+                  data-bind="click: divertMode.bind($data,'Standby'), css: (status.divert_mode()=='Standby'?(status.divert_state()==1?'green':'red'):'')">Diversion</button>
               </div>
               <br>
-              <div style=""><b>Period</b></div>
+              <div style=""><b>Period of standby (no diversion)</b></div>
               <div style="display:inline-block; margin:10px">Start: <input type="date"
                   data-bind="value: config.f_standby_start"></div>
               <div style="display:inline-block; margin:10px">Stop: <input type="date"
