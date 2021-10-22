@@ -23,8 +23,8 @@ static int getNodeId()
   return (chip_id - chip_tmp);
 }
 
-String node_type = NODE_TYPE;
-String node_description = NODE_DESCRIPTION;
+const String node_type = NODE_TYPE;
+const String node_description = NODE_DESCRIPTION;
 int node_id = getNodeId();
 String node_name_default = node_type + String(node_id);
 String node_name = "";
@@ -62,8 +62,8 @@ int timer_stop2 = 0;
 int voltage_output = 0;
 
 String ctrl_mode = "Off";
-bool ctrl_update = 0;
-bool ctrl_state = 0;
+bool ctrl_update = false;
+bool ctrl_state = false;
 int time_offset = 0;
 
 
@@ -127,12 +127,13 @@ ConfigJson config(opts, sizeof(opts) / sizeof(opts[0]), EEPROM_SIZE);
 // -------------------------------------------------------------------
 // Reset EEPROM, wipes all settings
 // -------------------------------------------------------------------
-void
-ResetEEPROM() {
+void ResetEEPROM()
+{
   EEPROM.begin(EEPROM_SIZE);
 
   //DEBUG.println("Erasing EEPROM");
-  for (int i = 0; i < EEPROM_SIZE; ++i) {
+  for (int i = 0; i < EEPROM_SIZE; ++i)
+  {
     EEPROM.write(i, 0xff);
     //DEBUG.print("#");
   }
@@ -142,12 +143,12 @@ ResetEEPROM() {
 // -------------------------------------------------------------------
 // Load saved settings from EEPROM
 // -------------------------------------------------------------------
-void
-config_load_settings()
+void config_load_settings()
 {
   config.onChanged(config_changed);
 
-  if(!config.load()) {
+  if (!config.load())
+  {
     DBUGF("No JSON config found, trying v1 settings");
     config_load_v1_settings();
   }
@@ -157,16 +158,23 @@ void config_changed(String name)
 {
   DBUGF("%s changed", name.c_str());
 
-  if(name.equals(F("flags"))) {
-    if(mqtt_connected() != config_mqtt_enabled()) {
+  if (name.equals(F("flags")))
+  {
+    if (mqtt_connected() != config_mqtt_enabled())
+    {
       mqtt_restart();
     }
-    if(emoncms_connected != config_emoncms_enabled()) {
+    if (emoncms_connected != config_emoncms_enabled())
+    {
       emoncms_updated = true;
     }
-  } else if(name.startsWith(F("mqtt_"))) {
+  }
+  else if (name.startsWith(F("mqtt_")))
+  {
     mqtt_restart();
-  } else if(name.startsWith(F("emoncms_"))) {
+  }
+  else if (name.startsWith(F("emoncms_")))
+  {
     emoncms_updated = true;
   }
 }
@@ -176,7 +184,8 @@ void config_commit()
   config.commit();
 }
 
-bool config_deserialize(String& json) {
+bool config_deserialize(String &json)
+{
   return config.deserialize(json.c_str());
 }
 
@@ -200,16 +209,20 @@ bool config_serialize(DynamicJsonDocument &doc, bool longNames, bool compactOutp
   return config.serialize(doc, longNames, compactOutput, hideSecrets);
 }
 
-void config_set(const char *name, uint32_t val) {
+void config_set(const char *name, uint32_t val)
+{
   config.set(name, val);
 }
-void config_set(const char *name, String val) {
+void config_set(const char *name, String val)
+{
   config.set(name, val);
 }
-void config_set(const char *name, bool val) {
+void config_set(const char *name, bool val)
+{
   config.set(name, val);
 }
-void config_set(const char *name, double val) {
+void config_set(const char *name, double val)
+{
   config.set(name, val);
 }
 
@@ -217,7 +230,8 @@ void config_save_emoncms(bool enable, String server, String path, String node, S
                     String fingerprint)
 {
   uint32_t newflags = flags & ~CONFIG_SERVICE_EMONCMS;
-  if(enable) {
+  if (enable)
+  {
     newflags |= CONFIG_SERVICE_EMONCMS;
   }
 
@@ -233,7 +247,8 @@ void config_save_emoncms(bool enable, String server, String path, String node, S
 void config_save_mqtt(bool enable, String server, int port, String topic, String prefix, String user, String pass)
 {
   uint32_t newflags = flags & ~CONFIG_SERVICE_MQTT;
-  if(enable) {
+  if (enable)
+  {
     newflags |= CONFIG_SERVICE_MQTT;
   }
 
@@ -253,8 +268,8 @@ void config_save_mqtt_server(String server)
   config.commit();
 }
 
-void
-config_save_admin(String user, String pass) {
+void config_save_admin(String user, String pass)
+{
   config.set(F("www_username"), user);
   config.set(F("www_password"), pass);
   config.commit();
@@ -276,34 +291,40 @@ void config_save_voltage_output(int qvoltage_output, int save_to_eeprom)
 {
   voltage_output = qvoltage_output;
   
-  if (save_to_eeprom) {
+  if (save_to_eeprom)
+  {
     config.set(F("voltage_output"), qvoltage_output);
     config.commit();
   }
 }
 
-void
-config_save_advanced(String hostname) {
+void config_save_advanced(String hostname)
+{
   config.set(F("hostname"), hostname);
   config.commit();
 }
 
-void
-config_save_wifi(String qsid, String qpass)
+void config_save_wifi(String qsid, String qpass)
 {
   config.set(F("ssid"), qsid);
   config.set(F("pass"), qpass);
   config.commit();
 }
 
-void
-config_save_flags(uint32_t newFlags) {
+void config_save_flags(uint32_t newFlags)
+{
   config.set(F("flags"), newFlags);
   config.commit();
 }
 
-void
-config_reset() {
+void config_save_ctrl(String mode)
+{
+  config.set(F("ctrl_mode"), mode);
+  config.commit();
+}
+
+void config_reset()
+{
   ResetEEPROM();
   config.reset();
 }

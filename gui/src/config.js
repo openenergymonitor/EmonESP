@@ -37,7 +37,7 @@ function addcolon(t) {
   if (t.length == 3) {
     t = "0"+t;
   }
-  return t.substr(0,2)+":"+t.substr(2,4);
+  return t.substr(0, 2) + ":" + t.substr(2, 2);
 }
 
 $(function () {
@@ -108,8 +108,11 @@ document.getElementById("restart").addEventListener("click", function (e) {
 
 function toggle(id) {
    var e = document.getElementById(id);
-   if(e.style.display == "block")
+  if (e.style.display == "block") {
+    e.previousElementSibling.firstChild.textContent = "+";
       e.style.display = "none";
-   else
+  } else {
+    e.previousElementSibling.firstChild.textContent = "-";
       e.style.display = "block";
+  }
 }

@@ -137,7 +137,7 @@ static void mqtt_msg_callback(char *topic, byte *payload, unsigned int length) {
 // -------------------------------------------------------------------
 // MQTT Connect
 // -------------------------------------------------------------------
-boolean mqtt_connect()
+bool mqtt_connect()
 {
   mqttclient.setServer(mqtt_server.c_str(), mqtt_port);
   mqttclient.setCallback(mqtt_msg_callback); //function to be called when mqtt msg is received on subscribed topic
@@ -248,7 +248,7 @@ void mqtt_restart()
   mqttRestartTime = millis();
 }
 
-boolean mqtt_connected()
+bool mqtt_connected()
 {
   return mqttclient.connected();
 }
