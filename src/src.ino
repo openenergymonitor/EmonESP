@@ -188,16 +188,13 @@ void loop()
     else // 2. On (default)
       divert_state = true;
 
-    // 3. Apply
+      // 3. Apply
+#ifdef DIVERSION_PIN
     if (divert_state)
-    {
-      // ON
-      digitalWrite(DIVERTION_PIN, DIVERTION_PIN_ON_STATE);
-    }
+      digitalWrite(DIVERSION_PIN, DIVERSION_PIN_ON_STATE);
     else
-    {
-      digitalWrite(DIVERTION_PIN, !DIVERTION_PIN_ON_STATE);
-    }
+      digitalWrite(DIVERSION_PIN, !DIVERSION_PIN_ON_STATE);
+#endif
 
     // Override
     if (ctrl_mode == "Timer")
