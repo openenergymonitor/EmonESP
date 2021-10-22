@@ -36,11 +36,11 @@
 // -------------------------------------------------------------------
 
 // Global config varables
-extern String node_type;
+extern const String node_type;
+extern const String node_description;
 extern int node_id;
 extern String node_name;
 extern String node_describe;
-extern String node_description;
 
 // Wifi Network Strings
 extern String esid;
@@ -65,7 +65,7 @@ extern String mqtt_user;
 extern String mqtt_pass;
 extern String mqtt_feed_prefix;
 
-// Timer Settings 
+// Timer Settings
 extern int timer_start1;
 extern int timer_stop1;
 extern int timer_start2;
@@ -86,19 +86,23 @@ extern uint32_t flags;
 #define CONFIG_CTRL_UPDATE      (1 << 2)
 #define CONFIG_CTRL_STATE       (1 << 3)
 
-inline bool config_emoncms_enabled() {
+inline bool config_emoncms_enabled()
+{
   return CONFIG_SERVICE_EMONCMS == (flags & CONFIG_SERVICE_EMONCMS);
 }
 
-inline bool config_mqtt_enabled() {
+inline bool config_mqtt_enabled()
+{
   return CONFIG_SERVICE_MQTT == (flags & CONFIG_SERVICE_MQTT);
 }
 
-inline bool config_ctrl_update() {
+inline bool config_ctrl_update()
+{
   return CONFIG_CTRL_UPDATE == (flags & CONFIG_CTRL_UPDATE);
 }
 
-inline bool config_ctrl_state() {
+inline bool config_ctrl_state()
+{
   return CONFIG_CTRL_STATE == (flags & CONFIG_CTRL_STATE);
 }
 
@@ -134,6 +138,10 @@ extern void config_save_voltage_output(int qvoltage_output, int save_to_eeprom);
 // -------------------------------------------------------------------
 extern void config_save_wifi(String qsid, String qpass);
 
+// -------------------------------------------------------------------
+// Save the Control Mode
+// -------------------------------------------------------------------
+extern void config_save_ctrl(String mode);
 
 // -------------------------------------------------------------------
 // Reset the config back to defaults

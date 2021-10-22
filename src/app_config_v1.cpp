@@ -149,7 +149,7 @@ void config_load_v1_settings()
                      EEPROM_EMON_FINGERPRINT_SIZE, emoncms_fingerprint);
 
   flags &= ~CONFIG_SERVICE_EMONCMS;
-  if(emoncms_apikey != 0) {
+  if(!emoncms_apikey.isEmpty()) {
     flags |= CONFIG_SERVICE_EMONCMS;
   }
 
@@ -174,7 +174,7 @@ void config_load_v1_settings()
   EEPROM_read_string(EEPROM_MQTT_PASS_START, EEPROM_MQTT_PASS_SIZE, mqtt_pass);
 
   flags &= ~CONFIG_SERVICE_MQTT;
-  if(mqtt_server != 0) {
+  if(!mqtt_server.isEmpty()) {
     flags |= CONFIG_SERVICE_MQTT;
   }
 
