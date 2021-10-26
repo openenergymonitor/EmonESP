@@ -60,6 +60,6 @@ extern void mqtt_restart();
 // -------------------------------------------------------------------
 // Return true if we are connected to an MQTT broker, false if not
 // -------------------------------------------------------------------
-extern boolean mqtt_connected();
+extern bool mqtt_connected();
 
 #endif // _EMONESP_MQTT_H
