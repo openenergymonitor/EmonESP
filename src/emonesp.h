@@ -31,8 +31,8 @@
 #include "profile.h"
 
 String getTime();
-
-void setTimeOffset();
+String getDate();
+int getDateAsInt();
 
 #ifndef WIFI_LED
 #define WIFI_LED 0

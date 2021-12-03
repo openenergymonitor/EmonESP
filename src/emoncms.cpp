@@ -51,7 +51,6 @@ const char *post_path = "/input/post?";
 static void emoncms_result(bool success, String message)
 {
   StaticJsonDocument<128> event;
-  
 
   if (success)
   {

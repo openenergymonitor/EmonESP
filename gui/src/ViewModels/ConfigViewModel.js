@@ -27,9 +27,9 @@ function ConfigViewModel() {
     "timer_start2":"",
     "timer_stop2":"",
     "voltage_output":"",
-    "time_offset":""
+    "time_zone": false
   }, baseEndpoint + "/config");
-  
+
   this.f_timer_start1 = ko.pureComputed({
       read: function () {
           return addcolon(this.timer_start1());
@@ -75,7 +75,7 @@ function ConfigViewModel() {
       },
       owner: this
   });
-  
+
 }
 ConfigViewModel.prototype = Object.create(BaseViewModel.prototype);
 ConfigViewModel.prototype.constructor = ConfigViewModel;
