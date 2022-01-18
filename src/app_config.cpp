@@ -40,6 +40,7 @@ String www_password = "";
 
 // EMONCMS SERVER strings
 String emoncms_server = "";
+int emoncms_port = 0;
 String emoncms_path = "";
 String emoncms_node = "";
 String emoncms_apikey = "";
@@ -88,12 +89,13 @@ ConfigOpt *opts[] =
 
 // EMONCMS SERVER strings, 5
   new ConfigOptDefenition<String>(emoncms_server, "emoncms.org", "emoncms_server", "es"),
+  new ConfigOptDefenition<int>(emoncms_port, 0, "emoncms_port", "ept"),
   new ConfigOptDefenition<String>(emoncms_path, "", "emoncms_path", "ep"),
   new ConfigOptDefenition<String>(emoncms_node, node_name, "emoncms_node", "en"),
   new ConfigOptSecret(emoncms_apikey, "", "emoncms_apikey", "ea"),
   new ConfigOptDefenition<String>(emoncms_fingerprint, "", "emoncms_fingerprint", "ef"),
 
-// MQTT Settings, 10
+// MQTT Settings, 11
   new ConfigOptDefenition<String>(mqtt_server, "emonpi", "mqtt_server", "ms"),
   new ConfigOptDefenition<int>(mqtt_port, 1883, "mqtt_port", "mpt"),
   new ConfigOptDefenition<String>(mqtt_topic, "emonesp", "mqtt_topic", "mt"),
@@ -101,7 +103,7 @@ ConfigOpt *opts[] =
   new ConfigOptSecret(mqtt_pass, "emonpimqtt2016", "mqtt_pass", "mp"),
   new ConfigOptDefenition<String>(mqtt_feed_prefix, "", "mqtt_feed_prefix", "mfp"),
 
-// Timer Settings, 16
+// Timer Settings, 17
   new ConfigOptDefenition<int>(timer_start1, 0, "timer_start1", "tsr1"),
   new ConfigOptDefenition<int>(timer_stop1, 0, "timer_stop1", "tsp1"),
   new ConfigOptDefenition<int>(timer_start2, 0, "timer_start2", "tsr2"),
@@ -112,10 +114,10 @@ ConfigOpt *opts[] =
 
   new ConfigOptDefenition<String>(ctrl_mode, "Off", "ctrl_mode", "cm"),
 
-// Flags, 23
+// Flags, 24
   &flagsOpt,
 
-// Virtual Options, 24
+// Virtual Options, 25
   new ConfigOptVirtualBool(flagsOpt, CONFIG_SERVICE_EMONCMS, CONFIG_SERVICE_EMONCMS, "emoncms_enabled", "ee"),
   new ConfigOptVirtualBool(flagsOpt, CONFIG_SERVICE_MQTT, CONFIG_SERVICE_MQTT, "mqtt_enabled", "me"),
   new ConfigOptVirtualBool(flagsOpt, CONFIG_CTRL_UPDATE, CONFIG_CTRL_UPDATE, "ctrl_update", "ce"),
@@ -226,8 +228,8 @@ void config_set(const char *name, double val)
   config.set(name, val);
 }
 
-void config_save_emoncms(bool enable, String server, String path, String node, String apikey,
-                    String fingerprint)
+void config_save_emoncms(bool enable, String server, int port, String path, String node,
+                    String apikey, String fingerprint)
 {
   uint32_t newflags = flags & ~CONFIG_SERVICE_EMONCMS;
   if (enable)
@@ -236,6 +238,7 @@ void config_save_emoncms(bool enable, String server, String path, String node, S
   }
 
   config.set(F("emoncms_server"), server);
+  config.set(F("emoncms_port"), port);
   config.set(F("emoncms_path"), path);
   config.set(F("emoncms_node"), node);
   config.set(F("emoncms_apikey"), apikey);

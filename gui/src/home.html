@@ -167,6 +167,11 @@
             </span><br />
           </p>
           <p data-bind="visible: config.emoncms_enabled">
+            <b>Emoncms Port:</b><br>
+            <input data-bind="textInput: config.emoncms_port" type="text"><br />
+            <span class="small-text">e.g 8080, or blank for default</span><br>
+          </p>
+          <p data-bind="visible: config.emoncms_enabled">
             <b>Emoncms Path:</b><br>
             <input type="text" data-bind="textInput: config.emoncms_path"><br />
             <span>

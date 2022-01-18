@@ -64,14 +64,14 @@ String get_https(const char* fingerprint, const char* host, String &path, int ht
     return F("Invalid fingerprint");
   }
 
-  return get_http_internal(*client, host, path, httpsPort, true);
+  return get_http_internal(*client, host, path, httpsPort ? httpsPort : 443, true);
 }
 
 // -------------------------------------------------------------------
 // HTTP GET Request
 // url: N/A
 // -------------------------------------------------------------------
-String get_http(const char *host, String &path){
+String get_http(const char *host, String &path, int httpPort){
   WiFiClient client;
-  return get_http_internal(client, host, path, 80, false);
+  return get_http_internal(client, host, path, httpPort ? httpPort : 80, false);
 } // end http_get

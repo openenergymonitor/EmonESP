@@ -308,16 +308,26 @@ void handleSaveEmoncms(AsyncWebServerRequest *request)
     return;
   }
 
+  int port = 0;
+  AsyncWebParameter *portParm = request->getParam(F("port"), true);
+  DBUGVAR((uint32_t)portParm);
+  if (nullptr != portParm)
+  {
+    port = portParm->value().toInt();
+  }
+
   config_save_emoncms(isPositive(request->arg(F("enable"))),
                       request->arg(F("server")),
+                      port,
                       request->arg(F("path")),
                       request->arg(F("node")),
                       request->arg(F("apikey")),
                       request->arg(F("fingerprint")));
 
   char tmpStr[200];
-  snprintf_P(tmpStr, sizeof(tmpStr), PSTR("Saved: %s %s %s %s %s"),
+  snprintf_P(tmpStr, sizeof(tmpStr), PSTR("Saved: %s %d %s %s %s %s"),
              emoncms_server.c_str(),
+             port,
              emoncms_path.c_str(),
              emoncms_node.c_str(),
              emoncms_apikey.c_str(),

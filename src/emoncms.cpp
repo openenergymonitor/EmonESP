@@ -103,14 +103,13 @@ void emoncms_publish(JsonDocument &data)
       // HTTPS on port 443 if HTTPS fingerprint is present
       DBUGLN(F("HTTPS Enabled"));
       result =
-        get_https(emoncms_fingerprint.c_str(), emoncms_server.c_str(), url,
-                  443);
+        get_https(emoncms_fingerprint.c_str(), emoncms_server.c_str(), url, emoncms_port);
     }
     else
     {
       // Plain HTTP if other emoncms server e.g EmonPi
       DBUGLN(F("Plain old HTTP"));
-      result = get_http(emoncms_server.c_str(), url);
+      result = get_http(emoncms_server.c_str(), url, emoncms_port);
     }
 
     const size_t capacity = JSON_OBJECT_SIZE(2) + result.length();
