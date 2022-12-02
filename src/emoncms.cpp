@@ -98,7 +98,7 @@ void emoncms_publish(JsonDocument &data)
 
     // Send data to Emoncms server
     String result = "";
-    if (emoncms_fingerprint.isEmpty())
+    if (!emoncms_fingerprint.isEmpty())
     {
       // HTTPS on port 443 if HTTPS fingerprint is present
       DBUGLN(F("HTTPS Enabled"));
