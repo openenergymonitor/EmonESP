@@ -53,10 +53,25 @@ Compile and upload both the firmware and the sketch data.
 
 To turn the plug on, publish a topic:message of the following format:
 
-    topic                     message
-    emon/smartplug1/status    1
+
+    topic                                  message
+    <base-topic>/<plug-name>/in/ctrlmode      1
+    emon/smartplug1/in/ctrlmode               1
     
 To turn the plug off, publish a topic:message of the following format:
 
-    topic                     message
-    emon/smartplug1/status    0
+    topic                                  message
+    <base-topic>/<plug-name>/in/ctrlmode      0
+    emon/smartplug1/in/ctrlmode               0
+
+  To enable timer, publish a topic:message of the following format:
+
+    topic                                     message
+    <base-topic>/<plug-name>/in/ctrlmode      timer
+    emon/smartplug1/in/ctrlmode               timer  
+
+  The status of the plug is published as follows
+
+      topic                                  message
+    <base-topic>/<plug-name>/out/ctrlmode     On / Off
+    emon/smartplug1/out/ctrlmode              On / Off
