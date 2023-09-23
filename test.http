@@ -45,6 +45,7 @@ Content-Type: application/json
 {
   "emoncms_enabled": true,
   "emoncms_server": "emoncms.org",
+  "emoncms_port": "",
   "emoncms_node": "emonesp_test",
   "emoncms_apikey": "{{apikey_emoncms}}",
   "emoncms_fingerprint": ""

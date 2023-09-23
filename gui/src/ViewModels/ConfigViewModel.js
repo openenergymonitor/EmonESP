@@ -7,6 +7,7 @@ function ConfigViewModel() {
     "pass": "",
     "emoncms_enabled": false,
     "emoncms_server": "data.openevse.com",
+    "emoncms_port": "",
     "emoncms_path": "/emoncms",
     "emoncms_apikey": "",
     "emoncms_node": "",

@@ -31,7 +31,8 @@ module.exports = {
   },
   output: {
     path: path.resolve(__dirname, "dist"),
-    filename: "[name].js"
+    filename: "[name].js",
+    hashFunction: "sha256"
   },
   devServer: {
     host: devHost,
@@ -153,8 +154,7 @@ module.exports = {
   }
 };
 
-function uglify(name, code)
-{
+function uglify(name, code) {
   var compiled = babel.transformSync(code, {
     presets: ["@babel/preset-env"],
     sourceMaps: true
@@ -163,10 +163,10 @@ function uglify(name, code)
     warnings: true,
     sourceMap: {
       content: compiled.map,
-      url: name+".map"
+      url: name + ".map"
     }
   });
-  if(ugly.error) {
+  if (ugly.error) {
     console.log(ugly.error);
     return code;
   }

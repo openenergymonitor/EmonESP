@@ -51,7 +51,8 @@ void auth_request() {
     int stringpart = 0;
     
     // This needs to be done with an encrypted request otherwise credentials are shared as plain text
-    result = get_http(mqtt_server.c_str(), url);
+    // TODO: we are going to mqtt host, which port should we be using?
+    result = get_http(mqtt_server.c_str(), url, 0);
     if (result != F("request registered")) {
         for (int i=0; i<result.length(); i++) {
             char c = result[i];

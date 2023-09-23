@@ -42,6 +42,6 @@ extern String get_https(const char* fingerprint, const char* host, String &path,
 // HTTP GET Request
 // url: N/A
 // -------------------------------------------------------------------
-extern String get_http(const char* host, String &path);
+extern String get_http(const char* host, String &path, int httpPort);
 
 #endif // _EMONESP_HTTP_H

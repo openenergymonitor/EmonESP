@@ -37,15 +37,14 @@ static String get_http_internal(WiFiClient &client, const char *host, String &pa
 
   http.begin(client, host, port, path, secure);
   int httpCode = http.GET();
+  String payload = http.getString();
+  http.end();
   if((httpCode > 0) && (httpCode == HTTP_CODE_OK))
   {
-    String payload = http.getString();
     DEBUG.println(payload);
-    http.end();
     return(payload);
   } else {
-    http.end();
-    return(String(F("server error: "))+http.errorToString(httpCode));
+    return(String(F("server error: "))+http.errorToString(httpCode)+payload);
   }
 }
 
@@ -64,14 +63,14 @@ String get_https(const char* fingerprint, const char* host, String &path, int ht
     return F("Invalid fingerprint");
   }
 
-  return get_http_internal(*client, host, path, httpsPort, true);
+  return get_http_internal(*client, host, path, httpsPort ? httpsPort : 443, true);
 }
 
 // -------------------------------------------------------------------
 // HTTP GET Request
 // url: N/A
 // -------------------------------------------------------------------
-String get_http(const char *host, String &path){
+String get_http(const char *host, String &path, int httpPort){
   WiFiClient client;
-  return get_http_internal(client, host, path, 80, false);
+  return get_http_internal(client, host, path, httpPort ? httpPort : 80, false);
 } // end http_get

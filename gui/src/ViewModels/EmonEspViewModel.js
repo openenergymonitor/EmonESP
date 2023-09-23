@@ -198,6 +198,7 @@ function EmonEspViewModel(baseHost, basePort, baseProtocol) {
     var emoncms = {
       enable: self.config.emoncms_enabled(),
       server: self.config.emoncms_server(),
+      port: self.config.emoncms_port(),
       path: self.config.emoncms_path(),
       apikey: self.config.emoncms_apikey(),
       node: self.config.emoncms_node(),
@@ -206,6 +207,9 @@ function EmonEspViewModel(baseHost, basePort, baseProtocol) {
 
     if (emoncms.server === "" || emoncms.node === "") {
       alert("Please enter Emoncms server and node");
+    } else if (Number(emoncms.port) % 1 !== 0) {
+      // accepts whitespace or integers
+      alert("Please enter port number or leave blank");
     } else if (emoncms.apikey.length != 32 && !self.emoncmsApiKey.isDummy()) {
       alert("Please enter valid Emoncms apikey");
     } else if (emoncms.fingerprint !== "" && emoncms.fingerprint.length != 59) {
