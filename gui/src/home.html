@@ -128,7 +128,10 @@
               id="timer"
               data-bind="click: ctrlMode.bind($data,'Timer'), css: (status.ctrl_mode()=='Timer'?(status.ctrl_state()==1?'green':'red'):'')">Timer</button>
           </div>
-          <p><b>Time now:</b> <span data-bind="text: status.time">12:34:56</span></p>
+          <p><b>Date & time now:</b> <span data-bind="text: status.date">1234-56-78</span>
+            <span> </span>
+            <span data-bind="text: status.time">12:34:56</span>
+          </p>
           <div><b>Period 1</b></div>
           <div style="display:inline-block; margin:10px">Start: <input type="time"
               data-bind="textInput: config.f_timer_start1"></div>
@@ -144,7 +147,13 @@
           <p data-bind="visible: config.node_type()=='hpmon'">
             Flow temperature: <input type="text" data-bind="textInput: config.flowT">
           </p>
-          <p>Time offset (seconds): <input type="text" data-bind="textInput: config.time_offset" style="width:80px"></p>
+          <p>
+            <b>Time zone:</b><br />
+            <select data-bind="options: zones.zones,
+                                    optionsText: 'name',
+                                    optionsValue: 'value',
+                                    value: time_zone"></select>
+          </p>
           <button
             data-bind="click: saveTimer, text: (saveTimerFetching() ? 'Saving' : (saveTimerSuccess() ? 'Saved' : 'Save')), disable: saveTimerFetching">Save</button>
           <br><br>

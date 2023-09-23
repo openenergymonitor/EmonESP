@@ -54,6 +54,7 @@ module.exports = {
         "/lastvalues",
         "/emoncms/describe",
         "/time",
+        "/date",
         "/ctrlmode",
         "/vout",
         "/flow",
@@ -128,6 +129,7 @@ module.exports = {
           "src/ViewModels/LastValuesViewModel.js",
           "src/ViewModels/PasswordViewModel.js",
           "src/ViewModels/EmonEspViewModel.js",
+          "src/ViewModels/ZonesViewModel.js",
           "src/config.js"
         ],
         "term.js": [
@@ -141,7 +143,8 @@ module.exports = {
       }
     }),
     new CopyPlugin([
-      { from: "assets/*", flatten: true }
+      { from: "assets/*", flatten: true },
+      { from: "posix_tz_db/zones.json", flatten: true }
     ])
   ],
   optimization: {
@@ -153,8 +156,7 @@ module.exports = {
   }
 };
 
-function uglify(name, code)
-{
+function uglify(name, code) {
   var compiled = babel.transformSync(code, {
     presets: ["@babel/preset-env"],
     sourceMaps: true

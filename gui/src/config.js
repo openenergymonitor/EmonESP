@@ -40,6 +40,14 @@ function addcolon(t) {
   return t.substr(0, 2) + ":" + t.substr(2, 2);
 }
 
+function addhyphen(d) {
+  d = new String(d);
+  if (d.length != 8) {
+    return "0000-00-00";
+  }
+  return d.substr(0, 4) + "-" + d.substr(4, 2) + "-" + d.substr(6, 2);
+}
+
 $(function () {
   // Activates knockout.js
   var emonesp = new EmonEspViewModel(baseHost, basePort, baseProtocol);

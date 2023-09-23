@@ -33,15 +33,23 @@
 #include "mqtt.h"
 #include "http.h"
 #include "autoauth.h"
-#include <NTPClient.h>
+
+#include <time.h>     // time() ctime()
+#include <sys/time.h> // struct timeval
+
+#define TZ 1      // (utc+) TZ in hours
+#define DST_MN 60 // use 60mn for summer time in some countries
+
+#define TZ_MN ((TZ)*60)
+#define TZ_SEC ((TZ)*3600)
+#define DST_SEC ((DST_MN)*60)
 
 WiFiUDP ntpUDP;
-NTPClient timeClient(ntpUDP,"europe.pool.ntp.org",time_offset,60000);
 unsigned long last_ctrl_update = 0;
 unsigned long last_pushbtn_check = 0;
-bool pushbtn_action = 0;
-bool pushbtn_state = 0;
-bool last_pushbtn_state = 0;
+bool pushbtn_action = false;
+bool pushbtn_state = false;
+bool last_pushbtn_state = false;
 
 static uint32_t last_mem = 0;
 static uint32_t start_mem = 0;
@@ -50,7 +58,8 @@ static unsigned long mem_info_update = 0;
 // -------------------------------------------------------------------
 // SETUP
 // -------------------------------------------------------------------
-void setup() {
+void setup()
+{
   debug_setup();
 
   DEBUG.println();
@@ -62,13 +71,13 @@ void setup() {
 
   DBUG("Node type: ");
   DBUGLN(node_type);
-  
+
   // Read saved settings from the config
   config_load_settings();
   DBUGF("After config_load_settings: %d", ESP.getFreeHeap());
 
-  timeClient.setTimeOffset(time_offset);
-  
+  configTime("CET-1CEST,M3.5.0,M10.5.0/3", "pool.ntp.org");
+
   DBUG("Node name: ");
   DBUGLN(node_name);
 
@@ -80,12 +89,12 @@ void setup() {
   pinMode(CONTROL_PIN, OUTPUT);
   digitalWrite(CONTROL_PIN, !CONTROL_PIN_ON_STATE);
 
-  // custom: analog output pin
+// custom: analog output pins
   #ifdef VOLTAGE_OUT_PIN
   pinMode(4, OUTPUT);
   #endif
   // ---------------------------------------------------------
-  
+
   // Initial LED on
   led_flash(3000, 100);
 
@@ -107,16 +116,13 @@ void setup() {
   auth_setup();
   DBUGF("After auth_setup: %d", ESP.getFreeHeap());
 
-  // Time
-  timeClient.begin();
-  DBUGF("After timeClient.begin: %d", ESP.getFreeHeap());
-  
   delay(100);
 
   start_mem = last_mem = ESP.getFreeHeap();
 } // end setup
 
-void led_flash(int ton, int toff) {
+void led_flash(int ton, int toff)
+{
   digitalWrite(WIFI_LED, WIFI_LED_ON_STATE);
   delay(ton);
   digitalWrite(WIFI_LED, WIFI_LED_ON_STATE);
@@ -128,11 +134,13 @@ void led_flash(int ton, int toff) {
 // -------------------------------------------------------------------
 void loop()
 {
-  if (millis() > mem_info_update) {
+  if (millis() > mem_info_update)
+  {
     mem_info_update = millis() + 2000;
     uint32_t current = ESP.getFreeHeap();
     int32_t diff = (int32_t)(last_mem - current);
-    if(diff != 0) {
+    if (diff != 0)
+    {
       DEBUG.printf("Free memory %u - diff %d %d\n", current, diff, start_mem - current);
       last_mem = current;
     }
@@ -141,15 +149,15 @@ void loop()
   ota_loop();
   web_server_loop();
   wifi_loop();
-  timeClient.update();
 
   StaticJsonDocument<512> data;
-  boolean gotInput = input_get(data);
+  bool gotInput = input_get(data);
 
   if (wifi_client_connected())
   {
     mqtt_loop();
-    if(gotInput) {
+    if (gotInput)
+    {
       emoncms_publish(data);
       event_send(data);
     }
@@ -160,29 +168,40 @@ void loop()
   // --------------------------------------------------------------
   // CONTROL UPDATE
   // --------------------------------------------------------------
-  if ((millis()-last_ctrl_update)>1000 || ctrl_update) {
+  if ((millis() - last_ctrl_update) > 1000 || ctrl_update)
+  {
     last_ctrl_update = millis();
-    ctrl_update = 0;
-    ctrl_state = 0; // default off
+    ctrl_update = false;
+    ctrl_state = false;  // default OFF
 
+    auto now = time(nullptr);
+    auto datetimenow = localtime(&now);
+
+    int timenow = datetimenow->tm_hour * 100 + datetimenow->tm_min;
+    int datenow = getDateAsInt();
+    int day = datetimenow->tm_wday;
+
+    if (ctrl_mode == "Timer")
+    {
     // 1. Timer
-    int timenow = timeClient.getHours()*100+timeClient.getMinutes();
-    
-    if (timer_stop1>=timer_start1 && (timenow>=timer_start1 && timenow<timer_stop1)) ctrl_state = 1;
-    if (timer_stop2>=timer_start2 && (timenow>=timer_start2 && timenow<timer_stop2)) ctrl_state = 1;
-
-    if (timer_stop1<timer_start1 && (timenow>=timer_start1 || timenow<timer_stop1)) ctrl_state = 1;
-    if (timer_stop2<timer_start2 && (timenow>=timer_start2 || timenow<timer_stop2)) ctrl_state = 1;    
-
-    // 2. On/Off
-    if (ctrl_mode=="On") ctrl_state = 1;
-    if (ctrl_mode=="Off") ctrl_state = 0;
+        if (timer_stop1 >= timer_start1 && (timenow >= timer_start1 && timenow < timer_stop1))
+          ctrl_state = true;
+        if (timer_stop1 < timer_start1 && (timenow >= timer_start1 || timenow < timer_stop1))
+          ctrl_state = true;
+    }
+    else if (ctrl_mode == "On") // 2. On
+      ctrl_state = true;
+    else // 2'. Off (default)
+      ctrl_state = false;
 
     // 3. Apply
-    if (ctrl_state) {
+    if (ctrl_state)
+    {
       // ON
       digitalWrite(CONTROL_PIN, CONTROL_PIN_ON_STATE);
-    } else {
+    }
+    else
+    {
       digitalWrite(CONTROL_PIN, !CONTROL_PIN_ON_STATE);
     }
 
@@ -191,29 +210,69 @@ void loop()
     #endif
   }
   // --------------------------------------------------------------
-  if ((millis()-last_pushbtn_check)>100) {
+  if (node_type == "smartplug" && (millis() - last_pushbtn_check) > 100)
+  {
     last_pushbtn_check = millis();
 
     last_pushbtn_state = pushbtn_state;
     pushbtn_state = !digitalRead(0);
-    
+
     if (pushbtn_state && last_pushbtn_state && !pushbtn_action) {
-      pushbtn_action = 1;
-      if (ctrl_mode=="On") ctrl_mode = "Off"; else ctrl_mode = "On";
+      pushbtn_action = true;
+      if (ctrl_mode == "On")
+        ctrl_mode = "Off";
+      else
+        ctrl_mode = "On";
       if (mqtt_server!=0) mqtt_publish("out/ctrlmode",String(ctrl_mode));
 
     }
-    if (!pushbtn_state && !last_pushbtn_state) pushbtn_action = 0;
+    if (!pushbtn_state && !last_pushbtn_state)
+      pushbtn_action = false;
   }
-  
+
 } // end loop
 
-String getTime() {
-    return timeClient.getFormattedTime();
+String getTime()
+{
+  auto now = time(nullptr);
+  auto datetimenow = localtime(&now);
+
+  auto hours = datetimenow->tm_hour;
+  String hoursStr = hours < 10 ? "0" + String(hours) : String(hours);
+
+  auto minutes = datetimenow->tm_min;
+  String minuteStr = minutes < 10 ? "0" + String(minutes) : String(minutes);
+
+  auto seconds = datetimenow->tm_sec;
+  String secondStr = seconds < 10 ? "0" + String(seconds) : String(seconds);
+
+  return hoursStr + ":" + minuteStr + ":" + secondStr;
 }
 
-void setTimeOffset() {
-    timeClient.setTimeOffset(time_offset);
+String getDate()
+{
+  // Based on https://github.com/PaulStoffregen/Time/blob/master/Time.cpp
+  // currently assumes UTC timezone, instead of using this->_timeOffset
+  auto now = time(nullptr);
+  auto datetimenow = localtime(&now);
+
+  auto month = datetimenow->tm_mon;
+  auto day = datetimenow->tm_mday;
+
+  String monthStr = ++month < 10 ? "0" + String(month) : String(month); // jan is month 1
+  String dayStr = day < 10 ? "0" + String(day) : String(day);           // day of month
+  return String(datetimenow->tm_year + 1900) + "-" + monthStr + "-" + dayStr;
+}
+
+int getDateAsInt()
+{
+  // Based on https://github.com/PaulStoffregen/Time/blob/master/Time.cpp
+  // currently assumes UTC timezone, instead of using this->_timeOffset
+
+  auto now = time(nullptr);
+  auto datetimenow = localtime(&now);
+
+  return ((datetimenow->tm_year + 1900) * 10000) + ((datetimenow->tm_mon + 1) * 100) + datetimenow->tm_mday;
 }
 
 void event_send(String &json)

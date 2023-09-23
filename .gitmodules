@@ -1,0 +1,3 @@
+[submodule "gui/posix_tz_db"]
+	path = gui/posix_tz_db
+	url = https://github.com/nayarsystems/posix_tz_db.git

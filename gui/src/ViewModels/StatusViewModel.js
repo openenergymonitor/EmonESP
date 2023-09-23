@@ -14,8 +14,9 @@ function StatusViewModel() {
     "mqtt_connected": 0,
     "free_heap": 0,
     "time":"",
-    "ctrl_mode":"off",
-    "ctrl_state":0,
+    "date": "",
+    "ctrl_mode":"Off",
+    "ctrl_state": false,
     "ota_update": false
   }, baseEndpoint + "/status");
 

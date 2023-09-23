@@ -163,11 +163,11 @@ void config_load_v1_settings()
 
   // Anoyingly the mqtt_port was added in the middle of the mqtt block not at the end of EEPROM
   // detect some values that may be older firmwares
-  if(word('e', 'm')) { 
+  if(word('e', 'm')) {
     mqtt_port = 1883; // apply a default port
     read_offset = -EEPROM_MQTT_PORT_SIZE;
   }
-  
+
   EEPROM_read_string(EEPROM_MQTT_TOPIC_START, EEPROM_MQTT_TOPIC_SIZE, mqtt_topic);
   EEPROM_read_string(EEPROM_MQTT_FEED_PREFIX_START, EEPROM_MQTT_FEED_PREFIX_SIZE, mqtt_feed_prefix);
   EEPROM_read_string(EEPROM_MQTT_USER_START, EEPROM_MQTT_USER_SIZE, mqtt_user);
@@ -189,6 +189,4 @@ void config_load_v1_settings()
   EEPROM_read_int(EEPROM_TIMER_STOP2_START, timer_stop2);
 
   EEPROM_read_int(EEPROM_VOLTAGE_OUTPUT_START, voltage_output);
-  
-  EEPROM_read_int(EEPROM_TIME_OFFSET_START, time_offset);
 }

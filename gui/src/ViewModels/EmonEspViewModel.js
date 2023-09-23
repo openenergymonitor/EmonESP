@@ -31,6 +31,7 @@ function EmonEspViewModel(baseHost, basePort, baseProtocol) {
   self.last = new LastValuesViewModel();
   self.scan = new WiFiScanViewModel(self.baseEndpoint);
   self.wifi = new WiFiConfigViewModel(self.baseEndpoint, self.config, self.status, self.scan);
+  self.zones = new ZonesViewModel(self.baseEndpoint);
 
   // Show/hide password state
   self.wifiPassword = new PasswordViewModel(self.config.pass);
@@ -50,13 +51,13 @@ function EmonEspViewModel(baseHost, basePort, baseProtocol) {
   self.config.ssid.subscribe((ssid) => {
     self.wifi.setSsid(ssid);
   });
-    
+
   var updateTimer = null;
   var updateTime = 1 * 1000;
 
   var logUpdateTimer = null;
   var logUpdateTime = 500;
-    
+
   // Upgrade URL
   self.upgradeUrl = ko.observable("about:blank");
 
@@ -73,6 +74,15 @@ function EmonEspViewModel(baseHost, basePort, baseProtocol) {
           updateTimer = setTimeout(self.update, updateTime);
 
           self.upgradeUrl(baseEndpoint + "/update");
+
+          // Load the Time Zone information
+          if (false !== self.config.time_zone()) {
+            self.zones.initialValue(self.config.time_zone());
+            self.zones.update(() => {
+              self.config.time_zone.valueHasMutated();
+            });
+          }
+
           self.updating(false);
         });
       });
@@ -86,7 +96,7 @@ function EmonEspViewModel(baseHost, basePort, baseProtocol) {
     if (self.updating()) {
       return;
     }
-    self.updating(true);    
+    self.updating(true);
     if (null !== updateTimer) {
       clearTimeout(updateTimer);
       updateTimer = null;
@@ -98,6 +108,17 @@ function EmonEspViewModel(baseHost, basePort, baseProtocol) {
       });
     });
   };
+
+  self.time_zone = ko.computed({
+    read: () => {
+      return self.config.time_zone();
+    },
+    write: (val) => {
+      if (undefined !== val && false === self.zones.fetching()) {
+        self.config.time_zone(val);
+      }
+    }
+  });
 
   self.wifiConnecting = ko.observable(false);
   self.status.mode.subscribe(function (newValue) {
@@ -144,7 +165,7 @@ function EmonEspViewModel(baseHost, basePort, baseProtocol) {
       self.saveAdminFetching(false);
     });
   };
-  
+
   // -----------------------------------------------------------------------
   // Event: Timer save
   // -----------------------------------------------------------------------
@@ -153,13 +174,13 @@ function EmonEspViewModel(baseHost, basePort, baseProtocol) {
   self.saveTimer = function () {
     self.saveTimerFetching(true);
     self.saveTimerSuccess(false);
-    $.post(baseEndpoint + "/savetimer", { 
-      timer_start1: self.config.timer_start1(), 
-      timer_stop1: self.config.timer_stop1(), 
-      timer_start2: self.config.timer_start2(), 
+    $.post(baseEndpoint + "/savetimer", {
+      timer_start1: self.config.timer_start1(),
+      timer_stop1: self.config.timer_stop1(),
+      timer_start2: self.config.timer_start2(),
       timer_stop2: self.config.timer_stop2(),
       voltage_output: self.config.voltage_output(),
-      time_offset: self.config.time_offset()
+      time_zone: self.config.time_zone()
     }, function (data) {
       self.saveTimerSuccess(true);
       setTimeout(function(){
@@ -171,13 +192,13 @@ function EmonEspViewModel(baseHost, basePort, baseProtocol) {
       self.saveTimerFetching(false);
     });
   };
-  
+
   // -----------------------------------------------------------------------
   // Event: Switch On, Off, Timer
-  // -----------------------------------------------------------------------  
+  // -----------------------------------------------------------------------
   //self.btn_off = ko.observable(false);
   //self.btn_timer = ko.observable(false);
-  
+
   self.ctrlMode = function (mode) {
     var last = self.status.ctrl_mode();
     self.status.ctrl_mode(mode);

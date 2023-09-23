@@ -41,7 +41,6 @@
 #include "emoncms.h"
 #include "ota.h"
 #include "debug.h"
-#include <NTPClient.h>
 #include "espal.h"
 
 AsyncWebServer server(80); // Create class for Web server
@@ -404,22 +403,14 @@ void handleSaveTimer(AsyncWebServerRequest *request)
     return;
   }
 
-  String tmp = request->arg(F("timer_start1"));
-  int qtimer_start1 = tmp.toInt();
-  tmp = request->arg(F("timer_stop1"));
-  int qtimer_stop1 = tmp.toInt();
-  tmp = request->arg(F("timer_start2"));
-  int qtimer_start2 = tmp.toInt();
-  tmp = request->arg(F("timer_stop2"));
-  int qtimer_stop2 = tmp.toInt();
-  tmp = request->arg(F("voltage_output"));
-  int qvoltage_output = tmp.toInt();
-  tmp = request->arg(F("time_offset"));
-  int qtime_offset = tmp.toInt();
+  config_save_timer(request->arg(F("timer_start1")).toInt(),
+                    request->arg(F("timer_stop1")).toInt(),
+                    request->arg(F("timer_start2")).toInt(),
+                    request->arg(F("timer_stop2")).toInt(),
+                    request->arg(F("voltage_output")).toInt(),
+                    request->arg(F("time_zone")));
 
-  config_save_timer(qtimer_start1, qtimer_stop1, qtimer_start2, qtimer_stop2, qvoltage_output, qtime_offset);
-
-  mqtt_publish("out/timer", String(qtimer_start1) + " " + String(qtimer_stop1) + " " + String(qtimer_start2) + " " + String(qtimer_stop2) + " " + String(qvoltage_output));
+  mqtt_publish("out/timer", String(timer_start1) + " " + String(timer_stop1) + " " + String(timer_start2) + " " + String(timer_stop2) + " " + String(voltage_output));
 
   response->setCode(200);
   response->print(F("saved"));
@@ -545,6 +536,7 @@ void handleStatus(AsyncWebServerRequest *request)
 
   doc[F("free_heap")] = ESPAL.getFreeHeap();
   doc[F("time")] = getTime();
+  doc[F("date")] = getDate();
   doc[F("ctrl_mode")] = ctrl_mode;
   doc[F("ctrl_state")] = ctrl_state;
   doc[F("ota_update")] = (int)Update.isRunning();
@@ -851,6 +843,12 @@ void handleTime(AsyncWebServerRequest *request)
   request->send(response);
 }
 
+void handleDate(AsyncWebServerRequest *request)
+{
+  AsyncWebServerResponse *response = request->beginResponse(200, CONTENT_TYPE_TEXT, getDate());
+  request->send(response);
+}
+
 void handleCtrlMode(AsyncWebServerRequest *request)
 {
   AsyncResponseStream *response;
@@ -1018,6 +1016,7 @@ void web_server_setup()
 
   server.on("/emoncms/describe", handleDescribe);
   server.on("/time", handleTime);
+  server.on("/date", handleDate);
   server.on("/ctrlmode", handleCtrlMode);
   server.on("/vout", handleSetVout);
   server.on("/flow", handleSetFlowT);
